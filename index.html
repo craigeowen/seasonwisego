@@ -185,7 +185,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .ready h2{margin:0;font-family:var(--f-display);font-weight:800;font-size:1.6rem;text-transform:uppercase;letter-spacing:.02em;text-wrap:balance}
 .ready p{margin:0;color:var(--muted);max-width:60ch}
 .results.pre .ready{display:grid}
-.results.pre .sumbar,.results.pre #list,.results.pre .adbar,.results.pre #sharebox,.results.pre .note,.results.pre .plan{display:none}
+.results.pre .sumbar,.results.pre #list,.results.pre .affnote,.results.pre .adbar,.results.pre #sharebox,.results.pre .note,.results.pre .plan{display:none}
 .stale{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border:1px solid var(--accent);border-radius:6px;background:var(--card);font-size:.88rem;position:sticky;top:max(8px,env(safe-area-inset-top,0px));z-index:3}
 .stale[hidden]{display:none}
 .sx{margin-left:auto;display:flex;align-items:center;gap:10px}
@@ -238,6 +238,9 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .adnote{margin:0;font-size:.82rem;color:var(--muted);display:flex;gap:8px;align-items:baseline}
 .adtag{display:inline-block;font-family:var(--f-body);font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;line-height:1;padding:3px 5px;border-radius:3px;border:1px solid var(--muted);color:var(--muted);margin-right:6px;vertical-align:2px;text-decoration:none}
 .adnote .adtag{margin-right:0;flex:none}
+.affnote{margin:0;font-size:.82rem;color:var(--muted)}
+.affnote a{color:var(--muted);text-decoration-color:var(--accent);text-underline-offset:3px}
+.go .adtag{margin-right:5px}
 .spon{border:1px dashed var(--muted);border-radius:6px;background:transparent;padding:12px 16px;display:grid;gap:8px}
 .sponhead{display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--muted)}
 .sponhead .adtag{margin:0}
@@ -530,6 +533,7 @@ a.acci .go{font-size:.72rem;color:var(--accent);font-weight:600}
           </div>
         </div>
       </details>
+      <p class="affnote"><span class="adtag">Ad</span>marks links that may earn us a commission if you book, at no extra cost to you. It never changes the ranking. <a href="https://seasonwisego.com/affiliate-disclosure" target="_blank" rel="noopener">How we make money</a></p>
       <div id="list" class="results"></div>
       <div id="cookiebar" class="cookiebar" role="region" aria-label="Cookie choice" hidden>
         <p>We use cookies to track bookings made through partner links. No ad networks, no profiling.</p>
@@ -1246,7 +1250,7 @@ function render(opt){
     }
     const gf=`https://www.google.com/travel/flights?q=${encodeURIComponent(`${p.directOnly?"Nonstop flights":"Flights"} from ${p.dep} to ${r.ap} on ${p.d1} returning ${d2} for ${p.pax} adults`)}`;
     const sk=`https://www.skyscanner.net/transport/flights/${p.dep.toLowerCase()}/${r.ap.toLowerCase()}/${yymmdd(p.d1)}/${yymmdd(d2)}/?adultsv2=${p.pax}${p.directOnly?"&preferdirects=true":""}`;
-    const bk=`https://www.booking.com/searchresults.en-gb.html?ss=${encodeURIComponent(r.n.replace(/ \(.*\)/,""))}&checkin=${p.d1}&checkout=${d2}&group_adults=${p.pax}&no_rooms=1`;
+    const bk=bkUrl(r,p,d2,null);
     const isOpen=openCards.has(r.n);
     return `<article class="card${i===0?" top":""}${isOpen?"":" collapsed"}" data-card="${esc(r.n)}">
       <div class="alt">${altSvg(r)}</div>
@@ -1282,9 +1286,8 @@ function render(opt){
         <div class="links"><span class="lbl">Search${p.directOnly?" · direct only":""}</span>
           <a href="${gf}" target="_blank" rel="noopener">Google Flights</a>
           <a href="${sk}" target="_blank" rel="noopener">${adTag()}Skyscanner</a>
-          <a href="${bk}" target="_blank" rel="noopener">${adTag()}Booking.com in ${esc(r.n.replace(/ \(.*\)/,""))}</a>
-          <a href="${bkUrl(r,p,d2,"201;220;228")}" target="_blank" rel="noopener">${adTag()}Self-catering on Booking.com</a>
-          <a href="${abnb(r,p,d2)}" target="_blank" rel="noopener">Airbnb</a>
+          <a href="${bk}" target="_blank" rel="noopener">${affTag}Booking.com in ${esc(r.n.replace(/ \(.*\)/,""))}</a>
+          <a href="${vrbo(r,p,d2)}" target="_blank" rel="noopener">${affTag}Vrbo holiday rentals</a>
         </div>
       </div></article>`;
   });
@@ -1309,7 +1312,7 @@ function render(opt){
 
 
 // Typical accommodation mix (approximate, compiled for the prototype). Order: hotel, chalet, apartment, guesthouse, private rental. 3 common, 2 some, 1 rare
-const ACC_T=["Hotels","Catered chalets","Apartments","Guesthouses","Airbnb / private"];
+const ACC_T=["Hotels","Catered chalets","Apartments","Guesthouses","Holiday rentals"];
 const ACC_DEF={France:[2,2,3,1,3],Austria:[3,2,2,3,1],Switzerland:[3,2,2,2,2],Italy:[3,1,2,2,2],Andorra:[3,1,3,1,2],Bulgaria:[3,1,2,2,2],Spain:[3,1,3,2,2],Germany:[3,1,2,3,2],Norway:[2,2,3,1,2],Sweden:[2,1,3,1,2],Slovenia:[3,1,2,2,2]};
 const ACC={
  "Val Thorens":[[2,2,3,1,2],"Mostly big apartment residences; a few hotels and chalets."],
@@ -1344,12 +1347,18 @@ const ACC={
  "Soldeu (Grandvalira)":[[3,1,2,1,1],"Mainly hotels."]
 };
 function accFor(r){const o=ACC[r.n];return {lv:o?o[0]:(ACC_DEF[r.c]||[2,2,2,2,2]),note:o?o[1]:""};}
+// Stay22 (affiliate ID seasonwisego) wraps the Booking.com links and builds the Vrbo links, so accommodation bookings earn commission.
+const S22={aid:"seasonwisego",campaign:"pistepicker"};
+function s22wrap(provider,url){return `https://www.stay22.com/allez/${provider}?aid=${S22.aid}&link=${encodeURIComponent(url)}&campaign=${S22.campaign}`;}
+function vrbo(r,p,d2){const q=r.n.replace(/ \(.*\)/,"");return `https://www.stay22.com/allez/vrbo?aid=${S22.aid}&address=${encodeURIComponent(q+", "+r.c)}&checkin=${p.d1}&checkout=${d2}&adults=${p.pax}&campaign=${S22.campaign}`;}
+const affTag='<span class="adtag" title="We may earn a commission if you book">Ad</span>';
 function abnb(r,p,d2){const q=r.n.replace(/ \(.*\)/,"");return `https://www.airbnb.co.uk/s/${encodeURIComponent(q+", "+r.c)}/homes?checkin=${p.d1}&checkout=${d2}&adults=${p.pax}`;}
 // Booking.com property-type filters (ht_id): 204 hotels, 228 chalets, 201 apartments, 220 holiday homes, 216 guest houses, 208 B&Bs
 const ACC_HT=["204","228","201;220","216;208",null];
-function bkUrl(r,p,d2,ht){const q=encodeURIComponent(r.n.replace(/ \(.*\)/,""));
-  const f=ht?"&nflt="+encodeURIComponent(ht.split(";").map(x=>"ht_id="+x).join(";")):"";
-  return `https://www.booking.com/searchresults.en-gb.html?ss=${q}&checkin=${p.d1}&checkout=${d2}&group_adults=${p.pax}&no_rooms=1${f}`;}
+// Booking.com through Stay22: the resort, dates and guests carry through. Stay22 doesn't pass on Booking.com's
+// property-type filters, so every "where people stay" box opens the resort's full list (ht is kept for later).
+function bkUrl(r,p,d2,ht){const q=r.n.replace(/ \(.*\)/,"");
+  return `https://www.stay22.com/allez/booking?aid=${S22.aid}&address=${encodeURIComponent(q+", "+r.c)}&checkin=${p.d1}&checkout=${d2}&adults=${p.pax}&campaign=${S22.campaign}`;}
 // Kit and lessons: links go straight to each partner's own site, where the user picks the resort.
 // Add per-resort deep links in KIT_DEEP (from each partner's deep-link tool) and affiliate IDs in PARTNER once approved.
 const PARTNER={skiset:"",snowrental:"",checkyeti:""};
@@ -1404,7 +1413,7 @@ function openDetail(i){
         <div><dt>${r.city?"Into town":"Transfer"}</dt><dd>${r.t} min</dd></div>
         <div><dt>Ride days</dt><dd>Up to ${fmtDays(s.days)}</dd></div>
       </dl>
-      ${(()=>{const a=accFor(r);return `<div class="acc"><h4>Where people stay · tap a type to search</h4><div class="accg">${ACC_T.map((t,k)=>{const u=ACC_HT[k]?bkUrl(r,p,d2,ACC_HT[k]):abnb(r,p,d2),via=ACC_HT[k]?"Booking.com":"Airbnb";return `<a class="acci l${a.lv[k]}" href="${u}" target="_blank" rel="noopener" title="Search ${t.toLowerCase()} on ${via}"><span>${t}</span><span class="lv">${["","Rare","Some","Common"][a.lv[k]]}</span><span class="go">${via} ↗</span></a>`}).join("")}</div>${a.note?`<p class="trline">${esc(a.note)}</p>`:""}</div>`})()}
+      ${(()=>{const a=accFor(r);return `<div class="acc"><h4>Where people stay</h4><div class="accg">${ACC_T.map((t,k)=>{const u=ACC_HT[k]?bkUrl(r,p,d2,ACC_HT[k]):vrbo(r,p,d2),via=ACC_HT[k]?"Booking.com":"Vrbo";return `<a class="acci l${a.lv[k]}" href="${u}" target="_blank" rel="noopener" title="See places to stay on ${via}"><span>${t}</span><span class="lv">${["","Rare","Some","Common"][a.lv[k]]}</span><span class="go">${affTag}${via} ↗</span></a>`}).join("")}</div>${a.note?`<p class="trline">${esc(a.note)}</p>`:""}</div>`})()}
       ${travelPanel(r,p,d2,apN)}
       ${adOn?partnerBox(r,apN):""}
       ${kitPanel(r)}
@@ -1412,7 +1421,7 @@ function openDetail(i){
       ${leg("Outbound",esc(depN),esc(apN),p.d1)}
       ${leg("Return",esc(apN),esc(depN),d2)}
       <p class="pend"><b>Scheduled flights arrive with live data.</b> Once the flight backend is connected, these tables list real departures with times, and whether you land in time to ride on arrival day or can ride before flying home.</p>
-      <div class="links"><span class="lbl">Search now</span><a href="${gf}" target="_blank" rel="noopener">Google Flights</a><a href="https://www.skyscanner.net/transport/flights/${p.dep.toLowerCase()}/${r.ap.toLowerCase()}/${yymmdd(p.d1)}/${yymmdd(d2)}/?adultsv2=${p.pax}${p.directOnly?"&preferdirects=true":""}" target="_blank" rel="noopener">Skyscanner</a><a href="https://www.booking.com/searchresults.en-gb.html?ss=${encodeURIComponent(r.n.replace(/ \(.*\)/,""))}&checkin=${p.d1}&checkout=${d2}&group_adults=${p.pax}&no_rooms=1" target="_blank" rel="noopener">Booking.com</a><a href="${abnb(r,p,d2)}" target="_blank" rel="noopener">Airbnb</a></div>
+      <div class="links"><span class="lbl">Search now</span><a href="${gf}" target="_blank" rel="noopener">Google Flights</a><a href="https://www.skyscanner.net/transport/flights/${p.dep.toLowerCase()}/${r.ap.toLowerCase()}/${yymmdd(p.d1)}/${yymmdd(d2)}/?adultsv2=${p.pax}${p.directOnly?"&preferdirects=true":""}" target="_blank" rel="noopener">Skyscanner</a><a href="${bkUrl(r,p,d2,null)}" target="_blank" rel="noopener">${affTag}Booking.com</a><a href="${vrbo(r,p,d2)}" target="_blank" rel="noopener">${affTag}Vrbo</a></div>
     </div>`;
   dlg.querySelector("[data-close]").addEventListener("click",()=>dlg.close());
   dlg.showModal();
