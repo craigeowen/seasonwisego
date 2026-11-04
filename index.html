@@ -1,0 +1,1524 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Piste Picker · SeasonWiseGo</title>
+<meta name="description" content="Tell Piste Picker how you want to ride and how long you've got. It shortlists European ski resorts that fit, ranked, with the reasons.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23142030'/%3E%3Cpath d='M5 25 L14 9 L19 17 L22 13 L27 25 Z' fill='%23F2F5F8'/%3E%3Cpath d='M14 9 L16.5 13 L13 14 Z' fill='%23D3480F'/%3E%3C/svg%3E">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: trail-map utility — form panel left (sticky on desktop), ranked resort cards right; stacks on phones. */
+:root{
+  --sky:#E3ECF5; --r1:#C9D7E6; --r2:#9FB4CB; --r3:#5F7792; --cap:#FFFFFF;
+  --snow:#F4F6F9; --card:#FFFFFF; --ink:#142030; --muted:#566476; --line:#D5DDE6; --soft:#E8EDF3;
+  --accent:#D3480F; --accent-ink:#FFFFFF;
+  --good:#237A36; --warn:#9A5200;
+  --p-green:#2F9E44; --p-blue:#1C6FD1; --p-red:#D92B2B; --p-black:#142030;
+  --f-display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --sky:#16212D; --r1:#1D2A38; --r2:#253546; --r3:#30445A; --cap:#C9D6E3;
+  --snow:#0D131A; --card:#151F2A; --ink:#E4EAF1; --muted:#97A5B5; --line:#2A3746; --soft:#1C2834;
+  --accent:#FF7B3F; --accent-ink:#1A0B02; --good:#6FD889; --warn:#FFB65C;
+  --p-green:#4CC266; --p-blue:#4D9BF0; --p-red:#FF5C5C; --p-black:#E4EAF1; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --sky:#16212D; --r1:#1D2A38; --r2:#253546; --r3:#30445A; --cap:#C9D6E3;
+  --snow:#0D131A; --card:#151F2A; --ink:#E4EAF1; --muted:#97A5B5; --line:#2A3746; --soft:#1C2834;
+  --accent:#FF7B3F; --accent-ink:#1A0B02; --good:#6FD889; --warn:#FFB65C;
+  --p-green:#4CC266; --p-blue:#4D9BF0; --p-red:#FF5C5C; --p-black:#E4EAF1; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--snow);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:24px}
+header{position:relative;overflow:hidden;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:8px 24px;background:var(--sky);border-radius:10px;padding:22px 24px 92px;border:1px solid var(--line)}
+header > *{position:relative;z-index:1}
+.themesw{position:absolute;top:12px;right:14px;display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--card)}
+.themesw button{font:inherit;font-size:.72rem;font-weight:600;border:0;background:transparent;color:var(--muted);padding:4px 10px;cursor:pointer}
+.themesw button[aria-pressed="true"]{background:var(--ink);color:var(--card)}
+.themesw button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+header .tag{margin-top:26px}
+@media (max-width:600px){.themesw{position:static;order:-1;align-self:flex-end;margin-left:auto}header .tag{margin-top:0}}
+.ridges{position:absolute;left:0;right:0;bottom:0;width:100%;height:84px;z-index:0;display:block}
+@media (max-width:600px){header{padding:18px 18px 76px}.ridges{height:68px}}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(2.2rem,5vw,3.2rem);line-height:.9;margin:0;letter-spacing:.01em;text-transform:uppercase}
+h1 span{color:var(--accent)}
+.tag{color:var(--muted);max-width:52ch;margin:0;font-size:.92rem}
+.grid{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+
+form{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:18px;display:grid;gap:18px;position:sticky;top:max(16px,env(safe-area-inset-top,0px))}
+/* desktop: the settings panel scrolls on its own so every control is reachable while it stays in view */
+@media (min-width:861px){
+  form{max-height:calc(100vh - 140px);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+  form.mb{box-shadow:inset 0 -28px 18px -18px rgba(20,32,48,.22)}
+  form::-webkit-scrollbar{width:10px;-webkit-appearance:none}
+  form::-webkit-scrollbar-track{background:var(--soft);border-radius:6px}
+  form::-webkit-scrollbar-thumb{background:var(--muted);border-radius:6px;border:2px solid var(--soft)}
+}
+@supports not selector(::-webkit-scrollbar){@media (min-width:861px){form{scrollbar-width:thin;scrollbar-color:var(--muted) var(--soft)}}}
+@media (max-width:860px){form{position:static}}
+fieldset{border:0;margin:0;padding:0;display:grid;gap:10px;min-width:0}
+legend{font-family:var(--f-display);font-weight:700;font-size:1.1rem;text-transform:uppercase;letter-spacing:.06em;padding:0;margin-bottom:6px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label.f{display:grid;gap:4px;font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+select,input[type=date],input[type=number]{font:inherit;font-size:.95rem;color:var(--ink);background:var(--snow);border:1px solid var(--line);border-radius:4px;padding:7px 8px;width:100%;min-width:0;text-transform:none;letter-spacing:0}
+input[type=range]{width:100%;accent-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.wt{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}
+.wt .nm{font-size:.9rem;font-weight:500}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{font-size:.72rem;font-weight:600;padding:5px 8px;cursor:pointer;color:var(--muted);border-left:1px solid var(--line);user-select:none}
+.seg label:first-of-type{border-left:0}
+.seg input:checked+label{background:var(--ink);color:var(--snow)}
+.seg input:focus-visible+label{outline:2px solid var(--accent);outline-offset:-2px}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 11px 5px 8px;font-size:.85rem;cursor:pointer;user-select:none}
+.chip input:checked+label{border-color:var(--ink);background:var(--soft);font-weight:600}
+.chip input:focus-visible+label{outline:2px solid var(--accent)}
+.mk{width:12px;height:12px;flex:none;display:inline-block}
+.mk.g{background:var(--p-green);border-radius:50%}
+.mk.b{background:var(--p-blue)}
+.mk.r{background:var(--p-red);transform:rotate(45deg) scale(.85)}
+.mk.k{background:var(--p-black);transform:rotate(45deg) scale(.85)}
+.toggle{display:flex;align-items:center;gap:8px;font-size:.9rem}
+.toggle input{accent-color:var(--accent);width:16px;height:16px}
+.hint{font-size:.78rem;color:var(--muted);margin:0}
+.out{font-family:var(--f-mono);font-size:.85rem;color:var(--ink);text-transform:none;letter-spacing:0}
+
+.results{display:grid;gap:16px;min-width:0}
+.sumbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 16px}
+.sumbar p{margin:0;color:var(--muted);font-size:.9rem}
+.btn{font:inherit;font-size:.85rem;font-weight:600;border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:4px;padding:6px 12px;cursor:pointer}
+.btn:hover{background:var(--soft)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;display:grid;grid-template-columns:112px minmax(0,1fr);overflow:hidden}
+@media (max-width:480px){.card{grid-template-columns:92px minmax(0,1fr)}}
+.card.top{border-color:var(--ink);box-shadow:0 2px 0 var(--ink)}
+.alt{background:var(--soft);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:12px 0 16px;min-height:320px}
+.ah{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:0 10px 10px}
+.plot{position:relative;flex:1;margin:16px 0 0 10px}
+.tk{position:absolute;left:0;right:0;border-top:1px solid var(--line)}
+.tk em{position:absolute;right:6px;top:-15px;font-style:normal;font-family:var(--f-mono);font-size:.64rem;color:var(--muted)}
+.ab{position:absolute;left:0;width:12px;background:var(--ink);border-radius:2px}
+.ab.gl{border-top:10px solid var(--p-blue)}
+.al{position:absolute;left:18px;right:4px;transform:translateY(-50%);background:var(--soft);display:grid;font-family:var(--f-mono);font-size:.8rem;font-weight:500;line-height:1.15;color:var(--ink);padding:2px 0;z-index:1}
+.al small{font-family:var(--f-body);font-size:.64rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.body{padding:14px 16px 16px;display:grid;gap:10px;min-width:0}
+.head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.rank{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.card h2{font-family:var(--f-display);font-weight:800;font-size:1.75rem;line-height:1;margin:0;text-transform:uppercase;letter-spacing:.01em;text-wrap:balance}
+.ctry{font-size:.85rem;color:var(--muted)}
+.site{font-size:.82rem;font-weight:600;color:var(--ink);text-decoration-color:var(--accent);text-underline-offset:3px}
+.score{margin-left:auto;display:flex;align-items:baseline;gap:4px}
+.score b{font-family:var(--f-display);font-size:2rem;line-height:1;color:var(--accent)}
+.score small{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:8px;margin:0}
+.stats div{border-top:1px solid var(--line);padding-top:5px;min-width:0}
+.stats dt{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+.stats dd{margin:0;font-family:var(--f-mono);font-size:.88rem;font-variant-numeric:tabular-nums}
+.why{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:4px 20px}
+.why ul{list-style:none;margin:0;padding:0;display:grid;gap:3px;font-size:.9rem}
+.why li{display:grid;grid-template-columns:16px minmax(0,1fr);gap:6px}
+.why li::before{font-weight:700}
+.pro li::before{content:"+";color:var(--good)}
+.con li::before{content:"!";color:var(--warn)}
+.terrain{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.78rem;color:var(--muted)}
+.terrain span{display:inline-flex;align-items:center;gap:5px}
+.pips{display:inline-flex;gap:2px}
+.pips i{width:6px;height:10px;background:var(--line);display:block;border-radius:1px}
+.pips i.on{background:var(--ink)}
+.links{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85rem;padding-top:4px;border-top:1px dashed var(--line)}
+.links a{color:var(--ink);font-weight:600;text-decoration-color:var(--accent);text-underline-offset:3px}
+.links .lbl{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;align-self:center}
+.snow{display:grid;gap:6px}
+.snowhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;font-size:.8rem;color:var(--muted)}
+.snowhead b{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink)}
+.fcl{margin-left:auto;color:var(--ink);font-weight:600;text-decoration-color:var(--accent);text-underline-offset:3px}
+.fcl.live{color:var(--accent)}
+.fcn{font-size:.72rem}
+.months{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;width:100%;max-width:300px}
+.mo{display:grid;justify-items:center;gap:2px;font-size:.72rem;color:var(--muted);border-radius:3px;padding:3px 0}
+.mo.on{background:var(--soft);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1px var(--ink)}
+.mo .bar{width:14px;height:34px;background:var(--line);border-radius:2px;display:flex;align-items:flex-end;overflow:hidden}
+.mo .bar i{display:block;width:100%}
+.mo .bar i.hi{background:var(--p-green)}
+.mo .bar i.md{background:var(--p-blue)}
+.mo .bar i.lo{background:var(--warn)}
+.snowbody{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px}
+.skey{list-style:none;margin:0;padding:0;display:grid;gap:3px;font-size:.74rem;color:var(--muted)}
+.skey li{display:flex;align-items:center;gap:6px}
+.skey i{width:10px;height:10px;border-radius:2px;display:inline-block;flex:none}
+.skey i.hi{background:var(--p-green)}
+.skey i.md{background:var(--p-blue)}
+.skey i.lo{background:var(--warn)}
+.skey i.cur{background:var(--soft);box-shadow:inset 0 0 0 1px var(--ink)}
+.mo .mv{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.plan{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padding-top:8px;max-width:70ch}
+.plan b{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink)}
+.plan ul{margin:4px 0 0;padding-left:18px;display:grid;gap:2px}
+.drv .kitg{padding:10px;border-top:1px solid var(--line);grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.drv .kiti span:not(.via){font-weight:600}
+.trstatus{margin:0;padding:8px 10px;border-top:1px solid var(--line);font-size:.84rem}
+.trstatus .ok{color:var(--good);font-weight:600}
+.trstatus .btn.sm{margin-left:4px}
+.trlinks{display:flex;flex-wrap:wrap;gap:6px 14px}
+.trlinks a,.trline a{color:var(--ink);font-weight:600;text-decoration-color:var(--accent);text-underline-offset:3px;margin-left:8px}
+.trlinks a{margin-left:0}
+.trline{margin:0;font-size:.84rem;color:var(--muted)}
+.trline b{color:var(--ink)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.05);background:var(--accent)}
+.findbar{position:sticky;bottom:0;margin:0 -18px -18px;padding:12px 18px 16px;border-radius:0 0 6px 6px;background:var(--card);border-top:1px solid var(--line);z-index:2}
+.findbar .btn{width:100%;padding:10px 14px;font-size:.95rem}
+.ready{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:28px 24px;display:none;gap:12px;justify-items:start}
+.ready h2{margin:0;font-family:var(--f-display);font-weight:800;font-size:1.6rem;text-transform:uppercase;letter-spacing:.02em;text-wrap:balance}
+.ready p{margin:0;color:var(--muted);max-width:60ch}
+.results.pre .ready{display:grid}
+.results.pre .sumbar,.results.pre #list,.results.pre .adbar,.results.pre #sharebox,.results.pre .note,.results.pre .plan{display:none}
+.stale{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border:1px solid var(--accent);border-radius:6px;background:var(--card);font-size:.88rem;position:sticky;top:max(8px,env(safe-area-inset-top,0px));z-index:3}
+.stale[hidden]{display:none}
+.sx{margin-left:auto;display:flex;align-items:center;gap:10px}
+.sx .score{margin-left:0}
+.card.collapsed{grid-template-columns:minmax(0,1fr)}
+@media (max-width:600px){.card.collapsed .head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:2px 8px}.card.collapsed .head .rank{grid-row:1}.card.collapsed .head h2{grid-column:2;min-width:0}.card.collapsed .head .sx{grid-column:3;grid-row:1 / span 2;align-self:center;flex-direction:column;align-items:flex-end;gap:4px}.card.collapsed .head .ctry{grid-column:2;grid-row:2}.card.collapsed .head .more{grid-column:2;grid-row:3;justify-self:start}}
+.card.collapsed .alt{display:none}
+.card.collapsed .body{padding:10px 14px;gap:4px}
+.card.collapsed .body > :not(.head):not(.mini){display:none}
+.card.collapsed .site,.card.collapsed .more small,.card.collapsed .whyb{display:none}
+.card.collapsed h2{font-size:1.45rem}
+.card.collapsed .score b{font-size:1.6rem}
+.card:not(.collapsed) .mini{display:none}
+.mini{margin:0;display:flex;flex-wrap:wrap;gap:2px 0;font-size:.84rem;color:var(--muted)}
+.mini span:not(:last-child)::after{content:"\00b7";margin:0 8px;color:var(--line)}
+.xpand{font:inherit;font-size:.78rem;font-weight:600;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:3px 10px 3px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;align-self:center}
+.xpand span{width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-top:-3px}
+.xpand[aria-expanded="true"] span{transform:rotate(-135deg);margin-top:3px}
+.xpand:hover{border-color:var(--ink)}
+.whyb{flex-basis:100%;text-align:right;font:inherit;font-size:.72rem;font-weight:600;color:var(--ink);background:transparent;border:0;padding:2px 0;cursor:pointer;text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px}
+.score{flex-wrap:wrap;justify-content:flex-end}
+.whyp{border:1px solid var(--line);border-radius:4px;background:var(--snow);overflow-x:auto}
+.whyp table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:460px}
+.whyp th{text-align:left;font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;padding:6px 10px}
+.whyp td{padding:5px 10px;border-top:1px solid var(--line);vertical-align:top}
+.whyp td:first-child{font-weight:600;white-space:nowrap}
+.whyp .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.whyp .neg td{color:var(--warn)}
+.whyp .tot td{font-weight:700;border-top:2px solid var(--ink)}
+.wbar{display:inline-block;width:60px;height:6px;background:var(--line);border-radius:3px;overflow:hidden;vertical-align:middle}
+.wbar i{display:block;height:100%;background:var(--accent)}
+.rbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;flex-basis:100%;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:6px}
+.folds{display:grid;gap:0;border-top:1px solid var(--line);padding-top:12px}
+.foldhint{margin:0 0 6px;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.fold{border-bottom:1px solid var(--line)}
+.fold summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) 16px;align-items:baseline;gap:10px;padding:10px 2px}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);justify-self:end;align-self:center;margin-top:-4px;transition:transform .15s}
+.fold[open] summary::after{transform:rotate(-135deg);margin-top:4px}
+.fold summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.ft{font-family:var(--f-display);font-weight:700;font-size:1.05rem;text-transform:uppercase;letter-spacing:.06em}
+.fs{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.fold[open] .fs{visibility:hidden}
+.fb{display:grid;gap:10px;padding:2px 2px 14px}
+.sortby{display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sortby select{font:inherit;font-size:.85rem;font-weight:600;text-transform:none;letter-spacing:0;color:var(--ink);background:var(--card);border:1px solid var(--ink);border-radius:4px;padding:5px 8px}
+.grp{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:8px 0 -4px;padding-bottom:6px;border-bottom:2px solid var(--ink);font-family:var(--f-display);font-weight:800;font-size:1.35rem;text-transform:uppercase;letter-spacing:.03em}
+.grp small{font-family:var(--f-body);font-size:.8rem;font-weight:500;color:var(--muted);text-transform:none;letter-spacing:0}
+.adbar{display:grid;gap:6px}
+.adnote{margin:0;font-size:.82rem;color:var(--muted);display:flex;gap:8px;align-items:baseline}
+.adtag{display:inline-block;font-family:var(--f-body);font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;line-height:1;padding:3px 5px;border-radius:3px;border:1px solid var(--muted);color:var(--muted);margin-right:6px;vertical-align:2px;text-decoration:none}
+.adnote .adtag{margin-right:0;flex:none}
+.spon{border:1px dashed var(--muted);border-radius:6px;background:transparent;padding:12px 16px;display:grid;gap:8px}
+.sponhead{display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--muted)}
+.sponhead .adtag{margin:0}
+.sponbody{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px}
+.spontext{flex:1;min-width:220px;display:grid;gap:3px}
+.sponname{font-family:var(--f-display);font-weight:800;font-size:1.3rem;text-transform:uppercase;letter-spacing:.02em;line-height:1}
+.spontext p{margin:0;font-size:.88rem;color:var(--ink);max-width:60ch}
+.sponfine{font-size:.72rem;color:var(--muted);font-style:italic}
+.sponcta{cursor:default;opacity:.85}
+.spon-sm{padding:10px 12px}
+.spon-sm .sponname{font-size:1.05rem}
+.cookiebar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -2px 10px rgba(0,0,0,.08);display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 16px;font-size:.85rem;
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.cookiebar p{margin:0;color:var(--ink)}
+.cbtn{display:flex;gap:8px}
+body.cbpad{padding-bottom:140px}
+.rchips{display:flex;flex-wrap:wrap;gap:6px}
+.rchips:empty{display:none}
+.rchip{font:inherit;font-size:.85rem;font-weight:600;border:1px solid var(--ink);background:var(--soft);color:var(--ink);border-radius:999px;padding:4px 10px 4px 12px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.rchip span{color:var(--muted);font-weight:700;font-size:1rem;line-height:1}
+.rchip:hover span,.rchip:focus-visible span{color:var(--accent)}
+.sharebox{display:inline-flex;align-items:center;gap:8px;font-size:.8rem}
+.sharebox[hidden]{display:none}
+.sharebox #shareCode{width:auto;padding:5px 8px;font-size:.95rem}
+.sharemsg{color:var(--good);font-weight:600}
+.sharelbl{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sharebox{padding-right:6px;border-right:1px solid var(--line)}
+.sharebox input,.ocrow input{font-family:var(--f-mono);font-size:1rem;letter-spacing:.08em;color:var(--ink);background:var(--snow);border:1px solid var(--line);border-radius:4px;padding:7px 8px;width:100%;min-width:0}
+.saved{background:var(--card);border:1px solid var(--line);border-radius:6px}
+.saved summary{cursor:pointer;padding:10px 14px;font-family:var(--f-display);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:1rem}
+.saved summary span{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);letter-spacing:0}
+.savedbody{display:grid;gap:12px;padding:0 14px 14px}
+#savedList{list-style:none;margin:0;padding:0;display:grid}
+#savedList li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:8px 0;border-top:1px solid var(--line)}
+#savedList li.none{color:var(--muted);font-size:.85rem}
+.sv{flex:1;min-width:180px;display:grid}
+.sv b{font-size:.9rem;font-weight:600}
+.sv small{color:var(--muted);font-size:.75rem}
+.btn.ghost{border-color:var(--line);color:var(--muted)}
+.ocrow{display:flex;gap:8px}
+.opencode{display:grid;gap:6px}
+.holwarn{flex-basis:100%;border:1px solid var(--warn);color:var(--ink);background:var(--card);border-radius:4px;padding:8px 12px;font-size:.88rem}
+.holwarn b{color:var(--warn)}
+.holwarn.core{border-width:2px}
+.holwarn .holalt{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
+.btn.sm{padding:3px 9px;font-size:.78rem}
+.stats dd .sub{display:block;font-family:var(--f-body);font-size:.7rem;color:var(--muted);line-height:1.3}
+.stats .bud dd{color:var(--accent);font-weight:500}
+.bline{margin:0;font-size:.8rem;color:var(--muted)}
+.city{border:1px solid var(--line);border-radius:4px;background:var(--snow);min-width:0}
+.cityhead{display:flex;flex-wrap:wrap;gap:2px 12px;align-items:baseline;padding:8px 10px;border-bottom:1px solid var(--line);font-size:.85rem}
+.cityhead b{font-family:var(--f-display);font-size:1.05rem;text-transform:uppercase;letter-spacing:.05em}
+.cityhead span{color:var(--muted);font-size:.8rem}
+.tscroll{overflow-x:auto}
+.city table{width:100%;border-collapse:collapse;font-size:.84rem;min-width:520px}
+.city th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;padding:6px 10px}
+.city td{padding:6px 10px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+.city td:first-child{font-weight:600;white-space:normal}
+.city tr.pick td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.xp{font-size:.68rem;font-weight:600;color:var(--warn);border:1px solid currentColor;border-radius:3px;padding:0 4px;margin-left:4px;white-space:nowrap}
+.fit{display:inline-block;width:48px;height:6px;background:var(--line);border-radius:3px;margin-right:6px;vertical-align:middle;overflow:hidden}
+.fit i{display:block;height:100%;background:var(--ink)}
+.note{font-size:.8rem;color:var(--muted);margin:0;max-width:70ch}
+.rn{all:unset;cursor:pointer;text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:2px;text-underline-offset:4px}
+.rn:hover{color:var(--accent)}
+.rn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+dialog#dt{border:1px solid var(--ink);border-radius:6px;background:var(--card);color:var(--ink);padding:0;width:min(640px,calc(100vw - 32px));max-height:calc(100vh - 48px)}
+dialog#dt::backdrop{background:rgba(13,19,26,.55)}
+.dh{display:flex;align-items:baseline;gap:8px 12px;flex-wrap:wrap;padding:16px 18px 12px;border-bottom:2px solid var(--ink)}
+.dh h3{font-family:var(--f-display);font-weight:800;font-size:1.8rem;line-height:1;margin:0;text-transform:uppercase}
+.dh .x{margin-left:auto}
+.db{padding:14px 18px 18px;display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.db>*{min-width:0}
+.leg{border:1px solid var(--line);border-radius:4px;background:var(--snow)}
+.leg .cityhead{border-bottom:1px solid var(--line)}
+.leg table{width:100%;border-collapse:collapse;font-size:.84rem;min-width:480px}
+.leg th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;padding:6px 10px}
+.leg td{padding:6px 10px;border-top:1px solid var(--line);color:var(--muted)}
+.ph{display:inline-block;height:9px;border-radius:2px;background:var(--line);vertical-align:middle}
+.pend{border-left:3px solid var(--accent);padding:6px 10px;font-size:.84rem;margin:0;background:var(--soft)}
+.acc{display:grid;gap:6px}
+.acc h4{margin:0;font-size:.7rem;text-transform:uppercase;letter-spacing:.07em}
+.accg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px}
+.acci{border:1px solid var(--line);border-radius:4px;padding:6px 8px;display:grid;gap:4px;font-size:.84rem;background:var(--snow)}
+.acci .lv{display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.acci.l3{border-color:var(--ink);font-weight:600}
+.acci.l1{color:var(--muted)}
+a.acci{color:inherit;text-decoration:none;cursor:pointer}
+a.acci:hover{border-color:var(--accent);background:var(--soft)}
+.kit{display:grid;gap:6px}
+.kit h4{margin:0;font-size:.7rem;text-transform:uppercase;letter-spacing:.07em}
+.kitg{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px}
+.kiti{border:1px solid var(--line);border-radius:4px;padding:8px 10px;background:var(--snow);display:grid;gap:4px;font-size:.84rem}
+.kiti b{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.kiti a{color:var(--ink);font-weight:600;text-decoration-color:var(--accent);text-underline-offset:3px}
+.kiti .soon{font-size:.78rem;font-weight:600;color:var(--muted);border:1px dashed var(--line);border-radius:3px;padding:1px 6px;justify-self:start}
+.kiti .via{font-size:.74rem;color:var(--muted)}
+a.acci .go{font-size:.72rem;color:var(--accent);font-weight:600}
+.more{font:inherit;font-size:.78rem;font-weight:700;color:var(--accent);background:transparent;border:1.5px solid var(--accent);border-radius:999px;padding:3px 11px;cursor:pointer;display:inline-flex;align-items:baseline;gap:6px;white-space:nowrap}
+.more small{font-weight:500;color:var(--muted);font-size:.72rem}
+.more:hover{background:var(--accent);color:var(--accent-ink)}
+.more:hover small{color:var(--accent-ink)}
+@media (max-width:480px){.more small{display:none}}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:6px;padding:24px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.card{animation:in .25s ease both}}
+@keyframes in{from{transform:translateY(4px)}to{transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg class="ridges" viewBox="0 0 1200 84" preserveAspectRatio="none" aria-hidden="true">
+      <polygon fill="var(--r1)" points="0,52 90,30 170,44 260,14 340,36 430,20 520,40 610,10 700,34 790,22 880,42 980,16 1070,38 1200,24 1200,84 0,84"/>
+      <polygon fill="var(--r2)" points="0,64 110,40 200,58 300,30 380,54 470,36 560,60 660,32 760,56 850,42 950,62 1050,38 1140,56 1200,46 1200,84 0,84"/>
+      <polygon fill="var(--cap)" points="300,30 284,40 292,39 300,44 309,38 316,40"/>
+      <polygon fill="var(--cap)" points="660,32 642,43 651,42 660,47 669,41 678,43"/>
+      <polygon fill="var(--cap)" points="1050,38 1034,48 1043,47 1050,51 1058,46 1066,48"/>
+      <polygon fill="var(--r3)" points="0,76 140,58 250,72 360,54 470,74 580,60 700,78 820,62 930,76 1040,60 1200,72 1200,84 0,84"/>
+    </svg>
+    <h1>Piste <span>Picker</span></h1>
+    <p class="tag">Tell it how you want to ride and how long you've got. It shortlists European resorts that fit, ranked, with the reasons.</p>
+    <div class="themesw" role="group" aria-label="Colour theme">
+      <button type="button" data-th="light">Light</button><button type="button" data-th="dark">Dark</button><button type="button" data-th="auto">Device</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <form id="f" autocomplete="off">
+      <fieldset>
+        <legend>Your trip</legend>
+        <div class="row">
+          <label class="f">Flying from
+            <select id="dep"></select>
+          </label>
+          <label class="f">Riders
+            <input type="number" id="pax" min="1" max="12" value="2">
+          </label>
+        </div>
+        <div class="row">
+          <label class="f">Outbound
+            <input type="date" id="d1" value="2027-01-14">
+          </label>
+          <label class="f">Nights
+            <select id="nights"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>14</option></select>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>What you're after</legend>
+        <div id="weights" style="display:grid;gap:8px"></div>
+        <label class="f">Après
+          <select id="apres">
+            <option value="1.5">Low-key: a beer and an early night</option>
+            <option value="3" selected>Sociable: a good bar or two</option>
+            <option value="5">Full-on: tables, DJs, late finishes</option>
+          </select>
+        </label>
+      </fieldset>
+
+      <div class="folds">
+        <p class="foldhint">Fine-tune (optional)</p>
+        <details class="fold" id="fd-travel">
+          <summary><span class="ft">Getting there</span><span class="fs" id="fs-travel"></span></summary>
+          <div class="fb">
+            <label class="f">Also happy to fly from
+              <select id="depPick"><option value="">Add another airport…</option></select>
+            </label>
+            <input type="hidden" id="deps" value="">
+            <div class="rchips" id="depChips"></div>
+            <label class="toggle"><input type="checkbox" id="direct"> Direct flights only</label>
+            <label class="toggle"><input type="checkbox" id="train" checked> Consider the train where it fits</label>
+            <label class="toggle"><input type="checkbox" id="drive" checked> Consider driving (week-long trips)</label>
+            <label class="f">Longest transfer you'll accept <span class="out" id="maxTOut"></span>
+              <input type="range" id="maxT" min="45" max="240" step="15" value="120">
+            </label>
+            <p class="hint">On a long weekend, every hour in a minibus is an hour off the hill.</p>
+          </div>
+        </details>
+
+        <details class="fold" id="fd-group">
+          <summary><span class="ft">Your group</span><span class="fs" id="fs-group"></span></summary>
+          <div class="fb">
+            <div class="chips" id="abil">
+              <span class="chip"><input type="checkbox" id="ab-beg" value="beg"><label for="ab-beg"><i class="mk g"></i>Beginner</label></span>
+              <span class="chip"><input type="checkbox" id="ab-int" value="int" checked><label for="ab-int"><i class="mk b"></i>Intermediate</label></span>
+              <span class="chip"><input type="checkbox" id="ab-adv" value="adv" checked><label for="ab-adv"><i class="mk r"></i>Advanced</label></span>
+              <span class="chip"><input type="checkbox" id="ab-exp" value="exp"><label for="ab-exp"><i class="mk k"></i>Expert</label></span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="board" checked> Snowboarders in the group</label>
+            <label class="toggle"><input type="checkbox" id="hire" checked> Hiring board and boots</label>
+            <label class="toggle"><input type="checkbox" id="avoidHols" checked> Avoid school holidays (UK and local)</label>
+          </div>
+        </details>
+
+        <details class="fold" id="fd-where">
+          <summary><span class="ft">Where</span><span class="fs" id="fs-where"></span></summary>
+          <div class="fb">
+            <div class="chips" id="ctry">
+              <span class="chip"><input type="checkbox" id="c-fr" value="France"><label for="c-fr">France</label></span>
+              <span class="chip"><input type="checkbox" id="c-at" value="Austria"><label for="c-at">Austria</label></span>
+              <span class="chip"><input type="checkbox" id="c-ch" value="Switzerland"><label for="c-ch">Switzerland</label></span>
+              <span class="chip"><input type="checkbox" id="c-it" value="Italy"><label for="c-it">Italy</label></span>
+              <span class="chip"><input type="checkbox" id="c-ad" value="Andorra"><label for="c-ad">Andorra</label></span>
+              <span class="chip"><input type="checkbox" id="c-bg" value="Bulgaria"><label for="c-bg">Bulgaria</label></span>
+              <span class="chip"><input type="checkbox" id="c-es" value="Spain"><label for="c-es">Spain</label></span>
+              <span class="chip"><input type="checkbox" id="c-de" value="Germany"><label for="c-de">Germany</label></span>
+              <span class="chip"><input type="checkbox" id="c-no" value="Norway"><label for="c-no">Norway</label></span>
+              <span class="chip"><input type="checkbox" id="c-se" value="Sweden"><label for="c-se">Sweden</label></span>
+              <span class="chip"><input type="checkbox" id="c-si" value="Slovenia"><label for="c-si">Slovenia</label></span>
+            </div>
+            <label class="f">Use the countries to
+              <select id="cmode">
+                <option value="prefer" selected>Prefer them (boost in ranking)</option>
+                <option value="only">Only show them</option>
+              </select>
+            </label>
+            <p class="hint">Leave every country unticked to search anywhere.</p>
+            <label class="f">Resorts you have in mind
+              <select id="resPick"><option value="">Add a resort…</option></select>
+            </label>
+            <input type="hidden" id="resorts" value="">
+            <div class="rchips" id="resChips"></div>
+            <label class="f">Use the resorts to
+              <select id="rmode">
+                <option value="prefer" selected>Prefer them (boost in ranking)</option>
+                <option value="only">Only show them (compare side by side)</option>
+              </select>
+            </label>
+            <p class="hint">Preferred resorts get a boost and are never dropped for transfer time.</p>
+          </div>
+        </details>
+      </div>
+      <div class="findbar"><button type="button" class="btn primary" id="findBtn">Find my resorts</button></div>
+    </form>
+
+    <section class="results pre" id="resultsSec" aria-live="polite">
+      <div class="ready" id="ready">
+        <h2>Set up your trip, then find your resorts</h2>
+        <p>Fill in your trip and what you're after on the left. The fine-tune sections are optional. Piste Picker then ranks 62 European resorts and shows the best matches, with the reasons for each.</p>
+        <button type="button" class="btn primary" id="readyBtn">Find my resorts</button>
+      </div>
+      <div class="stale" id="stale" hidden><span>You've changed your settings.</span><button type="button" class="btn sm primary" id="staleBtn">Update results</button></div>
+      <div class="sumbar">
+        <p id="summary"></p>
+        <div id="holwarn" class="holwarn" hidden></div>
+        <div class="rbar" id="rb">
+          <label class="sortby" for="sortBy">Order
+            <select id="sortBy">
+              <option value="match">By best match</option>
+              <option value="airport">By destination airport</option>
+              <option value="country">By destination country</option>
+            </select>
+          </label>
+          <label class="sortby" for="maxPP">Budget per person
+            <select id="maxPP">
+              <option value="0" selected>Any budget</option>
+              <option value="400">Under £400</option>
+              <option value="600">Under £600</option>
+              <option value="800">Under £800</option>
+              <option value="1000">Under £1,000</option>
+              <option value="1500">Under £1,500</option>
+            </select>
+          </label>
+          <button type="button" class="btn sm ghost" id="expandAll">Expand all</button>
+          <label class="sortby" for="count">Results
+            <select id="count"><option>3</option><option selected>5</option><option>8</option><option>10</option><option>15</option></select>
+          </label>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn" id="saveBtn">Save search</button>
+          <button type="button" class="btn" id="shareBtn">Share trip code</button>
+          <span id="sharebox" class="sharebox" hidden>
+            <label for="shareCode" class="sharelbl">Your trip code</label>
+            <input id="shareCode" readonly size="14">
+            <span id="shareMsg" class="sharemsg"></span>
+          </span>
+          <button type="button" class="btn" id="copy">Copy shortlist</button>
+        </div>
+      </div>
+      <details id="saved" class="saved">
+        <summary>Saved searches <span id="savedCount"></span></summary>
+        <div class="savedbody">
+          <ul id="savedList"></ul>
+          <div class="opencode">
+            <label class="f" for="codeIn">Open a trip code</label>
+            <div class="ocrow"><input id="codeIn" placeholder="For example 7KQM-A2XD-4" autocomplete="off"><button type="button" class="btn" id="codeOpen">Open</button></div>
+            <p class="hint" id="codeMsg">Saved searches stay in this browser only. Trip codes carry your settings, not your name or any account.</p>
+          </div>
+        </div>
+      </details>
+      <div class="adbar">
+        <label class="toggle"><input type="checkbox" id="adPrev"> Show ad preview (mock-up)</label>
+        <p id="adnote" class="adnote" hidden><span class="adtag">Ad</span> marks partner links and sponsored spots: Piste Picker is paid a commission if you book through them. They never change your ranking.</p>
+      </div>
+      <div id="list" class="results"></div>
+      <div id="cookiebar" class="cookiebar" role="region" aria-label="Cookie choice" hidden>
+        <p>We use cookies to track bookings made through partner links. No ad networks, no profiling.</p>
+        <div class="cbtn"><button type="button" class="btn" data-cookie>Reject</button><button type="button" class="btn" data-cookie>Accept</button></div>
+      </div>
+      <dialog id="dt" aria-labelledby="dtt"></dialog>
+      <p class="note">Resort figures (accommodation mix, altitudes, km, transfer times by road from the nearest practical airport, UK flight coverage, lift prices) are approximate and compiled for this prototype. Budgets are per person, excluding flights, assume two sharing, convert euros at about £0.86, and add 25% to beds in school holidays. </p>
+      <div class="plan"><b>Planned</b><ul>
+        <li>Real historical snow data: about 20 years of snow depth per resort from a weather archive, replacing the modelled snow-sure estimate.</li>
+        <li>Live scheduled flights in each resort's detail view (click the resort name), so ride days show whether you can ride on the travel days themselves.</li>
+        <li>Two or three arrival airports per resort (adding Chambéry, Lyon, Turin and Milan Malpensa), with the best one picked for your departure airport.</li>
+        <li>"My trip": save a resort and dates, then get a checklist (transfer, hire, lessons, lift pass, insurance), the snow forecast as the trip nears, and rest-day activities to book.</li>
+        <li>An optional “Starting from” box (town or first half of a postcode) that suggests your best UK airports by drive and train time.</li>
+        <li>Request a resort: a short form for resorts that aren't listed yet, so the most-wanted ones get added properly.</li>
+        <li>Plan from any country, not just the UK, to resorts anywhere in the world, in the user's own language, currency and units.</li>
+        <li>A route checker for independent multi-stop trips (for example A to B to C to D in Costa Rica, self-drive and self-catering) that flags season, timing and travel-time problems.</li>
+        <li>Campervans and caravans: aires (motorhome only) and winter campsites near the lifts, with hook-ups, plus towing and tunnel restrictions on the drive.</li>
+        <li>An all-year holiday finder beyond skiing, with affiliate links on the searches.</li>
+      </ul></div>
+      <p class="note">Snow-sure figures are an estimate of how often each resort has good cover in that month, modelled from altitude, glacier, regional snowfall and snowmaking, not live data or a measured archive. Holiday dates are for 2026/27. UK windows cover every council's published dates across England, Wales, Scotland and Northern Ireland; academies and independent schools can set their own. French spring holidays aren't included yet. Check snow reports and live routes before booking. Flight and hotel links open a pre-filled search.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+// Colour theme: Light by default; Dark, or follow the device, if chosen. Remembered per browser.
+(function(){
+  let t="light"; try{t=localStorage.getItem("pp-theme")||"light";}catch(e){}
+  const apply=v=>{ if(v==="auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme",v);
+    document.querySelectorAll(".themesw button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.th===v))); };
+  apply(t);
+  document.querySelectorAll(".themesw button").forEach(b=>b.addEventListener("click",()=>{ apply(b.dataset.th); try{localStorage.setItem("pp-theme",b.dataset.th);}catch(e){} }));
+})();
+// ---------- Data ----------
+// UK flight coverage tier: 3 = most UK airports, 2 = London + some regionals (often seasonal), 1 = limited/charter
+const AIR = {
+  GVA:{n:"Geneva",tier:3}, ZRH:{n:"Zurich",tier:3}, INN:{n:"Innsbruck",tier:2}, SZG:{n:"Salzburg",tier:2},
+  TRN:{n:"Turin",tier:2}, GNB:{n:"Grenoble",tier:1}, CMF:{n:"Chambéry",tier:1}, LYS:{n:"Lyon",tier:2},
+  MXP:{n:"Milan Malpensa",tier:3}, BGY:{n:"Milan Bergamo",tier:2}, VRN:{n:"Verona",tier:2},
+  BCN:{n:"Barcelona",tier:3}, TLS:{n:"Toulouse",tier:2}, SOF:{n:"Sofia",tier:2},
+  MUC:{n:"Munich",tier:3}, VCE:{n:"Venice",tier:3}, AGP:{n:"Málaga",tier:3}, OSL:{n:"Oslo",tier:3},
+  OST:{n:"Åre Östersund",tier:1}, LJU:{n:"Ljubljana",tier:1}
+};
+const DEP = [["LGW","London Gatwick"],["LHR","London Heathrow"],["STN","London Stansted"],["LTN","London Luton"],
+  ["MAN","Manchester"],["BHX","Birmingham"],["BRS","Bristol"],["EMA","East Midlands"],["LBA","Leeds Bradford"],
+  ["NCL","Newcastle"],["EDI","Edinburgh"],["GLA","Glasgow"],["BFS","Belfast"],
+  ["BOH","Bournemouth"],["SOU","Southampton"],["EXT","Exeter"],["CWL","Cardiff"],["LPL","Liverpool"],["ABZ","Aberdeen"]].sort((a,b)=>a[1].localeCompare(b[1]));
+const depName=c=>(DEP.find(x=>x[0]===c)||[c,c])[1];
+// Confirmed direct winter routes from regional airports (checked Oct 2026): [airline, from, to] as MM-DD
+const ROUTES = {BOH:{GVA:["easyJet","12-05","03-21"]}};
+function directRoute(dep,ap,d1){const r=ROUTES[dep]&&ROUTES[dep][ap]; if(!r) return null;
+  const md=(d1||"").slice(5); const inSeason = r[1]<=r[2] ? (md>=r[1]&&md<=r[2]) : (md>=r[1]||md<=r[2]);
+  return {airline:r[0],inSeason,from:r[1],to:r[2]};}
+const LONDON = new Set(["LGW","LHR","STN","LTN"]);
+
+// pw powder/off-piste, pi groomed pistes, pk park, st steeps, tr trees, bg beginner terrain,
+// bd board-friendliness (few flats/drags), av après 1 quiet..5 party, $ cost 1..3, g glacier
+const R = [
+ {n:"Val Thorens",c:"France",ap:"GVA",t:165,base:2300,top:3230,km:600,pw:3,pi:5,pk:4,st:3,tr:1,bg:4,bd:4,av:4,$:3},
+ {n:"Méribel",c:"France",ap:"GVA",t:150,base:1450,top:2952,km:600,pw:3,pi:5,pk:4,st:3,tr:3,bg:4,bd:4,av:4,$:3},
+ {n:"Courchevel",c:"France",ap:"GVA",t:150,base:1300,top:2738,km:600,pw:3,pi:5,pk:4,st:4,tr:3,bg:5,bd:4,av:3,$:3},
+ {n:"Val d'Isère",c:"France",ap:"GVA",t:180,base:1850,top:3456,km:300,pw:5,pi:4,pk:3,st:5,tr:2,bg:3,bd:3,av:5,$:3,g:true},
+ {n:"Tignes",c:"France",ap:"GVA",t:180,base:1550,top:3456,km:300,pw:5,pi:4,pk:5,st:4,tr:1,bg:3,bd:3,av:3,$:2,g:true},
+ {n:"Les Arcs",c:"France",ap:"GVA",t:150,base:1200,top:3226,km:425,pw:4,pi:4,pk:4,st:4,tr:3,bg:4,bd:3,av:3,$:2},
+ {n:"La Plagne",c:"France",ap:"GVA",t:150,base:1250,top:3250,km:425,pw:3,pi:4,pk:3,st:3,tr:2,bg:5,bd:3,av:3,$:2,g:true},
+ {n:"Chamonix",c:"France",ap:"GVA",t:60,base:1035,top:3842,km:170,pw:5,pi:2,pk:2,st:5,tr:3,bg:2,bd:2,av:4,$:2},
+ {n:"Avoriaz",c:"France",ap:"GVA",t:90,base:1800,top:2466,km:600,pw:3,pi:4,pk:5,st:3,tr:3,bg:4,bd:3,av:3,$:2},
+ {n:"Morzine",c:"France",ap:"GVA",t:75,base:1000,top:2466,km:600,pw:3,pi:4,pk:4,st:3,tr:5,bg:4,bd:3,av:4,$:2},
+ {n:"Flaine",c:"France",ap:"GVA",t:70,base:1600,top:2500,km:265,pw:4,pi:4,pk:3,st:3,tr:2,bg:4,bd:3,av:2,$:2},
+ {n:"Alpe d'Huez",c:"France",ap:"GNB",t:120,base:1860,top:3330,km:250,pw:3,pi:4,pk:4,st:4,tr:1,bg:4,bd:3,av:4,$:2},
+ {n:"Les 2 Alpes",c:"France",ap:"GNB",t:120,base:1300,top:3600,km:200,pw:3,pi:3,pk:5,st:3,tr:1,bg:3,bd:4,av:5,$:2,g:true},
+ {n:"Serre Chevalier",c:"France",ap:"TRN",t:120,base:1200,top:2800,km:250,pw:4,pi:4,pk:3,st:3,tr:5,bg:4,bd:3,av:3,$:1},
+ {n:"St Anton",c:"Austria",ap:"INN",t:75,base:1304,top:2811,km:305,pw:5,pi:4,pk:2,st:5,tr:2,bg:2,bd:3,av:5,$:3},
+ {n:"Lech-Zürs",c:"Austria",ap:"INN",t:90,base:1450,top:2811,km:305,pw:5,pi:5,pk:2,st:4,tr:2,bg:3,bd:3,av:3,$:3},
+ {n:"Ischgl",c:"Austria",ap:"INN",t:100,base:1377,top:2872,km:239,pw:3,pi:5,pk:4,st:3,tr:1,bg:3,bd:4,av:5,$:3},
+ {n:"Mayrhofen",c:"Austria",ap:"INN",t:60,base:630,top:2500,km:136,pw:3,pi:4,pk:5,st:4,tr:2,bg:3,bd:4,av:5,$:2},
+ {n:"Sölden",c:"Austria",ap:"INN",t:80,base:1350,top:3340,km:144,pw:3,pi:4,pk:3,st:3,tr:1,bg:3,bd:4,av:5,$:2,g:true},
+ {n:"Obergurgl",c:"Austria",ap:"INN",t:90,base:1800,top:3080,km:110,pw:3,pi:4,pk:2,st:2,tr:1,bg:5,bd:3,av:2,$:3},
+ {n:"Innsbruck (city base)",c:"Austria",ap:"INN",t:15,base:560,top:3210,km:300,pw:4,pi:4,pk:4,st:4,tr:2,bg:3,bd:3,av:3,$:1,g:true,city:true,
+  pass:"SkiPlusCity Pass covers 13 areas, ski buses included",
+  trips:[
+   {n:"Nordkette",m:20,how:"Funicular from the old town",inPass:true,pw:5,pi:1,pk:3,st:5,tr:1,bg:1},
+   {n:"Patscherkofel",m:25,how:"Ski bus",inPass:true,pw:2,pi:4,pk:1,st:2,tr:3,bg:3},
+   {n:"Glungezer",m:30,how:"Ski bus",inPass:true,pw:4,pi:2,pk:1,st:3,tr:2,bg:2},
+   {n:"Axamer Lizum",m:35,how:"Ski bus",inPass:true,pw:4,pi:3,pk:5,st:3,tr:1,bg:3},
+   {n:"Schlick 2000",m:35,how:"Ski bus or Stubaitalbahn tram",inPass:true,pw:3,pi:3,pk:3,st:2,tr:2,bg:4},
+   {n:"Seefeld Rosshütte",m:35,how:"Train",inPass:true,pw:2,pi:3,pk:2,st:2,tr:3,bg:4},
+   {n:"Kühtai",m:45,how:"Ski bus",inPass:true,pw:3,pi:4,pk:3,st:3,tr:1,bg:4},
+   {n:"Stubai Glacier",m:50,how:"Ski bus",inPass:true,pw:3,pi:4,pk:4,st:3,tr:1,bg:3},
+   {n:"Mayrhofen",m:60,how:"Car or train + bus",inPass:false,pw:3,pi:4,pk:5,st:4,tr:2,bg:3},
+   {n:"St Anton",m:75,how:"Train",inPass:false,pw:5,pi:4,pk:2,st:5,tr:2,bg:2}
+  ]},
+ {n:"Salzburg (city base)",c:"Austria",ap:"SZG",t:15,base:800,top:2313,km:760,pw:3,pi:5,pk:4,st:3,tr:3,bg:4,bd:3,av:3,$:1,city:true,
+  pass:"Day passes bought per resort; Ski Amadé multi-day covers the Salzburg resorts",
+  trips:[
+   {n:"Dachstein West",m:60,how:"Car or tour bus",inPass:true,pw:2,pi:4,pk:3,st:2,tr:3,bg:4},
+   {n:"Flachau / Snow Space",m:60,how:"Car or ski shuttle",inPass:true,pw:2,pi:5,pk:4,st:3,tr:2,bg:4},
+   {n:"Obertauern",m:75,how:"Car or ski shuttle",inPass:false,pw:4,pi:4,pk:3,st:3,tr:1,bg:4},
+   {n:"Zell am See-Kaprun",m:80,how:"Car or train",inPass:false,pw:3,pi:4,pk:4,st:3,tr:2,bg:4},
+   {n:"Saalbach",m:85,how:"Car",inPass:false,pw:3,pi:5,pk:4,st:3,tr:4,bg:4},
+   {n:"Gastein",m:90,how:"Train",inPass:true,pw:4,pi:4,pk:3,st:3,tr:2,bg:3}
+  ]},
+ {n:"Kitzbühel",c:"Austria",ap:"SZG",t:80,base:800,top:2000,km:230,pw:2,pi:4,pk:3,st:3,tr:3,bg:4,bd:3,av:5,$:3},
+ {n:"Saalbach",c:"Austria",ap:"SZG",t:75,base:1003,top:2096,km:270,pw:3,pi:5,pk:4,st:3,tr:4,bg:4,bd:4,av:5,$:2},
+ {n:"Verbier",c:"Switzerland",ap:"GVA",t:120,base:820,top:3330,km:410,pw:5,pi:3,pk:4,st:5,tr:3,bg:2,bd:3,av:5,$:3},
+ {n:"Zermatt",c:"Switzerland",ap:"GVA",t:210,base:1620,top:3883,km:360,pw:4,pi:5,pk:3,st:4,tr:1,bg:3,bd:3,av:4,$:3,g:true},
+ {n:"Laax",c:"Switzerland",ap:"ZRH",t:105,base:1100,top:3018,km:224,pw:4,pi:4,pk:5,st:3,tr:3,bg:4,bd:5,av:4,$:3},
+ {n:"Engelberg",c:"Switzerland",ap:"ZRH",t:75,base:1000,top:3020,km:82,pw:5,pi:2,pk:2,st:5,tr:2,bg:2,bd:3,av:3,$:2,g:true},
+ {n:"Andermatt",c:"Switzerland",ap:"ZRH",t:100,base:1447,top:2961,km:180,pw:5,pi:3,pk:2,st:4,tr:2,bg:3,bd:3,av:2,$:2},
+ {n:"Davos-Klosters",c:"Switzerland",ap:"ZRH",t:135,base:1124,top:2844,km:300,pw:4,pi:4,pk:4,st:3,tr:3,bg:3,bd:3,av:3,$:3},
+ {n:"Sauze d'Oulx",c:"Italy",ap:"TRN",t:75,base:1509,top:2823,km:400,pw:3,pi:4,pk:3,st:3,tr:4,bg:4,bd:3,av:4,$:1},
+ {n:"Cervinia",c:"Italy",ap:"TRN",t:120,base:2050,top:3480,km:360,pw:2,pi:5,pk:3,st:2,tr:1,bg:5,bd:3,av:3,$:2,g:true},
+ {n:"Courmayeur",c:"Italy",ap:"GVA",t:90,base:1224,top:2755,km:100,pw:4,pi:3,pk:1,st:4,tr:4,bg:3,bd:3,av:4,$:2},
+ {n:"Livigno",c:"Italy",ap:"BGY",t:210,base:1816,top:2797,km:115,pw:3,pi:4,pk:5,st:2,tr:2,bg:5,bd:5,av:4,$:1},
+ {n:"Val Gardena",c:"Italy",ap:"INN",t:100,base:1236,top:2518,km:175,pw:2,pi:5,pk:2,st:2,tr:2,bg:4,bd:3,av:3,$:2},
+ {n:"Madonna di Campiglio",c:"Italy",ap:"VRN",t:150,base:850,top:2504,km:156,pw:2,pi:5,pk:3,st:3,tr:2,bg:4,bd:3,av:3,$:3},
+ {n:"Soldeu (Grandvalira)",c:"Andorra",ap:"TLS",t:180,base:1710,top:2640,km:210,pw:2,pi:4,pk:4,st:2,tr:3,bg:5,bd:4,av:5,$:1},
+ {n:"Bansko",c:"Bulgaria",ap:"SOF",t:150,base:990,top:2600,km:75,pw:2,pi:3,pk:3,st:2,tr:3,bg:4,bd:3,av:4,$:1},
+ {n:"Les Gets",c:"France",ap:"GVA",t:75,base:1172,top:2002,km:600,pw:3,pi:4,pk:4,st:2,tr:4,bg:5,bd:3,av:3,$:2},
+ {n:"Les Menuires",c:"France",ap:"GVA",t:160,base:1850,top:3230,km:600,pw:3,pi:5,pk:4,st:3,tr:1,bg:4,bd:4,av:3,$:2},
+ {n:"La Rosière",c:"France",ap:"GVA",t:180,base:1850,top:2800,km:160,pw:4,pi:4,pk:3,st:3,tr:3,bg:4,bd:3,av:2,$:2},
+ {n:"Sainte-Foy",c:"France",ap:"GVA",t:180,base:1550,top:2620,km:40,pw:5,pi:2,pk:1,st:4,tr:4,bg:2,bd:3,av:1,$:2},
+ {n:"Montgenèvre",c:"France",ap:"TRN",t:100,base:1860,top:2700,km:400,pw:4,pi:4,pk:3,st:3,tr:3,bg:4,bd:3,av:2,$:1},
+ {n:"Obertauern",c:"Austria",ap:"SZG",t:75,base:1740,top:2313,km:100,pw:4,pi:4,pk:3,st:3,tr:1,bg:4,bd:3,av:4,$:2},
+ {n:"Zell am See-Kaprun",c:"Austria",ap:"SZG",t:80,base:750,top:3029,km:138,pw:3,pi:4,pk:4,st:3,tr:2,bg:4,bd:3,av:4,$:2,g:true},
+ {n:"Schladming",c:"Austria",ap:"SZG",t:90,base:745,top:2015,km:230,pw:2,pi:5,pk:3,st:3,tr:3,bg:4,bd:3,av:4,$:2},
+ {n:"Hintertux",c:"Austria",ap:"INN",t:80,base:1500,top:3250,km:202,pw:4,pi:4,pk:4,st:3,tr:1,bg:3,bd:4,av:2,$:2,g:true},
+ {n:"St Moritz",c:"Switzerland",ap:"ZRH",t:180,base:1822,top:3303,km:350,pw:3,pi:5,pk:3,st:3,tr:2,bg:3,bd:3,av:4,$:3},
+ {n:"Saas-Fee",c:"Switzerland",ap:"GVA",t:180,base:1800,top:3600,km:150,pw:3,pi:4,pk:4,st:3,tr:1,bg:3,bd:4,av:3,$:3,g:true},
+ {n:"Crans-Montana",c:"Switzerland",ap:"GVA",t:120,base:1500,top:3000,km:140,pw:3,pi:4,pk:3,st:2,tr:3,bg:4,bd:3,av:3,$:3,g:true},
+ {n:"Grindelwald-Wengen",c:"Switzerland",ap:"ZRH",t:135,base:943,top:2501,km:206,pw:3,pi:4,pk:3,st:3,tr:3,bg:4,bd:3,av:3,$:3},
+ {n:"Arosa-Lenzerheide",c:"Switzerland",ap:"ZRH",t:120,base:1229,top:2865,km:225,pw:3,pi:5,pk:4,st:3,tr:3,bg:4,bd:4,av:3,$:3},
+ {n:"Cortina d'Ampezzo",c:"Italy",ap:"VCE",t:120,base:1224,top:2930,km:120,pw:3,pi:4,pk:2,st:4,tr:2,bg:3,bd:3,av:3,$:3},
+ {n:"Sestriere",c:"Italy",ap:"TRN",t:90,base:2035,top:2823,km:400,pw:3,pi:4,pk:3,st:3,tr:2,bg:3,bd:3,av:3,$:2},
+ {n:"Monterosa (Champoluc)",c:"Italy",ap:"TRN",t:120,base:1568,top:3275,km:180,pw:5,pi:3,pk:2,st:4,tr:2,bg:3,bd:3,av:2,$:2},
+ {n:"Passo Tonale",c:"Italy",ap:"BGY",t:150,base:1883,top:3016,km:100,pw:2,pi:4,pk:3,st:2,tr:1,bg:5,bd:3,av:3,$:1,g:true},
+ {n:"Baqueira-Beret",c:"Spain",ap:"TLS",t:150,base:1500,top:2610,km:167,pw:4,pi:4,pk:3,st:3,tr:3,bg:4,bd:3,av:4,$:2},
+ {n:"Sierra Nevada",c:"Spain",ap:"AGP",t:120,base:2100,top:3300,km:110,pw:1,pi:4,pk:3,st:2,tr:1,bg:4,bd:3,av:4,$:1,eo:-350},
+ {n:"Garmisch-Partenkirchen",c:"Germany",ap:"MUC",t:90,base:720,top:2720,km:60,pw:2,pi:3,pk:2,st:3,tr:3,bg:3,bd:3,av:3,$:2,g:true},
+ {n:"Hemsedal",c:"Norway",ap:"OSL",t:180,base:640,top:1497,km:51,pw:4,pi:3,pk:5,st:4,tr:4,bg:3,bd:4,av:4,$:3,eo:1450},
+ {n:"Åre",c:"Sweden",ap:"OST",t:75,base:380,top:1274,km:105,pw:3,pi:4,pk:4,st:3,tr:4,bg:4,bd:4,av:4,$:3,eo:1550},
+ {n:"Kranjska Gora",c:"Slovenia",ap:"LJU",t:60,base:810,top:1570,km:20,pw:1,pi:2,pk:2,st:2,tr:3,bg:5,bd:3,av:3,$:1}
+];
+
+// Adult day lift pass, euro, approximate peak-season walk-up (CH converted)
+const LIFT = {"Val Thorens":75,"Méribel":75,"Courchevel":75,"Val d'Isère":72,"Tignes":72,"Les Arcs":66,"La Plagne":66,"Chamonix":75,
+ "Avoriaz":68,"Morzine":68,"Flaine":60,"Alpe d'Huez":64,"Les 2 Alpes":60,"Serre Chevalier":58,"St Anton":76,"Lech-Zürs":76,"Ischgl":77,
+ "Mayrhofen":70,"Sölden":75,"Obergurgl":70,"Innsbruck (city base)":62,"Salzburg (city base)":70,"Kitzbühel":78,"Saalbach":74,"Verbier":88,"Zermatt":98,
+ "Laax":88,"Engelberg":75,"Andermatt":92,"Davos-Klosters":82,"Sauze d'Oulx":52,"Cervinia":62,"Courmayeur":60,"Livigno":60,
+ "Val Gardena":78,"Madonna di Campiglio":74,"Soldeu (Grandvalira)":65,"Bansko":50,
+ "Les Gets":66,"Les Menuires":72,"La Rosière":55,"Sainte-Foy":45,"Montgenèvre":52,"Obertauern":69,"Zell am See-Kaprun":75,"Schladming":74,
+ "Hintertux":72,"St Moritz":95,"Saas-Fee":85,"Crans-Montana":85,"Grindelwald-Wengen":90,"Arosa-Lenzerheide":90,"Cortina d'Ampezzo":78,
+ "Sestriere":55,"Monterosa (Champoluc)":62,"Passo Tonale":60,"Baqueira-Beret":70,"Sierra Nevada":60,"Garmisch-Partenkirchen":62,
+ "Hemsedal":70,"Åre":65,"Kranjska Gora":40};
+// Snow climate. sf: how snowy the area typically is (1 dry/inner-Alpine .. 5 big-snowfall north-Stau),
+// mk: approx % of pistes with snowmaking. Approximate, compiled for this prototype.
+const SNOWC = {"Val Thorens":[3,35],"Méribel":[3,45],"Courchevel":[3,60],"Val d'Isère":[3,35],"Tignes":[3,35],"Les Arcs":[3,30],
+ "La Plagne":[3,35],"Chamonix":[4,20],"Avoriaz":[4,30],"Morzine":[4,30],"Flaine":[5,30],"Alpe d'Huez":[2,50],"Les 2 Alpes":[2,40],
+ "Serre Chevalier":[2,40],"St Anton":[5,70],"Lech-Zürs":[5,70],"Ischgl":[3,85],"Mayrhofen":[3,90],"Sölden":[3,70],"Obergurgl":[3,70],
+ "Innsbruck (city base)":[3,70],"Salzburg (city base)":[3,90],"Kitzbühel":[3,90],"Saalbach":[3,90],"Verbier":[3,30],"Zermatt":[2,50],
+ "Laax":[4,50],"Engelberg":[5,40],"Andermatt":[5,30],"Davos-Klosters":[3,40],"Sauze d'Oulx":[3,50],"Cervinia":[2,60],
+ "Courmayeur":[3,40],"Livigno":[2,80],"Val Gardena":[2,95],"Madonna di Campiglio":[2,95],"Soldeu (Grandvalira)":[2,60],"Bansko":[2,50],
+ "Les Gets":[4,30],"Les Menuires":[3,40],"La Rosière":[4,25],"Sainte-Foy":[4,10],"Montgenèvre":[4,40],"Obertauern":[5,60],"Zell am See-Kaprun":[3,90],
+ "Schladming":[3,100],"Hintertux":[3,40],"St Moritz":[2,50],"Saas-Fee":[3,40],"Crans-Montana":[2,60],"Grindelwald-Wengen":[3,50],"Arosa-Lenzerheide":[3,50],
+ "Cortina d'Ampezzo":[2,95],"Sestriere":[3,60],"Monterosa (Champoluc)":[3,50],"Passo Tonale":[2,70],"Baqueira-Beret":[4,50],"Sierra Nevada":[1,70],
+ "Garmisch-Partenkirchen":[3,60],"Hemsedal":[3,60],"Åre":[3,50],"Kranjska Gora":[2,90]};
+const SF_LABEL=["","Dry area, relies on snowmaking","Below-average snowfall area","Average Alpine snowfall","Snowier than most","Big-snowfall area"];
+// Month-by-month chance of good cover (0-100). Elevation thresholds per month for ~full natural cover,
+// shifted by regional snowfall, then topped up by snowmaking (less effective in Apr/Nov).
+const THR={10:2900,11:2300,0:1900,1:1800,2:2100,3:2600,4:3100};
+function snowProfile(r){
+  const [sf,mk]=SNOWC[r.n]||[3,50], E=r.base*0.5+r.top*0.5+(r.g?300:0)+(r.eo||0);
+  const out={};
+  for(const m of [10,11,0,1,2,3,4]){
+    let nat=clamp((E-(THR[m]-500))/700+(sf-3)*0.08,0,1);
+    const k=(m===10||m===4)?0.1:m===3?0.3:0.75;
+    out[m]=Math.round(clamp(nat+(1-nat)*mk/100*k,0.03,0.97)*100);
+  }
+  return out;
+}
+
+// ---------- Train (London St Pancras to the Tarentaise) ----------
+// [station, onward transfer minutes]; minutes from London: ski train direct-ish via Lille, TGV via Paris adds a cross-Paris change
+const TRAIN = {"Les Menuires":["Moûtiers",40],"La Rosière":["Bourg-Saint-Maurice",35],"Sainte-Foy":["Bourg-Saint-Maurice",25],"Val Thorens":["Moûtiers",50],"Méribel":["Moûtiers",30],"Courchevel":["Moûtiers",30],
+  "La Plagne":["Aime-la-Plagne",30],"Les Arcs":["Bourg-Saint-Maurice",10],"Tignes":["Bourg-Saint-Maurice",45],"Val d'Isère":["Bourg-Saint-Maurice",50]};
+const TRAIN_MIN = {"Moûtiers":420,"Aime-la-Plagne":440,"Bourg-Saint-Maurice":464};
+const SKITRAIN = {out:["2026-12-19","2027-02-27"], sunRet:["2026-12-27","2027-02-28"],
+  satRet:["2026-12-26","2027-01-02","2027-01-09","2027-02-20","2027-02-27"]};
+const dow=d=>new Date(d+"T12:00:00Z").getUTCDay();
+function skiTrainFit(d1,nights){
+  const ret=plusDays(d1,nights), why=[];
+  const outOK = dow(d1)===6 && d1>=SKITRAIN.out[0] && d1<=SKITRAIN.out[1];
+  const retOK = (dow(ret)===0 && ret>=SKITRAIN.sunRet[0] && ret<=SKITRAIN.sunRet[1]) || SKITRAIN.satRet.includes(ret);
+  return {ok:outOK&&retOK, outOK, retOK, ret};
+}
+// nearest Saturday start (within 3 weeks) giving a 7- or 8-night ski-train trip
+function skiTrainSuggest(d1){
+  for(let i=0;i<=21;i++){for(const s of [-i,i]){const d=plusDays(d1,s); if(dow(d)!==6) continue;
+    for(const n of [7,8]){ if(skiTrainFit(d,n).ok) return {d,n}; }}}
+  return null;
+}
+// ---------- Driving from the UK (Channel Tunnel, then motorways) ----------
+// [road km from Calais, route code]. Approximate, compiled for this prototype.
+const DRIVE = {"Val Thorens":[980,"FRT"],"Méribel":[950,"FRT"],"Courchevel":[950,"FRT"],"Val d'Isère":[1010,"FRT"],"Tignes":[1000,"FRT"],
+ "Les Arcs":[950,"FRT"],"La Plagne":[960,"FRT"],"Les Menuires":[970,"FRT"],"La Rosière":[990,"FRT"],"Sainte-Foy":[990,"FRT"],
+ "Chamonix":[900,"FRN"],"Avoriaz":[890,"FRN"],"Morzine":[870,"FRN"],"Les Gets":[870,"FRN"],"Flaine":[850,"FRN"],
+ "Alpe d'Huez":[1000,"FRS"],"Les 2 Alpes":[1010,"FRS"],"Serre Chevalier":[1080,"FRS"],"Montgenèvre":[1100,"FRS"],
+ "Verbier":[950,"CH"],"Zermatt":[1050,"CH"],"Saas-Fee":[1050,"CH"],"Crans-Montana":[980,"CH"],"Engelberg":[850,"CH"],"Andermatt":[900,"CH"],
+ "Laax":[950,"CH"],"Davos-Klosters":[1000,"CH"],"Arosa-Lenzerheide":[980,"CH"],"St Moritz":[1050,"CH"],"Grindelwald-Wengen":[880,"CH"],
+ "St Anton":[1050,"AT"],"Lech-Zürs":[1040,"AT"],"Ischgl":[1080,"AT"],"Sölden":[1130,"AT"],"Obergurgl":[1150,"AT"],"Innsbruck (city base)":[1100,"AT"],
+ "Mayrhofen":[1150,"AT"],"Hintertux":[1170,"AT"],"Kitzbühel":[1150,"AT"],"Saalbach":[1180,"AT"],"Zell am See-Kaprun":[1200,"AT"],
+ "Salzburg (city base)":[1100,"AT"],"Obertauern":[1250,"AT"],"Schladming":[1250,"AT"],"Garmisch-Partenkirchen":[1000,"DE"],
+ "Courmayeur":[950,"ITMB"],"Cervinia":[1050,"ITMB"],"Monterosa (Champoluc)":[1050,"ITMB"],"Sauze d'Oulx":[1050,"ITFR"],"Sestriere":[1070,"ITFR"],
+ "Livigno":[1150,"ITCH"],"Val Gardena":[1250,"ITAT"],"Cortina d'Ampezzo":[1350,"ITAT"],"Madonna di Campiglio":[1250,"ITAT"],"Passo Tonale":[1200,"ITAT"],
+ "Soldeu (Grandvalira)":[1150,"PYR"],"Baqueira-Beret":[1100,"PYR"],"Kranjska Gora":[1450,"SI"]};
+// route code: [tolls and vignettes, return trip, euro; what they are]
+const DRIVE_ROUTE = {FRN:[150,"French motorway tolls"],FRT:[170,"French motorway tolls"],FRS:[170,"French motorway tolls"],
+ CH:[115,"French tolls to Basel, plus the Swiss motorway vignette (CHF 40, valid for the calendar year)"],
+ AT:[15,"Toll-free via Belgium and Germany, then the Austrian 10-day vignette. Arlberg or Felbertauern tunnels cost extra if your route uses them"],
+ DE:[0,"Toll-free via Belgium and Germany"],
+ ITMB:[230,"French tolls, the Mont Blanc tunnel and Italian motorway tolls"],ITFR:[250,"French tolls, the Fréjus tunnel and Italian motorway tolls"],
+ ITCH:[130,"French tolls to Basel, the Swiss vignette and the tunnel toll into Livigno"],
+ ITAT:[75,"Austrian vignette, the Brenner motorway toll and Italian motorway tolls"],PYR:[220,"French motorway tolls via Toulouse"],
+ SI:[50,"Austrian vignette, the Karawanken tunnel toll and the Slovenian vignette"]};
+const WINTER_RULES = {France:"Winter tyres, or snow chains or socks carried, in mountain areas from 1 November to 31 March.",
+ Austria:"Winter tyres are required in wintry conditions from 1 November to 15 April. Carry chains.",
+ Switzerland:"No winter-tyre law, but you are liable if your car isn't fit for the conditions. Fit chains where signed.",
+ Italy:"Winter tyres, or chains on board, on many mountain roads, typically 15 November to 15 April.",
+ Germany:"Winter tyres are required in wintry conditions.", Andorra:"Winter tyres or chains are required when roads are snowy.",
+ Spain:"Chains or winter tyres when signs require them.", Slovenia:"Winter equipment is required from 15 November to 15 March."};
+function driveInfo(r,p){const d=DRIVE[r.n]; if(!d) return {far:true};
+  const [km,code]=d, drive=Math.round(km*0.57+45), total=drive+80, oneDay=total<=780, pax=p.pax||2;
+  const rt=DRIVE_ROUTE[code], tollsGBP=Math.round(rt[0]*0.86/10)*10, fuelGBP=Math.round(km*2*0.075*1.85*0.86/10)*10;
+  const crossing=[200,350], cars=Math.ceil(pax/4), pp=Math.round(((crossing[0]+crossing[1])/2+tollsGBP+fuelGBP)*cars/pax/10)*10;
+  return {km,code,drive,total,oneDay,tollsGBP,tollNote:rt[1],fuelGBP,crossing,cars,pp,
+    rideDays:oneDay?Math.max(0,p.nights-1):Math.max(0,p.nights-2)};}
+
+function trainInfo(r,p,flyDays){
+  const t=TRAIN[r.n]; if(!t) return null;
+  const [st,onward]=t, base=TRAIN_MIN[st];
+  const fit=skiTrainFit(p.d1,p.nights);
+  // door to door from St Pancras: 30 min check-in + journey + onward transfer
+  const ski = 30+base+onward, tgv = 30+base+45+onward;
+  // flight: 2 h at the UK airport + ~1 h 45 flight + 45 min bags + transfer
+  const fly = 120+105+45+r.t;
+  return {st,onward,fit,ski,tgv,fly,trainDays:Math.max(0,p.nights-1),flyDays,
+    week:p.nights>=5, suggest: fit.ok?null:skiTrainSuggest(p.d1)};
+}
+
+// Official resort / tourist-office sites
+const SITE = {"Val Thorens":"https://www.valthorens.com","Méribel":"https://www.meribel.net","Courchevel":"https://www.courchevel.com",
+ "Val d'Isère":"https://www.valdisere.com","Tignes":"https://www.tignes.net","Les Arcs":"https://www.lesarcs.com","La Plagne":"https://www.la-plagne.com",
+ "Chamonix":"https://www.chamonix.com","Avoriaz":"https://www.avoriaz.com","Morzine":"https://en.morzine-avoriaz.com","Flaine":"https://www.flaine.com",
+ "Alpe d'Huez":"https://www.alpedhuez.com","Les 2 Alpes":"https://www.les2alpes.com","Serre Chevalier":"https://www.serre-chevalier.com",
+ "St Anton":"https://www.stantonamarlberg.com","Lech-Zürs":"https://www.lechzuers.com","Ischgl":"https://www.ischgl.com","Mayrhofen":"https://www.mayrhofen.at",
+ "Sölden":"https://www.soelden.com","Obergurgl":"https://www.obergurgl.com","Innsbruck (city base)":"https://www.innsbruck.info",
+ "Salzburg (city base)":"https://www.salzburg.info","Kitzbühel":"https://www.kitzbuehel.com","Saalbach":"https://www.saalbach.com",
+ "Verbier":"https://www.verbier.ch","Zermatt":"https://www.zermatt.ch","Laax":"https://www.laax.com","Engelberg":"https://www.engelberg.ch",
+ "Andermatt":"https://www.andermatt.ch","Davos-Klosters":"https://www.davos.ch","Sauze d'Oulx":"https://www.vialattea.it","Cervinia":"https://www.cervinia.it",
+ "Courmayeur":"https://www.courmayeur-montblanc.com","Livigno":"https://www.livigno.eu","Val Gardena":"https://www.valgardena.it",
+ "Madonna di Campiglio":"https://www.campigliodolomiti.it","Soldeu (Grandvalira)":"https://www.grandvalira.com",
+ "Les Gets":"https://www.lesgets.com","Les Menuires":"https://www.lesmenuires.com","La Rosière":"https://www.larosiere.net","Montgenèvre":"https://www.montgenevre.com",
+ "Obertauern":"https://www.obertauern.com","Zell am See-Kaprun":"https://www.zellamsee-kaprun.com","Schladming":"https://www.schladming-dachstein.at",
+ "Hintertux":"https://www.hintertuxergletscher.at","St Moritz":"https://www.stmoritz.com","Saas-Fee":"https://www.saas-fee.ch","Crans-Montana":"https://www.crans-montana.ch",
+ "Arosa-Lenzerheide":"https://www.arosalenzerheide.swiss","Sestriere":"https://www.vialattea.it","Monterosa (Champoluc)":"https://www.monterosaski.com",
+ "Passo Tonale":"https://www.pontedilegnotonale.com","Baqueira-Beret":"https://www.baqueira.es","Sierra Nevada":"https://sierranevada.es",
+ "Garmisch-Partenkirchen":"https://zugspitze.de","Kranjska Gora":"https://www.kranjska-gora.si"};
+const siteFor=r=>SITE[r.n]||`https://www.google.com/search?q=${encodeURIComponent(r.n.replace(/ \(.*\)/,"")+" ski resort official site")}`;
+
+// Bed per person per night, euro, sharing, by cost tier; Switzerland uplifted
+const BED = {1:[45,95],2:[70,150],3:[120,260]};
+const GBP = 0.86;
+function tripBudget(r,nights,days,hire,peak){
+  const ch = r.c==="Switzerland"?1.2:1;
+  const [bl,bh]=BED[r.$].map(x=>x*ch);
+  const ld = Math.max(1,Math.round(days)), lift = LIFT[r.n]||70;
+  const tr = r.city?[10,25]:r.t<=90?[40,90]:[60,130];
+  const kit = hire?[30,45]:[0,0];
+  const pk = peak?1.25:1;
+  const lo = nights*bl*pk + ld*lift*0.92 + tr[0] + ld*kit[0];
+  const hi = nights*bh*pk + ld*lift + tr[1] + ld*kit[1];
+  const rnd=x=>Math.round(x*GBP/10)*10;
+  return {lo:rnd(lo),hi:rnd(hi),lift,liftDays:ld,bed:[rnd(bl),rnd(bh)]};
+}
+function rankTrips(r,w){
+  return r.trips.map(x=>{let n=0,d=0;for(const k in w){if(x[k]===undefined)continue;n+=w[k]*x[k];d+=w[k]*5;}
+    const fit=d?n/d:0.6; const pick=fit*100-(x.m-20)*0.3-(x.inPass?0:8);
+    return {...x,fit:Math.round(fit*100),pick};}).sort((a,b)=>b.pick-a.pick);
+}
+function cityCommute(r,w){const t=rankTrips(r,w).slice(0,3);return Math.round(t.reduce((a,x)=>a+x.m,0)/t.length);}
+
+const WEIGHTS = [
+  ["pw","Powder & off-piste",2],["pi","Cruising groomers",2],["pk","Park days",2],
+  ["st","Steeps & blacks",1],["tr","Trees (bad-vis days)",1]
+];
+const WLAB = ["Skip","Some","Keen","Must"];
+const APRES = ["","Very quiet","Low-key","Sociable","Lively","Full-on party"];
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const PRO = {pw:"Strong powder and off-piste",pi:"Big groomed network",pk:"Standout terrain parks",st:"Proper steep, black terrain",
+  tr:"Tree runs for flat-light days",bg:"Gentle blues and nursery slopes for the beginner",bd:"Board-friendly lifts, few long flats"};
+const CON = {pw:"Limited powder and off-piste",pi:"Groomed network is small or patchy",pk:"Parks are basic",st:"Not much genuinely steep terrain",
+  tr:"Little tree riding, tough in flat light",bg:"Short on easy terrain for a beginner",bd:"Drags or flat traverses that annoy boarders"};
+
+// ---------- School holidays 2026/27 (inclusive, weekends added either side) ----------
+// UK: windows span every council's published dates, grouped by region. core = most of England.
+const UKH = {xmas:"Christmas",feb:"February half term",easter:"Easter"};
+const HOLS = [
+  {g:"xmas",l:"England, Wales and NI",f:"2026-12-19",t:"2027-01-03",c:"*",core:true},
+  {g:"xmas",l:"Scotland (some councils back 6 Jan)",f:"2026-12-19",t:"2027-01-05",c:"*"},
+  {g:"feb",l:"most of England",f:"2027-02-13",t:"2027-02-21",c:"*",core:true},
+  {g:"feb",l:"parts of northern England",f:"2027-02-12",t:"2027-02-22",c:"*"},
+  {g:"feb",l:"Hull, York and North Yorkshire",f:"2027-02-06",t:"2027-02-14",c:"*"},
+  {g:"feb",l:"Wales",f:"2027-02-05",t:"2027-02-15",c:"*"},
+  {g:"feb",l:"Scotland (varies by council)",f:"2027-02-06",t:"2027-02-22",c:"*"},
+  {g:"feb",l:"Northern Ireland",f:"2027-02-11",t:"2027-02-14",c:"*"},
+  {g:"easter",l:"most of England",f:"2027-03-25",t:"2027-04-11",c:"*",core:true},
+  {g:"easter",l:"Wales",f:"2027-03-20",t:"2027-04-04",c:"*"},
+  {g:"easter",l:"Scotland (varies by council)",f:"2027-03-25",t:"2027-04-19",c:"*"},
+  {g:"easter",l:"Northern Ireland",f:"2027-03-25",t:"2027-04-04",c:"*"},
+  {l:"French Christmas holidays",f:"2026-12-19",t:"2027-01-03",c:"France,Andorra"},
+  {l:"French winter holidays, zone C (Paris)",f:"2027-02-06",t:"2027-02-21",c:"France,Andorra"},
+  {l:"French winter holidays, zone A (Lyon, Grenoble)",f:"2027-02-13",t:"2027-02-28",c:"France,Andorra"},
+  {l:"French winter holidays, zone B",f:"2027-02-20",t:"2027-03-07",c:"France,Andorra"},
+  {l:"Austrian Christmas holidays",f:"2026-12-24",t:"2027-01-06",c:"Austria"},
+  {l:"Austrian semester break (Vienna)",f:"2027-01-30",t:"2027-02-07",c:"Austria"},
+  {l:"Austrian semester break (Carinthia)",f:"2027-02-06",t:"2027-02-14",c:"Austria"},
+  {l:"Austrian semester break (Tyrol, Salzburg)",f:"2027-02-13",t:"2027-02-21",c:"Austria"},
+  {l:"Austrian Easter holidays",f:"2027-03-20",t:"2027-03-29",c:"Austria"},
+  {l:"Italian and Swiss Christmas holidays",f:"2026-12-24",t:"2027-01-06",c:"Italy,Switzerland"}
+];
+const plusDays=(d,n)=>{const x=new Date(d+"T12:00:00Z");x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10)};
+function holsFor(country,d1,nights){const d2=plusDays(d1,nights);
+  return HOLS.filter(h=>(h.c==="*"||h.c.split(",").includes(country))&&d1<=h.t&&d2>=h.f);}
+const ukHols=(d1,nights)=>holsFor("",d1,nights);
+// nearest start date (same length) that misses every UK window, searching 3 weeks either way
+function nearestClear(d1,nights){
+  for(let i=1;i<=21;i++){for(const s of [-i,i]){const d=plusDays(d1,s);if(!ukHols(d,nights).length)return d;}}
+  return null;}
+
+// ---------- Scoring (pure) ----------
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+function snowScore(r,month){ // month 0-11
+  const p=snowProfile(r); return p[month]!==undefined ? p[month]/100 : (r.g?0.3:0.02);
+}
+function rideDays(t,nights){
+  return Math.max(0,nights-1) + (t<=90?0.5:0) + (t<=75?0.5:0);
+}
+function scoreResort(r,p){
+  const w = {...p.w};
+  if(p.abil.beg) w.bg = (w.bg||0)+2;
+  if(p.abil.exp) w.st = (w.st||0)+1;
+  if(p.board) w.bd = (w.bd||0)+1.5;
+  let num=0,den=0; for(const k in w){ num+=w[k]*r[k]; den+=w[k]*5; }
+  const act = den? num/den : 0.6;
+  const snow = snowScore(r,p.month);
+  const apres = 1-Math.abs(r.av-p.apres)/4;
+  const bdiff = r.$-p.budget; const budget = bdiff<=0?1:bdiff===1?0.5:0;
+  // city bases: the real cost is the daily commute, so score that (each way, x1.5 as it repeats every day)
+  const commute = r.city ? cityCommute(r,w) : 0;
+  // by train, the transfer that counts is station to resort
+  const trainFits = !!(p.train && TRAIN[r.n] && p.nights>=5 && p.d1 && skiTrainFit(p.d1,p.nights).ok);
+  const effT = trainFits ? TRAIN[r.n][1] : r.t;
+  // driving: only for week-long trips, and only where the drive fits in one (long) day
+  const driveFits = !!(p.drive && p.nights>=5 && DRIVE[r.n] && driveInfo(r,p).oneDay);
+  const transfer = r.city ? clamp(1-(commute*1.5-45)/(p.maxT*1.5),0,1) : clamp(1-(effT-45)/(p.maxT*1.5),0,1);
+  const tw = p.nights<=3?15:8;
+  const tier = AIR[r.ap].tier, london = LONDON.has(p.dep);
+  const direct = directRoute(p.dep,r.ap,p.d1);
+  // directOnly: London has direct winter routes to every listed airport; big regionals get the benefit of the doubt
+  // for wide-coverage airports (Geneva, Zurich, Milan, Barcelona); smaller airports count only confirmed routes
+  const BIGREG = ["MAN","BHX","BRS","EDI","GLA","NCL"];
+  const flyDirect = !!((direct&&direct.inSeason) || london || (tier===3 && BIGREG.includes(p.dep)));
+  const directLikely = trainFits || driveFits || flyDirect;
+  const flightPen = trainFits || driveFits || (direct&&direct.inSeason) ? 0
+    : p.directOnly&&!directLikely ? (tier===1?15:8)
+    : london ? (tier===1?3:0) : (tier===1?8:tier===2?3:0);
+  const hols = p.d1 ? holsFor(r.c,p.d1,p.nights) : [];
+  const localHol = hols.some(h=>h.c!=="*"), ukCore = hols.some(h=>h.c==="*"&&h.core), ukSome = hols.some(h=>h.c==="*");
+  const holPen = p.avoidHols ? (localHol?10:0)+(ukCore?4:ukSome?2:0) : 0;
+  const pref = p.countries&&p.countries.length&&p.cmode!=="only", inPref = pref&&p.countries.includes(r.c);
+  const rpref = p.resorts&&p.resorts.length&&p.rmode!=="only", inRes = !!(rpref&&p.resorts.includes(r.n));
+  const max = 50+15+10+8+tw+(pref?8:0)+(rpref?12:0);
+  const raw = act*50 + snow*15 + apres*10 + budget*8 + transfer*tw + (inPref?8:0) + (inRes?12:0) - flightPen - holPen;
+  const parts = {ride:act*50, snow:snow*15, apres:apres*10, budget:budget*8, transfer:transfer*tw, tw, pref:inPref?8:0, prefOn:!!pref, res:inRes?12:0, resOn:!!rpref, flight:-flightPen, hol:-holPen, max, raw};
+  return {r, parts, pct:Math.round(clamp(raw/max,0,1)*100), commute, direct, directLikely, flyDirect, trainFits, driveFits, hols, localHol, inPref, inRes, act, snow, apres, bdiff, transfer, w, tier, london, over:!driveFits&&effT>p.maxT,
+          days:rideDays(r.t,p.nights)};
+}
+// try each UK airport the user will fly from and keep the best-scoring one (main airport wins ties)
+function scoreBest(r,p){const deps=p.deps&&p.deps.length?p.deps:[p.dep]; let best=null;
+  for(const d of deps){const s=scoreResort(r,{...p,dep:d}); s.dep=d; if(!best||s.pct>best.pct) best=s;}
+  return best;}
+function rank(p,n=5){
+  const ronly = p.resorts&&p.resorts.length&&p.rmode==="only";
+  if(ronly){ // compare exactly the chosen resorts, whatever the filters
+    const mine=R.filter(r=>p.resorts.includes(r.n)).map(r=>scoreBest(r,p)).sort((a,b)=>b.pct-a.pct);
+    return {list:mine, relaxed:false, ronly:true};
+  }
+  const pool = p.countries&&p.countries.length&&p.cmode==="only" ? R.filter(r=>p.countries.includes(r.c)) : R;
+  const scored = pool.map(r=>scoreBest(r,p)).sort((a,b)=>b.pct-a.pct);
+  // budget filter: keep resorts whose cheapest realistic estimate fits (preferred resorts always stay)
+  const all = p.maxPP ? scored.filter(s=>s.inRes||tripBudget(s.r,p.nights,s.days,p.hire,s.hols.length>0).lo<=p.maxPP) : scored;
+  const fit = all.filter(s=>!s.over||s.inRes);
+  return {list:(fit.length>=3||!all.length?fit:all).slice(0,n), relaxed:fit.length<3&&all.length>0};
+}
+function reasons(s,p){
+  const pro=[],con=[]; const r=s.r;
+  for(const k of ["pw","pi","pk","st","tr","bg","bd"]){
+    const wt=s.w[k]||0; if(wt<1.5) continue;
+    if(r[k]>=4) pro.push(k==="pi"?`${PRO.pi} (${r.km} km)`:PRO[k]);
+    else if(r[k]<=2) con.push(CON[k]);
+  }
+  if(s.trainFits){ /* transfer covered by the train line above */ }
+  else if(r.city){
+    pro.unshift(`Different resort each day; city bars, food and cheaper beds`);
+    if(s.commute<=40) pro.unshift(`Best-fit areas are ~${s.commute} min each way`);
+    else con.push(`Best-fit areas are ~${s.commute} min each way, every day`);
+  } else if(r.t<=90) pro.push(`Short ${r.t} min transfer from ${AIR[r.ap].n}`);
+  if(s.apres>=0.85) pro.push(`Après fits: ${APRES[r.av].toLowerCase()}`);
+  const sc=SNOWC[r.n]||[3,50];
+  if(s.snow>=0.9 && (p.month===11||p.month===3)) pro.push(`Historically snow-sure in ${MONTHS[p.month]} (~${Math.round(s.snow*100)}%)`);
+  if(sc[0]>=5 && (s.w.pw||0)>=2) pro.push(`${SF_LABEL[5]}: good odds of fresh snow`);
+  if(r.$<p.budget) pro.push("Cheaper than your budget");
+  if(s.inPref) pro.unshift(`In ${r.c}, one of your preferred countries`);
+  if(s.inRes) pro.unshift(`One of the resorts you have in mind`);
+  if(p.deps&&p.deps.length>1&&s.dep&&s.dep!==p.deps[0]) pro.unshift(`Best flown from ${depName(s.dep)}${s.direct&&s.direct.inSeason?`: direct ${s.direct.airline} route`:s.flyDirect?": direct flights likely":""}`);
+  if(s.driveFits && !s.flyDirect && !s.trainFits) pro.unshift(`Drivable in a day: about ${Math.round(driveInfo(r,p).total/60)} h from Folkestone`);
+  if(s.trainFits) pro.unshift(`Eurostar ski train fits your dates: ${TRAIN[r.n][1]} min from ${TRAIN[r.n][0]} station`);
+  if(s.snow<0.6) con.push(`Only ~${Math.round(s.snow*100)}% snow-sure in ${MONTHS[p.month]}${sc[1]>=70?", leans on snowmaking":""}`);
+  if(s.over) con.push(`Transfer (${r.t} min) is over your limit`);
+  else if(r.t>=150 && !s.trainFits) con.push(`Long ${r.t} min transfer eats into a short trip`);
+  if(s.apres<0.5) con.push(`Après is ${APRES[r.av].toLowerCase()}, ${r.av>p.apres?"livelier":"quieter"} than you asked`);
+  const lh=s.hols.filter(h=>h.c!=="*");
+  if(lh.length){
+    const zones=lh.filter(h=>/zone/.test(h.l)).map(h=>h.l.match(/zone (\w)/)[1]);
+    const other=lh.filter(h=>!/zone/.test(h.l)).map(h=>h.l);
+    if(zones.length) other.push(`French winter holidays (zone${zones.length>1?"s":""} ${zones.join(", ")})`);
+    con.unshift(`${other.join("; ")}: busier slopes and peak prices`);
+  }
+  if(s.bdiff>0) con.push("Pricier than your budget");
+  const dm=d=>{const [m,dd]=d.split("-");return `${+dd} ${MONTHS[+m-1]}`};
+  if(s.direct&&s.direct.inSeason) pro.unshift(`Direct ${s.direct.airline} flights from ${p.dep} (${dm(s.direct.from)}–${dm(s.direct.to)})`);
+  else if(s.direct) con.push(`${s.direct.airline} ${p.dep} route only runs ${dm(s.direct.from)}–${dm(s.direct.to)}`);
+  else if(p.directOnly && !s.directLikely) con.unshift(`No confirmed direct flights from ${p.dep} to ${AIR[r.ap].n}`);
+  else if(!s.london && s.tier<=2) con.push(`Fewer UK routes to ${AIR[r.ap].n}; check from your airport`);
+  if(s.london && s.tier===1) con.push(`${AIR[r.ap].n} flights are mostly weekend charters`);
+  return {pro:pro.slice(0,4),con:con.slice(0,3)};
+}
+if(typeof module!=="undefined"){module.exports={R,AIR,scoreResort,rank,reasons,rideDays,snowScore,snowProfile,tripBudget,rankTrips};}
+
+// ---------- UI ----------
+if(typeof document!=="undefined"){
+const $=id=>document.getElementById(id);
+const depSel=$("dep"); DEP.forEach(([c,n])=>depSel.add(new Option(`${n} (${c})`,c)));
+const wBox=$("weights");
+WEIGHTS.forEach(([k,label,def])=>{
+  const d=document.createElement("div"); d.className="wt";
+  d.innerHTML=`<span class="nm" id="lb-${k}">${label}</span><span class="seg" role="radiogroup" aria-labelledby="lb-${k}">`+
+    WLAB.map((l,i)=>`<input type="radio" name="w-${k}" id="w-${k}-${i}" value="${i}"${i===def?" checked":""}><label for="w-${k}-${i}">${l}</label>`).join("")+`</span>`;
+  wBox.appendChild(d);
+});
+// ---------- Settings snapshots, saved searches, trip codes ----------
+const ctrls=()=>[...document.querySelectorAll("#f input,#f select,#rb select")].filter(el=>el.id);
+const valOf=el=>el.type==="checkbox"||el.type==="radio"?el.checked:el.value;
+function snapshot(){const o={};ctrls().forEach(el=>o[el.id]=valOf(el));return o;}
+function applySnap(o){ctrls().forEach(el=>{if(!(el.id in o))return;
+  if(el.type==="checkbox"||el.type==="radio") el.checked=!!o[el.id];
+  else{const prev=el.value; el.value=String(o[el.id]); if(el.tagName==="SELECT"&&el.selectedIndex<0) el.value=prev;}});}
+const DEFAULTS=snapshot();
+function encodeTrip(){const s=snapshot(),d={};for(const k in s) if(s[k]!==DEFAULTS[k]) d[k]=s[k];
+  return "PP1-"+btoa(unescape(encodeURIComponent(JSON.stringify(d)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
+function decodeTrip(txt){const m=String(txt||"").match(/PP1-([A-Za-z0-9_-]+)/); if(!m) return null;
+  try{let b=m[1].replace(/-/g,"+").replace(/_/g,"/"); while(b.length%4) b+="=";
+    const d=JSON.parse(decodeURIComponent(escape(atob(b)))); return d&&typeof d==="object"&&!Array.isArray(d)?d:null;}catch(e){return null;}}
+// ---------- Short trip codes: settings packed into a few characters (e.g. 7KQM-A2XD-4) ----------
+// Field order and lists are frozen: only ever APPEND to these lists, or old codes break.
+const SC = {
+  A:"0123456789ABCDEFGHJKMNPQRSTVWXYZ",
+  DEPS:["ABZ","BFS","BHX","BOH","BRS","CWL","EMA","EDI","EXT","GLA","LBA","LPL","LGW","LHR","LTN","STN","MAN","NCL","SOU"],
+  NIGHTS:["2","3","4","5","6","7","8","9","10","14"], COUNTS:["3","5","8","10","15"], PPS:["0","400","600","800","1000","1500"],
+  APRES:["1.5","3","5"], SORTS:["match","airport","country"],
+  CTRY:["c-fr","c-at","c-ch","c-it","c-ad","c-bg","c-es","c-de","c-no","c-se","c-si"],
+  ABIL:[["ab-beg",0],["ab-int",1],["ab-adv",1],["ab-exp",0]],
+  FLAGS:[["board",1],["hire",1],["avoidHols",1],["direct",0],["train",1],["drive",1]],
+  W:[["pw",2],["pi",2],["pk",2],["st",1],["tr",1]], DAY0:Date.UTC(2026,0,1)
+};
+// Layout: airport (5 bits), date (11), then an 8-bit mask saying which setting groups differ from the defaults,
+// then only those groups. Trailing zeros are dropped and a check character is added to catch typos.
+function shortCode(){
+  const o=snapshot(), W=[]; const put=(arr,v,n)=>{for(let k=n-1;k>=0;k--) arr.push((v>>k)&1);};
+  const idx=(list,v,def)=>{const i=list.indexOf(String(v)); return i<0?def:i;};
+  const rot=(i,d,n)=>((i-d)%n+n)%n; // default value encodes as 0
+  const groups=[
+    g=>{put(g,rot(Math.min(12,Math.max(1,+o.pax||2)),2,16),4); put(g,rot(idx(SC.NIGHTS,o.nights,1),1,10),4);},
+    g=>{SC.W.forEach(([k,d])=>{let v=d; for(let i=0;i<4;i++) if(o[`w-${k}-${i}`]) v=i; put(g,rot(v,d,4),2);});},
+    g=>{put(g,rot(idx(SC.APRES,o.apres,1),1,3),2); put(g,idx(SC.PPS,o.maxPP,0),3);},
+    g=>{SC.ABIL.forEach(([id,d])=>put(g,(o[id]?1:0)^d,1)); SC.FLAGS.forEach(([id,d])=>put(g,(o[id]?1:0)^d,1)); put(g,rot(Math.round(((+o.maxT||120)-45)/15),5,14),4);},
+    g=>{SC.CTRY.forEach(id=>put(g,o[id]?1:0,1)); put(g,o.cmode==="only"?1:0,1);},
+    g=>{const deps=String(o.deps||"").split("|").filter(c=>SC.DEPS.includes(c)&&c!==o.dep).slice(0,7); put(g,deps.length,3); deps.forEach(c=>put(g,SC.DEPS.indexOf(c),5));},
+    g=>{const res=String(o.resorts||"").split("|").map(n=>R.findIndex(r=>r.n===n)).filter(i=>i>=0).slice(0,15); put(g,res.length,4); res.forEach(i=>put(g,i,7)); put(g,o.rmode==="only"?1:0,1);},
+    g=>{put(g,rot(idx(SC.COUNTS,o.count,1),1,5),3); put(g,idx(SC.SORTS,o.sortBy,0),2);}
+  ].map(f=>{const g=[]; f(g); return g;});
+  put(W,Math.max(0,SC.DEPS.indexOf(o.dep)),5);
+  const day=Math.round((Date.parse((o.d1||"2027-01-14")+"T00:00:00Z")-SC.DAY0)/864e5); put(W,Math.max(0,Math.min(2047,day)),11);
+  groups.forEach(g=>W.push(g.some(Boolean)?1:0));
+  groups.forEach(g=>{ if(g.some(Boolean)) W.push(...g); });
+  while(W.length%5) W.push(0);
+  const vals=[]; for(let i=0;i<W.length;i+=5) vals.push(parseInt(W.slice(i,i+5).join(""),2));
+  while(vals.length>1&&vals.at(-1)===0) vals.pop();
+  vals.push(vals.reduce((a,v,i)=>a+(i+1)*v,7)%32);
+  return vals.map(v=>SC.A.charAt(v)).join("").match(/.{1,4}/g).join("-");
+}
+function decodeShort(txt){
+  const clean=String(txt||"").toUpperCase().replace(/O/g,"0").replace(/[IL]/g,"1").replace(/[^0-9A-Z]/g,"");
+  if(clean.length<2||clean.length>40) return null;
+  const vals=[...clean].map(c=>SC.A.indexOf(c)); if(vals.some(v=>v<0)) return null;
+  const chk=vals.pop(); if(vals.reduce((a,v,i)=>a+(i+1)*v,7)%32!==chk) return null;
+  const bits=[]; vals.forEach(v=>{for(let k=4;k>=0;k--) bits.push((v>>k)&1);});
+  let pos=0; const get=n=>{let v=0; for(let k=0;k<n;k++){v=(v<<1)|(bits[pos]||0);pos++;} return v;};
+  const unrot=(v,d,n)=>(v+d)%n, o={};
+  o.dep=SC.DEPS.at(get(5))||SC.DEPS[0];
+  o.d1=new Date(SC.DAY0+get(11)*864e5).toISOString().slice(0,10);
+  const mask=[...Array(8)].map(()=>get(1));
+  const on=i=>mask.at(i)===1, z=()=>0, rd=i=>on(i)?get:z;
+  let g=rd(0); o.pax=String(Math.min(12,Math.max(1,unrot(g(4),2,16)))); o.nights=SC.NIGHTS.at(unrot(g(4),1,10))||"3";
+  g=rd(1); SC.W.forEach(([k,d])=>{const v=unrot(g(2),d,4); for(let i=0;i<4;i++) o[`w-${k}-${i}`]=(i===v);});
+  g=rd(2); o.apres=SC.APRES.at(unrot(g(2),1,3))||"3"; o.maxPP=SC.PPS.at(g(3))||"0";
+  g=rd(3); SC.ABIL.forEach(([id,d])=>o[id]=!!(g(1)^d)); SC.FLAGS.forEach(([id,d])=>o[id]=!!(g(1)^d)); o.maxT=String(45+15*unrot(g(4),5,14));
+  g=rd(4); SC.CTRY.forEach(id=>o[id]=!!g(1)); o.cmode=g(1)?"only":"prefer";
+  g=rd(5); const nd=g(3), deps=[]; for(let i=0;i<nd;i++){const c=SC.DEPS.at(g(5)); if(c) deps.push(c);} o.deps=deps.join("|");
+  g=rd(6); const nr=g(4), res=[]; for(let i=0;i<nr;i++){const r=R.at(g(7)); if(r) res.push(r.n);} o.resorts=res.join("|"); o.rmode=g(1)?"only":"prefer";
+  g=rd(7); o.count=SC.COUNTS.at(unrot(g(3),1,5))||"5"; o.sortBy=SC.SORTS.at(g(2))||"match";
+  return o;
+}
+const readCode=t=>decodeTrip(t)||decodeShort(String(t||"").replace(/^.*?(trip code|code)[:\s]*/i,""))||decodeShort(t);
+function openTrip(d){applySnap({...DEFAULTS,...d}); shown=true; render();}
+const SKEY="piste-picker-saved-v1";
+function readSaved(){try{const a=JSON.parse(localStorage.getItem(SKEY)||"[]");return Array.isArray(a)?a:[]}catch(e){return []}}
+function writeSaved(a){try{localStorage.setItem(SKEY,JSON.stringify(a));return true}catch(e){return false}}
+
+// ---------- Ad preview (mock-up of how partner ads would sit in the page) ----------
+let adOn=true; try{adOn=localStorage.getItem("pp-adprev")!=="0";}catch(e){}
+let cookieDone=false;
+const adTag=()=>adOn?'<span class="adtag">Ad</span>':"";
+function sponsorCard(list){const pick=list.find(s=>accFor(s.r).lv[1]===3)||list.find(s=>accFor(s.r).lv[1]>=2)||list[0]; const n=pick.r.n.replace(/ \(.*\)/,"");
+  return `<aside class="spon" aria-label="Advertisement"><div class="sponhead"><span class="adtag">Ad</span><span>Sponsored. Shown separately from your ranked results.</span></div>
+    <div class="sponbody"><div class="spontext"><b class="sponname">Alpenglow Chalets</b><p>Catered chalets in ${esc(n)}: breakfast, afternoon tea and a three-course dinner with wine. Board storage and boot warmers in every chalet.</p>
+    <span class="sponfine">Example sponsor for this mock-up, not a real company.</span></div>
+    <span class="btn sponcta" aria-disabled="true">See chalets in ${esc(n)}</span></div></aside>`;}
+function partnerBox(r,apN){return `<div class="spon spon-sm" aria-label="Advertisement"><div class="sponhead"><span class="adtag">Ad</span><span>Partner</span></div>
+    <div class="sponbody"><div class="spontext"><b class="sponname">Summit Shuttle</b><p>Shared and private transfers from ${esc(apN)}, with board bags carried free.</p><span class="sponfine">Example partner for this mock-up, not a real company.</span></div>
+    <span class="btn sponcta" aria-disabled="true">Get a quote</span></div></div>`;}
+function syncAds(){$("adPrev").checked=adOn; $("adnote").hidden=!adOn; $("cookiebar").hidden=!adOn||cookieDone; document.body.classList.toggle("cbpad",!$("cookiebar").hidden); fitForm();}
+// keep the settings panel inside the visible screen on desktop, whatever the scroll position
+function fitForm(){const f=$("f"); if(!f) return;
+  if(innerWidth<=860){f.style.maxHeight="";f.classList.remove("mb");return;}
+  const top=Math.max(f.getBoundingClientRect().top,16), cb=$("cookiebar").hidden?0:$("cookiebar").offsetHeight;
+  f.style.maxHeight=Math.max(240,innerHeight-top-16-cb)+"px";
+  f.classList.toggle("mb", f.scrollTop+f.clientHeight < f.scrollHeight-4);}
+addEventListener("scroll",fitForm,{passive:true}); addEventListener("resize",fitForm);
+
+const KEY="piste-picker-v1";
+function save(){try{const o={};document.querySelectorAll("#f input,#f select,#rb select").forEach(el=>{o[el.id]=el.type==="checkbox"||el.type==="radio"?el.checked:el.value});localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
+function load(){try{const o=JSON.parse(localStorage.getItem(KEY)||"null");if(!o)return;for(const id in o){const el=$(id);if(!el)continue;if(el.type==="checkbox"||el.type==="radio")el.checked=o[id];else el.value=o[id];}}catch(e){}}
+load();
+
+function params(){
+  const w={}; WEIGHTS.forEach(([k])=>{const v=+document.querySelector(`input[name=w-${k}]:checked`).value; if(v) w[k]=v;});
+  const d1=$("d1").value||"2027-01-14";
+  return {dep:depSel.value,pax:+$("pax").value||2,d1,nights:+$("nights").value,maxT:+$("maxT").value,
+    month:new Date(d1+"T12:00:00").getMonth(),w,board:$("board").checked,hire:$("hire").checked,avoidHols:$("avoidHols").checked,
+    abil:{beg:$("ab-beg").checked,int:$("ab-int").checked,adv:$("ab-adv").checked,exp:$("ab-exp").checked},
+    apres:+$("apres").value,budget:(()=>{const m=+$("maxPP").value||0;return m===0?3:m<=500?1:m<=900?2:3;})(),maxPP:+$("maxPP").value||0,count:+$("count").value||5,
+    countries:[...document.querySelectorAll("#ctry input:checked")].map(x=>x.value),cmode:$("cmode").value,
+    directOnly:$("direct").checked,train:$("train").checked,drive:$("drive").checked,
+    resorts:chosenResorts(),rmode:$("rmode").value,
+    deps:[depSel.value,...chosenDeps().filter(d=>d!==depSel.value)]};
+}
+const depList=a=>a.length>1?a.slice(0,-1).join(", ")+" or "+a[a.length-1]:a[0];
+function chosenDeps(){return ($("deps").value||"").split("|").filter(c=>DEP.some(x=>x[0]===c));}
+function renderDepChips(){const main=depSel.value, sel=chosenDeps().filter(c=>c!==main);
+  $("depChips").innerHTML=sel.map(c=>`<button type="button" class="rchip" data-rmdep="${c}" aria-label="Remove ${esc(depName(c))}">${esc(depName(c))} (${c})<span aria-hidden="true">\u00d7</span></button>`).join("");
+  $("depPick").innerHTML=`<option value="">${sel.length?"Add another airport\u2026":"Add an airport\u2026"}</option>`+
+    DEP.filter(([c])=>c!==main&&!sel.includes(c)).map(([c,n])=>`<option value="${c}">${esc(n)} (${c})</option>`).join("");
+}
+function chosenResorts(){return ($("resorts").value||"").split("|").filter(n=>R.some(r=>r.n===n));}
+function renderResChips(){const sel=chosenResorts();
+  $("resChips").innerHTML=sel.map(n=>`<button type="button" class="rchip" data-rm="${esc(n)}" aria-label="Remove ${esc(n)}">${esc(n)}<span aria-hidden="true">×</span></button>`).join("");
+  const cs=[...new Set(R.map(r=>r.c))];
+  $("resPick").innerHTML=`<option value="">${sel.length?"Add another resort…":"Add a resort…"}</option>`+
+    cs.map(c=>{const o=R.filter(r=>r.c===c&&!sel.includes(r.n));return o.length?`<optgroup label="${c}">${o.map(r=>`<option value="${esc(r.n)}">${esc(r.n)}</option>`).join("")}</optgroup>`:"";}).join("");
+}
+const addDays=(d,n)=>{const x=new Date(d+"T12:00:00");x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
+const yymmdd=d=>d.slice(2).replace(/-/g,"");
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmtDays=n=>(n%1?n.toFixed(1):n)+"";
+
+function altSvg(r){
+  // HTML column that stretches to the card's full height; positions are % of the plot area
+  const lo=500,hi=4000,y=m=>(1-(m-lo)/(hi-lo))*100, n=v=>v.toLocaleString("en-GB");
+  const yt=y(r.top), yb=y(r.base), mid=(yt+yb)/2;
+  // keep the two labels at least 16% apart when the vertical drop is small
+  const ty=Math.max(3,Math.min(yt,mid-8)), by=Math.min(97,Math.max(yb,mid+8));
+  const topL=r.city?"Highest":"Top lift", baseL=r.city?"Lowest":"Village";
+  const ticks=[1000,2000,3000,4000].map(m=>`<span class="tk" style="top:${y(m)}%"><em>${n(m)} m</em></span>`).join("");
+  return `<span class="ah">Altitude</span>
+    <div class="plot" role="img" aria-label="${topL} ${r.top} metres, ${baseL.toLowerCase()} ${r.base} metres${r.g?", glacier":""}">
+      ${ticks}
+      <span class="ab${r.g?" gl":""}" style="top:${yt}%;bottom:${100-yb}%"></span>
+      <span class="al" style="top:${ty}%"><small>${topL}${r.g?" · glacier":""}</small>${n(r.top)} m</span>
+      <span class="al" style="top:${by}%"><small>${baseL}</small>${n(r.base)} m</span>
+    </div>`;
+}
+function getTherePanel(r,p,flyDays){
+  const ti=p.train?trainInfo(r,p,flyDays):null, di=p.drive?driveInfo(r,p):null;
+  if(!ti&&!di) return "";
+  const h=m=>{const x=Math.round(m/15)*15;return `${Math.floor(x/60)} h${x%60?" "+(x%60):""}`};
+  const fmt=d=>new Date(d+"T12:00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
+  const tlinks=`<a href="https://www.eurostar.com/uk-en/train/ski-train" target="_blank" rel="noopener">Eurostar ski train</a><a href="https://www.sncf-connect.com/en-en/" target="_blank" rel="noopener">SNCF Connect (TGV)</a>`;
+  const dlinks=`<a href="https://www.eurotunnel.com" target="_blank" rel="noopener">${adTag()}Eurotunnel Le Shuttle</a><a href="https://www.directferries.co.uk" target="_blank" rel="noopener">${adTag()}Compare ferries</a><a href="https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent("Calais, France")}&destination=${encodeURIComponent(r.n.replace(/ \(.*\)/,"")+", "+r.c)}&travelmode=driving" target="_blank" rel="noopener">Route from Calais</a>`;
+  if(p.nights<5){
+    const lines=[];
+    if(ti) lines.push(`<p class="trline"><b>Train:</b> about ${h(ti.ski)} each way from London to ${ti.st}, then ${ti.onward} min to the resort. It suits a week better than a long weekend. ${tlinks}</p>`);
+    if(di&&!di.far) lines.push(`<p class="trline"><b>Driving:</b> about ${h(di.total)} from Folkestone via the Channel Tunnel. Better for a week than a long weekend.</p>`);
+    return lines.join("");
+  }
+  const fly=120+105+45+r.t;
+  const rows=[[`Fly from ${p.dep}`,`~${h(fly)}`,`${r.t} min from ${AIR[r.ap].n}`,`Up to ${fmtDays(flyDays)}`,false]];
+  if(di) rows.push(di.far?["Drive","–","Not a practical drive from the UK","–",false]
+    :["Drive",`~${h(di.total)}`,`Channel Tunnel, then ${di.km.toLocaleString("en-GB")} km from Calais${di.oneDay?"":" (overnight stop advised)"}`,`${di.rideDays}${di.oneDay?"":" + a night en route each way"}`,false]);
+  if(ti){rows.push(["Eurostar ski train",`~${h(ti.ski)}`,`change at Lille, ${ti.onward} min from ${ti.st}`,`${ti.trainDays}`,ti.fit.ok]);
+    rows.push(["Eurostar + TGV",`~${h(ti.tgv)}`,`change stations in Paris, ${ti.onward} min from ${ti.st}`,`${ti.trainDays}`,false]);}
+  let tstatus="";
+  if(ti){
+    if(ti.fit.ok) tstatus=`<span class="ok">The Eurostar ski train fits your dates:</span> out ${fmt(p.d1)}, back ${fmt(ti.fit.ret)}.`;
+    else if(ti.suggest) tstatus=`The ski train runs Saturdays out, Saturday or Sunday back (19 Dec to 28 Feb). Nearest fit: <b>${fmt(ti.suggest.d)} for ${ti.suggest.n} nights</b> <button type="button" class="btn sm" data-train="${ti.suggest.d}|${ti.suggest.n}">Use these dates</button>. Eurostar plus TGV via Paris works on most days.`;
+    else tstatus=`The ski train doesn't run on these dates (19 Dec to 28 Feb). Eurostar plus TGV via Paris works on most days in winter.`;
+  }
+  let drv="";
+  if(di&&!di.far){
+    const rule=WINTER_RULES[r.c]||"";
+    drv=`<div class="drv"><div class="kitg">
+      <div class="kiti"><b>Channel crossing</b><span>Eurotunnel 35 min (check in 45 min before), or about 90 min by ferry from Dover</span><span class="via">Roughly £${di.crossing[0]}–${di.crossing[1]} return per car in winter</span></div>
+      <div class="kiti"><b>Tolls and vignettes</b><span>About £${di.tollsGBP} return</span><span class="via">${esc(di.tollNote)}</span></div>
+      <div class="kiti"><b>Fuel</b><span>About £${di.fuelGBP} return</span><span class="via">${(di.km*2).toLocaleString("en-GB")} km at around 7.5 litres per 100 km</span></div>
+      <div class="kiti"><b>Per person</b><span>About £${di.pp}</span><span class="via">Crossing, tolls and fuel for ${p.pax} rider${p.pax>1?"s":""} in ${di.cars} car${di.cars>1?"s":""}</span></div>
+    </div>
+    <p class="trstatus"><b>Winter driving in ${esc(r.c)}:</b> ${esc(rule)} Also take a UK sticker, adjust your headlamps and check your breakdown cover works in Europe. Routes through Lyon or Grenoble may need a French Crit'Air sticker.</p></div>`;
+  }
+  const title=ti&&di?"Fly, drive or train?":di?"Fly or drive?":"Train or fly?";
+  const sub=`Door to door, each way.${di?" Driving starts at Folkestone.":""}${ti?" Trains start at London St Pancras.":""}`;
+  return `<div class="city train"><div class="cityhead"><b>${title}</b><span>${sub}</span></div>
+    <div class="tscroll"><table><thead><tr><th>Option</th><th>Travel</th><th>Route</th><th>Ride days</th></tr></thead><tbody>`+
+    rows.map(x=>`<tr${x[4]?' class="pick"':""}><td>${x[0]}</td><td>${x[1]}</td><td>${esc(x[2])}</td><td>${x[3]}</td></tr>`).join("")+
+    `</tbody></table></div>${tstatus?`<p class="trstatus">${tstatus}</p>`:""}${drv}<p class="trstatus trlinks">${ti?tlinks:""}${di&&!di.far?dlinks:""}</p></div>`;
+}
+function whyPanel(s,p,i){
+  const q=s.parts, r=s.r, f=x=>(Math.round(x*10)/10).toFixed(1).replace(/\.0$/,"");
+  const rows=[
+    ["Riding fit",q.ride,50,"How the resort's terrain matches your Skip / Some / Keen / Must choices"],
+    ["Snow-sure",q.snow,15,`${Math.round(s.snow*100)}% snow-sure estimate for ${MONTHS[p.month]}`],
+    ["Après",q.apres,10,`${APRES[r.av]} après; you asked for ${p.apres<=2?"low-key":p.apres>=4?"full-on":"sociable"}`],
+    ["Budget",q.budget,8,p.maxPP?`Resort price level against your budget of under \u00a3${p.maxPP.toLocaleString("en-GB")}`:"Any budget, so every resort scores in full"],
+    ["Transfer",q.transfer,q.tw,s.trainFits?`${TRAIN[r.n][1]} min from the station by train`:r.city?`~${s.commute} min each way to the slopes`:`${r.t} min from ${AIR[r.ap].n}`]
+  ];
+  if(q.prefOn) rows.push(["Preferred country",q.pref,8,q.pref?`${r.c} is one of your countries`:`Not one of your preferred countries`]);
+  if(q.resOn) rows.push(["Resort you have in mind",q.res,12,q.res?"On your list":"Not on your list"]);
+  const minus=[];
+  if(q.flight) minus.push(["Flights",q.flight,`Fewer UK routes from ${depName(s.dep||p.dep)}${p.directOnly?", or no likely direct flight":""}`]);
+  if(q.hol) minus.push(["School holidays",q.hol,"Your dates overlap school holidays"]);
+  const bar=(v,m)=>`<span class="wbar"><i style="width:${m?Math.max(0,Math.min(100,v/m*100)):0}%"></i></span>`;
+  return `<div class="whyp" id="why-${i}" hidden><table><thead><tr><th>Factor</th><th>Points</th><th></th><th>Because</th></tr></thead><tbody>`+
+    rows.map(x=>`<tr><td>${x[0]}</td><td class="num">${f(x[1])} / ${x[2]}</td><td>${bar(x[1],x[2])}</td><td>${esc(x[3])}</td></tr>`).join("")+
+    minus.map(x=>`<tr class="neg"><td>${x[0]}</td><td class="num">${f(x[1])}</td><td></td><td>${esc(x[2])}</td></tr>`).join("")+
+    `<tr class="tot"><td>Total</td><td class="num">${f(Math.max(0,q.raw))} / ${q.max}</td><td></td><td>= ${s.pct}% match${s.dep&&p.deps&&p.deps.length>1?`, scored from ${depName(s.dep)}, your best airport for this resort`:""}</td></tr></tbody></table></div>`;
+}
+function snowStrip(r,p){
+  const pr=snowProfile(r), sc=SNOWC[r.n]||[3,50], ms=[11,0,1,2,3];
+  const daysOut=Math.round((new Date(p.d1+"T12:00:00")-new Date())/864e5);
+  const q=encodeURIComponent(r.n.replace(/ \(.*\)/,"")+" snow forecast");
+  const fc = daysOut<=10&&daysOut>=-1
+    ? `<a class="fcl live" href="https://www.google.com/search?q=${q}" target="_blank" rel="noopener">Live forecast now useful: check it</a>`
+    : `<a class="fcl" href="https://www.google.com/search?q=${q}" target="_blank" rel="noopener">Forecast</a><span class="fcn">reliable ~10 days out</span>`;
+  return `<div class="snow"><div class="snowhead"><b>Snow-sure by month</b><span>${SF_LABEL[sc[0]]} · ~${sc[1]}% snowmaking</span>${fc}</div>
+    <div class="snowbody"><div class="months">${ms.map(m=>`<div class="mo${m===p.month?" on":""}"><span class="bar"><i style="height:${pr[m]}%" class="${pr[m]>=85?"hi":pr[m]>=65?"md":"lo"}"></i></span><span class="ml">${MONTHS[m]}</span><span class="mv">${pr[m]}%</span></div>`).join("")}</div>
+    <ul class="skey" aria-label="Key"><li><i class="hi"></i>Reliable, 85%+</li><li><i class="md"></i>Fair, 65–84%</li><li><i class="lo"></i>Risky, under 65%</li><li><i class="cur"></i>Your month</li></ul></div></div>`;
+}
+function pips(v){return `<span class="pips">${[1,2,3,4,5].map(i=>`<i class="${i<=v?"on":""}"></i>`).join("")}</span>`}
+function tierTxt(t){return t===3?"Wide":t===2?"Moderate":"Limited"}
+
+let last=[];
+let shown=false; const openCards=new Set();
+function showResults(){ shown=true; render(); if(innerWidth<=860) $("resultsSec").scrollIntoView({behavior:"smooth",block:"start"}); }
+function onFormChange(){ if(shown){ render({formOnly:true}); $("stale").hidden=false; } else render(); }
+function render(opt){
+  renderResChips(); renderDepChips();
+  const p=params(); foldSummaries(p); $("maxTOut").textContent=`${p.maxT} min`;
+  $("resultsSec").classList.toggle("pre",!shown); $("findBtn").textContent=shown?"Update results":"Find my resorts";
+  if(!shown||(opt&&opt.formOnly)){ save(); return; }
+  $("stale").hidden=true;
+  const {list,relaxed,ronly}=rank(p,p.count); last=list;
+  const d2=addDays(p.d1,p.nights);
+  $("summary").textContent = ronly ? `Comparing your ${list.length} chosen resort${list.length===1?"":"s"} for ${p.nights} nights from ${depList(p.deps)}, ${new Date(p.d1+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}` : `${list.length} ${list.length===1?"pick":"picks"}${list.length<p.count&&!relaxed?` (only ${list.length} within your transfer limit)`:""} for ${p.nights} nights from ${depList(p.deps)}, ${new Date(p.d1+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}${p.maxPP?`, under £${p.maxPP.toLocaleString("en-GB")} per person`:""}`+(relaxed?" (transfer limit relaxed: too few resorts within it)":"");
+  const ukh=ukHols(p.d1,p.nights), hw=$("holwarn");
+  if(ukh.length){
+    const groups=[...new Set(ukh.map(h=>h.g))].map(g=>`${UKH[g]}: ${ukh.filter(h=>h.g===g).map(h=>esc(h.l)).join(", ")}`);
+    const core=ukh.some(h=>h.core), alt=nearestClear(p.d1,p.nights);
+    const fmt=d=>new Date(d+"T12:00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
+    hw.hidden=false; hw.className="holwarn"+(core?" core":"");
+    hw.innerHTML=`<b>${core?"Peak UK school holiday":"Some UK schools are off"}</b> on your dates. ${groups.join("; ")}. Expect higher flight prices and more UK families on the slopes.`+
+      (alt?` <span class="holalt">Nearest dates clear of every UK school holiday: ${fmt(alt)} to ${fmt(plusDays(alt,p.nights))}. <button type="button" class="btn sm" id="useAlt" data-d="${alt}">Use these dates</button></span>`:"");
+    const ub=$("useAlt"); if(ub) ub.addEventListener("click",()=>{$("d1").value=ub.dataset.d;render();});
+  } else hw.hidden=true;
+  const pAll=p;
+  const cards = list.map((s,i)=>{
+    const p={...pAll,dep:s.dep||pAll.dep};
+    const r=s.r,{pro,con}=reasons(s,p),b=tripBudget(r,p.nights,s.days,p.hire,s.hols.length>0);
+    let city="";
+    if(r.city){
+      const tr=rankTrips(r,s.w);
+      city=`<div class="city"><div class="cityhead"><b>Day trips from the city</b><span>Top 3 picks average ~${s.commute} min each way · ${esc(r.pass)}</span></div>
+        <div class="tscroll"><table><thead><tr><th>Resort</th><th>Each way</th><th>Round trip</th><th>Getting there</th><th>Your fit</th></tr></thead><tbody>`+
+        tr.map((x,j)=>`<tr${j<3?' class="pick"':""}><td>${esc(x.n)}${x.inPass?"":' <span class="xp">separate pass</span>'}</td><td>${x.m} min</td><td>${Math.round(x.m*2/5)*5} min</td><td>${esc(x.how)}</td><td><span class="fit"><i style="width:${x.fit}%"></i></span>${x.fit}%</td></tr>`).join("")+
+        `</tbody></table></div></div>`;
+    }
+    const gf=`https://www.google.com/travel/flights?q=${encodeURIComponent(`${p.directOnly?"Nonstop flights":"Flights"} from ${p.dep} to ${r.ap} on ${p.d1} returning ${d2} for ${p.pax} adults`)}`;
+    const sk=`https://www.skyscanner.net/transport/flights/${p.dep.toLowerCase()}/${r.ap.toLowerCase()}/${yymmdd(p.d1)}/${yymmdd(d2)}/?adultsv2=${p.pax}${p.directOnly?"&preferdirects=true":""}`;
+    const bk=`https://www.booking.com/searchresults.en-gb.html?ss=${encodeURIComponent(r.n.replace(/ \(.*\)/,""))}&checkin=${p.d1}&checkout=${d2}&group_adults=${p.pax}&no_rooms=1`;
+    const isOpen=openCards.has(r.n);
+    return `<article class="card${i===0?" top":""}${isOpen?"":" collapsed"}" data-card="${esc(r.n)}">
+      <div class="alt">${altSvg(r)}</div>
+      <div class="body">
+        <div class="head"><span class="rank">#${i+1}</span><h2><button type="button" class="rn" data-detail="${i}" title="Open resort details: flights, where to stay, hire and lessons">${esc(r.n)}</button></h2><span class="ctry">${r.c}</span>
+          <button type="button" class="more" data-detail="${i}">Details <span aria-hidden="true">›</span><small>flights · stays · hire · lessons</small></button>
+          <a class="site" href="${siteFor(r)}" target="_blank" rel="noopener">${SITE[r.n]?"Resort website":"Find resort website"} ↗</a>
+          <span class="sx"><span class="score"><b>${s.pct}</b><small>% match</small><button type="button" class="whyb" aria-expanded="false" data-why="${i}" data-pct="${s.pct}">Why ${s.pct}%?</button></span>
+          <button type="button" class="xpand" data-toggle aria-expanded="${isOpen}">${isOpen?"Less":"More"}<span aria-hidden="true"></span></button></span></div>
+        <p class="mini"><span>${s.trainFits?`${TRAIN[r.n][1]} min from ${TRAIN[r.n][0]} by train`:r.city?`City base, ~${s.commute} min to the slopes`:`${r.t} min from ${AIR[r.ap].n}`}</span><span>£${b.lo}–£${b.hi} pp</span><span>${Math.round(s.snow*100)}% snow-sure in ${MONTHS[p.month]}</span><span>${APRES[r.av]} après</span></p>
+        ${whyPanel(s,p,i)}
+        <dl class="stats">
+          <div><dt>${r.city?"From airport":"Transfer"}</dt><dd>${r.t} min · ${r.ap}</dd></div>
+          <div class="bud"><dt>Budget pp</dt><dd>£${b.lo}–£${b.hi}</dd></div>
+          <div><dt>Ride days</dt><dd>Up to ${fmtDays(s.days)}<span class="sub">depending on flight times</span></dd></div>
+          <div><dt>Altitude</dt><dd>${r.base}–${r.top} m</dd></div>
+          <div><dt>Pistes</dt><dd>${r.km} km</dd></div>
+          <div><dt>Après</dt><dd>${APRES[r.av]}</dd></div>
+          <div><dt>Fly from</dt><dd>${esc(depName(p.dep))}<span class="sub">${s.direct&&s.direct.inSeason?"direct with "+esc(s.direct.airline):s.flyDirect?"direct flights likely":tierTxt(s.tier).toLowerCase()+" UK coverage, may need a change"}</span></dd></div>
+        </dl>
+        ${snowStrip(r,p)}
+        <div class="terrain">
+          <span>Powder ${pips(r.pw)}</span><span>Groomers ${pips(r.pi)}</span><span>Park ${pips(r.pk)}</span>
+          <span>Steeps ${pips(r.st)}</span><span>Trees ${pips(r.tr)}</span>
+        </div>
+        <p class="bline">Budget excludes flights: ${p.nights} nights at £${b.bed[0]}–£${b.bed[1]} a night, ${b.liftDays} lift day${b.liftDays>1?"s":""} at about €${b.lift}${p.hire?", board hire":""}, ${r.city?"local buses":"return transfer"}.</p>
+        ${city}
+        ${getTherePanel(r,p,s.days)}
+        <div class="why">
+          <ul class="pro">${pro.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+          <ul class="con">${con.length?con.map(x=>`<li>${esc(x)}</li>`).join(""):""}</ul>
+        </div>
+        <div class="links"><span class="lbl">Search${p.directOnly?" · direct only":""}</span>
+          <a href="${gf}" target="_blank" rel="noopener">Google Flights</a>
+          <a href="${sk}" target="_blank" rel="noopener">${adTag()}Skyscanner</a>
+          <a href="${bk}" target="_blank" rel="noopener">${adTag()}Booking.com in ${esc(r.n.replace(/ \(.*\)/,""))}</a>
+          <a href="${bkUrl(r,p,d2,"201;220;228")}" target="_blank" rel="noopener">${adTag()}Self-catering on Booking.com</a>
+          <a href="${abnb(r,p,d2)}" target="_blank" rel="noopener">Airbnb</a>
+        </div>
+      </div></article>`;
+  });
+  // display order: ranked list, or grouped by arrival airport / country (groups ordered by their best match)
+  const mode=$("sortBy").value||"match";
+  let out=cards.slice();
+  if(mode!=="match"&&cards.length){
+    const keyOf=s=>mode==="airport"?s.r.ap:s.r.c;
+    const nameOf=s=>mode==="airport"?`${AIR[s.r.ap].n} (${s.r.ap})`:s.r.c;
+    const groups=[]; list.forEach((s,i)=>{const k=keyOf(s); let g=groups.find(x=>x.k===k); if(!g){g={k,name:nameOf(s),idx:[]};groups.push(g);} g.idx.push(i);});
+    out=[]; groups.forEach((g,gi)=>{
+      const extra=mode==="airport"?` · ${g.idx.map(i=>list[i].r.t).sort((a,b)=>a-b).filter((v,j,a)=>j===0||j===a.length-1).join("–")} min transfers`:"";
+      out.push(`<h3 class="grp"><span>${esc(g.name)}</span><small>${g.idx.length} resort${g.idx.length>1?"s":""}${extra}</small></h3>`);
+      g.idx.forEach(i=>out.push(cards[i]));
+      if(adOn&&gi===0&&groups.length>1&&cards.length>=2) out.push(sponsorCard(list));
+    });
+  } else if(adOn&&cards.length>=2) out.splice(Math.min(3,out.length),0,sponsorCard(list));
+  queueMicrotask(syncExpandAll);
+  $("list").innerHTML = out.join("") || `<div class="empty">No resorts fit these settings. Try a higher budget, a longer transfer limit or fewer filters.</div>`;
+  save();
+}
+
+
+// Typical accommodation mix (approximate, compiled for the prototype). Order: hotel, chalet, apartment, guesthouse, private rental. 3 common, 2 some, 1 rare
+const ACC_T=["Hotels","Catered chalets","Apartments","Guesthouses","Airbnb / private"];
+const ACC_DEF={France:[2,2,3,1,3],Austria:[3,2,2,3,1],Switzerland:[3,2,2,2,2],Italy:[3,1,2,2,2],Andorra:[3,1,3,1,2],Bulgaria:[3,1,2,2,2],Spain:[3,1,3,2,2],Germany:[3,1,2,3,2],Norway:[2,2,3,1,2],Sweden:[2,1,3,1,2],Slovenia:[3,1,2,2,2]};
+const ACC={
+ "Val Thorens":[[2,2,3,1,2],"Mostly big apartment residences; a few hotels and chalets."],
+ "Méribel":[[2,3,2,1,2],"A classic catered-chalet resort, with hotels and apartments too."],
+ "Courchevel":[[3,3,2,1,1],"Luxury hotels and catered chalets dominate; few cheap options."],
+ "Val d'Isère":[[2,3,3,1,2],"Catered chalets and apartments; hotels in the village."],
+ "Tignes":[[1,2,3,1,3],"Purpose-built: apartments and private rentals."],
+ "Les Arcs":[[2,1,3,1,3],"Purpose-built apartment blocks, plus a few hotels and Club Med."],
+ "La Plagne":[[1,1,3,1,3],"Purpose-built apartments across the villages."],
+ "Chamonix":[[3,2,3,2,3],"A real town: hotels, apartments and plenty of Airbnb."],
+ "Avoriaz":[[1,1,3,1,3],"Car-free and purpose-built: almost all apartments and residences."],
+ "Morzine":[[2,3,3,2,3],"Chalets and apartments, lots of Airbnb, some hotels."],
+ "Flaine":[[1,1,3,1,3],"Purpose-built apartments and residences."],
+ "Alpe d'Huez":[[2,1,3,1,3],"Mainly apartments, with some hotels."],
+ "Les 2 Alpes":[[2,1,3,1,3],"Mainly apartments, with some hotels."],
+ "Serre Chevalier":[[2,2,3,2,3],"Spread-out valley villages: apartments, chalets and hotels."],
+ "St Anton":[[3,2,2,3,1],"Hotels and family-run Pensionen; a few chalets."],
+ "Lech-Zürs":[[3,2,2,2,1],"Upmarket hotels; private rentals are limited."],
+ "Ischgl":[[3,1,2,3,1],"Hotels and guesthouses, little self-catering."],
+ "Mayrhofen":[[3,1,2,3,2],"Hotels and guesthouses, some apartments."],
+ "Sölden":[[3,1,2,3,1],"Hotels and guesthouses."],
+ "Obergurgl":[[3,1,2,2,1],"Mostly hotels at the top of the valley."],
+ "Innsbruck (city base)":[[3,1,2,2,2],"City hotels, guesthouses and some apartments."],
+ "Salzburg (city base)":[[3,1,2,2,3],"City hotels plus plenty of private rentals."],
+ "Kitzbühel":[[3,2,2,3,2],"Hotels, guesthouses and some chalets."],
+ "Saalbach":[[3,1,2,3,1],"Hotels and guesthouses."],
+ "Verbier":[[2,3,3,1,2],"Chalets and apartments; hotels are fewer and pricey."],
+ "Zermatt":[[3,2,3,1,2],"Hotels and apartments in the car-free village."],
+ "Laax":[[3,1,3,1,2],"Hotels and the big resort-apartment complex at the base."],
+ "Val Gardena":[[3,1,2,3,2],"Hotels and B&B-style guesthouses."],
+ "Livigno":[[3,1,3,2,2],"Hotels and apartments in a long village."],
+ "Soldeu (Grandvalira)":[[3,1,2,1,1],"Mainly hotels."]
+};
+function accFor(r){const o=ACC[r.n];return {lv:o?o[0]:(ACC_DEF[r.c]||[2,2,2,2,2]),note:o?o[1]:""};}
+function abnb(r,p,d2){const q=r.n.replace(/ \(.*\)/,"");return `https://www.airbnb.co.uk/s/${encodeURIComponent(q+", "+r.c)}/homes?checkin=${p.d1}&checkout=${d2}&adults=${p.pax}`;}
+// Booking.com property-type filters (ht_id): 204 hotels, 228 chalets, 201 apartments, 220 holiday homes, 216 guest houses, 208 B&Bs
+const ACC_HT=["204","228","201;220","216;208",null];
+function bkUrl(r,p,d2,ht){const q=encodeURIComponent(r.n.replace(/ \(.*\)/,""));
+  const f=ht?"&nflt="+encodeURIComponent(ht.split(";").map(x=>"ht_id="+x).join(";")):"";
+  return `https://www.booking.com/searchresults.en-gb.html?ss=${q}&checkin=${p.d1}&checkout=${d2}&group_adults=${p.pax}&no_rooms=1${f}`;}
+// Kit and lessons: links go straight to each partner's own site, where the user picks the resort.
+// Add per-resort deep links in KIT_DEEP (from each partner's deep-link tool) and affiliate IDs in PARTNER once approved.
+const PARTNER={skiset:"",snowrental:"",checkyeti:""};
+// Per-resort pages, checked in a browser Oct 2026.
+const KIT_DEEP={"Alpe d'Huez": {"lessons": "https://www.checkyeti.com/en/winter/france/alpe-d-huez/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/alpe-d-huez","snowrental": "https://www.snowrental.com/en/ski-hire/alpe-d-huez"},"Andermatt": {"lessons": "https://www.checkyeti.com/en/winter/switzerland/andermatt/snowboard-schools-and-lessons"},"Avoriaz": {"lessons": "https://www.checkyeti.com/en/winter/france/avoriaz/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/avoriaz","snowrental": "https://www.snowrental.com/en/ski-hire/avoriaz"},"Bansko": {"lessons": "https://www.checkyeti.com/en/winter/bulgaria/bansko/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/bansko"},"Cervinia": {"lessons": "https://www.checkyeti.com/en/winter/italy/cervinia/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/cervinia","snowrental": "https://www.snowrental.com/en/ski-hire/cervinia"},"Chamonix": {"lessons": "https://www.checkyeti.com/en/winter/france/chamonix/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/chamonix","snowrental": "https://www.snowrental.com/en/ski-hire/chamonix"},"Courchevel": {"lessons": "https://www.checkyeti.com/en/winter/france/courchevel/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/courchevel-1850","snowrental": "https://www.snowrental.com/en/ski-hire/courchevel-1850"},"Courmayeur": {"lessons": "https://www.checkyeti.com/en/winter/italy/courmayeur/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/courmayeur-plan-checroui","snowrental": "https://www.snowrental.com/en/ski-hire/courmayeur-plan-checroui"},"Davos-Klosters": {"lessons": "https://www.checkyeti.com/en/winter/switzerland/davos/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/klosters","snowrental": "https://www.snowrental.com/en/ski-hire/davos"},"Engelberg": {"lessons": "https://www.checkyeti.com/en/winter/switzerland/engelberg/snowboard-schools-and-lessons","snowrental": "https://www.snowrental.com/en/ski-hire/engelberg"},"Flaine": {"lessons": "https://www.checkyeti.com/en/winter/france/flaine/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/flaine","snowrental": "https://www.snowrental.com/en/ski-hire/flaine"},"Ischgl": {"lessons": "https://www.checkyeti.com/en/winter/austria/ischgl/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/ischgl","snowrental": "https://www.snowrental.com/en/ski-hire/ischgl"},"Kitzbühel": {"lessons": "https://www.checkyeti.com/en/winter/austria/kitzbuehel/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/kitzbuhel","snowrental": "https://www.snowrental.com/en/ski-hire/kitzbuhel"},"La Plagne": {"lessons": "https://www.checkyeti.com/en/winter/france/la-plagne/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/plagne-centre","snowrental": "https://www.snowrental.com/en/ski-hire/belle-plagne"},"Laax": {"lessons": "https://www.checkyeti.com/en/winter/switzerland/flims/snowboard-schools-and-lessons"},"Lech-Zürs": {"lessons": "https://www.checkyeti.com/en/winter/austria/lech/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/lech-am-arlberg"},"Les 2 Alpes": {"lessons": "https://www.checkyeti.com/en/winter/france/les-deux-alpes/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/les-deux-alpes","snowrental": "https://www.snowrental.com/en/ski-hire/les-deux-alpes"},"Les Arcs": {"lessons": "https://www.checkyeti.com/en/winter/france/les-arcs/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/arc-1800","snowrental": "https://www.snowrental.com/en/ski-hire/arc-1800"},"Livigno": {"lessons": "https://www.checkyeti.com/en/winter/italy/livigno/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/livigno","snowrental": "https://www.snowrental.com/en/ski-hire/livigno"},"Madonna di Campiglio": {"lessons": "https://www.checkyeti.com/en/winter/italy/madonna-di-campiglio/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/madonna-di-campiglio"},"Mayrhofen": {"lessons": "https://www.checkyeti.com/en/winter/austria/mayrhofen/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/mayrhofen-im-zillertal","snowrental": "https://www.snowrental.com/en/ski-hire/mayrhofen-im-zillertal"},"Morzine": {"lessons": "https://www.checkyeti.com/en/winter/france/morzine/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/morzine","snowrental": "https://www.snowrental.com/en/ski-hire/morzine"},"Méribel": {"lessons": "https://www.checkyeti.com/en/winter/france/meribel/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/meribel-centre","snowrental": "https://www.snowrental.com/en/ski-hire/meribel-centre"},"Obergurgl": {"lessons": "https://www.checkyeti.com/en/winter/austria/obergurgl/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/obergurgl-hochgurgl","snowrental": "https://www.snowrental.com/en/ski-hire/obergurgl-hochgurgl"},"Saalbach": {"lessons": "https://www.checkyeti.com/en/winter/austria/saalbach/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/saalbach","snowrental": "https://www.snowrental.com/en/ski-hire/hinterglemm"},"Salzburg (city base)": {"lessons": "https://www.checkyeti.com/en/winter/austria/salzburg/snowboard-schools-and-lessons"},"Sauze d'Oulx": {"lessons": "https://www.checkyeti.com/en/winter/italy/sauze-d-oulx/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/sauze-d-oulx","snowrental": "https://www.snowrental.com/en/ski-hire/sauze-d-oulx"},"Serre Chevalier": {"skiset": "https://www.skiset.co.uk/ski-resort/serre-chevalier","snowrental": "https://www.snowrental.com/en/ski-hire/serre-chevalier"},"Soldeu (Grandvalira)": {"skiset": "https://www.skiset.co.uk/ski-resort/soldeu","snowrental": "https://www.snowrental.com/en/ski-hire/soldeu"},"St Anton": {"lessons": "https://www.checkyeti.com/en/winter/austria/st-anton/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/st-anton","snowrental": "https://www.snowrental.com/en/ski-hire/st-anton"},"Sölden": {"lessons": "https://www.checkyeti.com/en/winter/austria/soelden/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/solden-hochsolden"},"Tignes": {"lessons": "https://www.checkyeti.com/en/winter/france/tignes/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/tignes","snowrental": "https://www.snowrental.com/en/ski-hire/tignes"},"Val Gardena": {"lessons": "https://www.checkyeti.com/en/winter/italy/val-gardena/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/val-gardena-selva","snowrental": "https://www.snowrental.com/en/ski-hire/selva-gardena-wolkenstein"},"Val Thorens": {"lessons": "https://www.checkyeti.com/en/winter/france/val-thorens/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/val-thorens","snowrental": "https://www.snowrental.com/en/ski-hire/val-thorens"},"Val d'Isère": {"lessons": "https://www.checkyeti.com/en/winter/france/val-d-isere/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/val-d-isere","snowrental": "https://www.snowrental.com/en/ski-hire/val-d-isere"},"Verbier": {"lessons": "https://www.checkyeti.com/en/winter/switzerland/verbier/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/verbier","snowrental": "https://www.snowrental.com/en/ski-hire/verbier"},"Zermatt": {"lessons": "https://www.checkyeti.com/en/winter/switzerland/zermatt/snowboard-schools-and-lessons","skiset": "https://www.skiset.co.uk/ski-resort/zermatt","snowrental": "https://www.snowrental.com/en/ski-hire/zermatt"}};
+function kitPanel(r){const n=r.n.replace(/ \(.*\)/,""),dp=KIT_DEEP[r.n]||{};
+  const fr=r.c==="France";
+  const les=dp.lessons?{u:dp.lessons,t:"Snowboard lessons",via:"CheckYeti"}
+    :fr?{u:siteFor(r),t:"Ski schools on the resort site",via:"ESF and independent schools"}
+    :{u:"https://www.checkyeti.com/en/",t:"CheckYeti",via:`Search ${esc(n)} for snowboard lessons`};
+  const sk=dp.skiset||"https://www.skiset.co.uk/", sr=dp.snowrental||"https://www.snowrental.com/";
+  const hint=dp.skiset||dp.snowrental?"Opens your resort's hire page":`Search ${esc(n)} on their site`;
+  return `<div class="kit"><h4>Kit, lessons and passes</h4><div class="kitg">
+    <div class="kiti"><b>Board hire</b><a href="${sk}" target="_blank" rel="noopener">${adTag()}Skiset${dp.skiset?"":" (search)"} ↗</a><a href="${sr}" target="_blank" rel="noopener">${adTag()}Snowrental${dp.snowrental?"":" (search)"} ↗</a><span class="via">${dp.skiset&&dp.snowrental?"Opens your resort's hire page":dp.skiset||dp.snowrental?"Where marked, search "+esc(n)+" on their site":"Search "+esc(n)+" on their site"}</span></div>
+    <div class="kiti"><b>Lessons</b><a href="${les.u}" target="_blank" rel="noopener">${dp.lessons?adTag():""}${les.t} ↗</a><span class="via">${les.via}</span></div>
+    <div class="kiti"><b>Lift pass</b><a href="${siteFor(r)}" target="_blank" rel="noopener">Official resort site ↗</a><span class="via">Usually cheapest bought online in advance</span></div>
+  </div></div>`;}
+// Transfers, insurance and car hire. Add each partner's link builder here once chosen; until then the box shows "Partner link coming".
+const TRAVEL_PARTNER={transfers:null,insurance:null,carhire:null}; // e.g. transfers:(r,p,d2)=>`https://partner.example/?from=${r.ap}&to=…&date=${p.d1}`
+const CAR_FIT={"Serre Chevalier":"Spread-out valley villages, so a car helps you move between them.","Val Gardena":"Handy for exploring the wider Dolomiti Superski area.","Madonna di Campiglio":"Useful for reaching other Trentino resorts."};
+function carNote(r){if(r.city) return "Gives you the choice of resorts each day, instead of bus timetables.";
+  if(CAR_FIT[r.n]) return CAR_FIT[r.n];
+  if(r.c==="France"&&r.ap==="GVA"&&r.n!=="Avoriaz") return "Hire from the French side of Geneva airport to avoid cross-border fees and get French winter kit.";
+  return null;}
+function travelPanel(r,p,d2,apN){
+  const box=(k,title,label,via)=>{const f=TRAVEL_PARTNER[k];
+    return `<div class="kiti"><b>${title}</b>${f?`<a href="${f(r,p,d2)}" target="_blank" rel="noopener">${label} ↗</a>`:`<span class="soon">Partner link coming</span>`}<span class="via">${via}</span></div>`;};
+  const cn=carNote(r);
+  return `<div class="kit"><h4>Getting there and before you go</h4><div class="kitg">
+    ${box("transfers",r.city?"Into town":"Airport transfer",`Book ${apN} transfer`,`About ${r.t} min from ${esc(apN)}. Shared shuttles are cheaper; private suits groups or late flights.`)}
+    ${box("insurance","Winter sports insurance","Compare policies","Standard travel policies often exclude skiing and snowboarding. Check off-piste and your own board are covered.")}
+    ${cn?box("carhire","Car hire",`Compare car hire at ${esc(apN)}`,cn):""}
+  </div></div>`;}
+function openDetail(i){
+  const s=last[i]; if(!s) return; const r=s.r,p0=params(),p={...p0,dep:s.dep||p0.dep},d2=addDays(p.d1,p.nights);
+  const depN=(DEP.find(x=>x[0]===p.dep)||[p.dep,p.dep])[1], apN=AIR[r.ap].n;
+  const fmt=d=>new Date(d+"T12:00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
+  const dr=s.direct||directRoute(p.dep,r.ap,p.d1);
+  const known=dr?`${esc(dr.airline)} flies ${p.dep}–${r.ap} direct${dr.inSeason?" on your dates":", but not on your dates (season "+dr.from.split("-").reverse().join("/")+" to "+dr.to.split("-").reverse().join("/")+")"}.`
+    :`UK flight coverage to ${esc(apN)}: ${tierTxt(s.tier).toLowerCase()}.`;
+  const ph=w=>`<span class="ph" style="width:${w}px"></span>`;
+  const rows=[0,1,2].map(()=>`<tr><td>${ph(70)}</td><td>${ph(48)}</td><td>${ph(40)}</td><td>${ph(40)}</td><td>${ph(56)}</td></tr>`).join("");
+  const leg=(t,a,b,d)=>`<div class="leg"><div class="cityhead"><b>${t}</b><span>${a} → ${b} · ${fmt(d)}</span></div>
+    <div class="tscroll"><table><thead><tr><th>Airline</th><th>Flight</th><th>Departs</th><th>Arrives</th><th>Ride that day?</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  const gf=`https://www.google.com/travel/flights?q=${encodeURIComponent(`${p.directOnly?"Nonstop flights":"Flights"} from ${p.dep} to ${r.ap} on ${p.d1} returning ${d2} for ${p.pax} adults`)}`;
+  const dlg=$("dt");
+  dlg.innerHTML=`<div class="dh"><h3 id="dtt">${esc(r.n)}</h3><span class="ctry">${r.c}</span>
+      <button type="button" class="btn sm x" data-close>Close</button></div>
+    <div class="db">
+      <dl class="stats">
+        <div><dt>Fly to</dt><dd>${esc(apN)} (${r.ap})</dd></div>
+        <div><dt>${r.city?"Into town":"Transfer"}</dt><dd>${r.t} min</dd></div>
+        <div><dt>Ride days</dt><dd>Up to ${fmtDays(s.days)}</dd></div>
+      </dl>
+      ${(()=>{const a=accFor(r);return `<div class="acc"><h4>Where people stay · tap a type to search</h4><div class="accg">${ACC_T.map((t,k)=>{const u=ACC_HT[k]?bkUrl(r,p,d2,ACC_HT[k]):abnb(r,p,d2),via=ACC_HT[k]?"Booking.com":"Airbnb";return `<a class="acci l${a.lv[k]}" href="${u}" target="_blank" rel="noopener" title="Search ${t.toLowerCase()} on ${via}"><span>${t}</span><span class="lv">${["","Rare","Some","Common"][a.lv[k]]}</span><span class="go">${via} ↗</span></a>`}).join("")}</div>${a.note?`<p class="trline">${esc(a.note)}</p>`:""}</div>`})()}
+      ${travelPanel(r,p,d2,apN)}
+      ${adOn?partnerBox(r,apN):""}
+      ${kitPanel(r)}
+      <p class="trline">${known}</p>
+      ${leg("Outbound",esc(depN),esc(apN),p.d1)}
+      ${leg("Return",esc(apN),esc(depN),d2)}
+      <p class="pend"><b>Scheduled flights arrive with live data.</b> Once the flight backend is connected, these tables list real departures with times, and whether you land in time to ride on arrival day or can ride before flying home.</p>
+      <div class="links"><span class="lbl">Search now</span><a href="${gf}" target="_blank" rel="noopener">Google Flights</a><a href="https://www.skyscanner.net/transport/flights/${p.dep.toLowerCase()}/${r.ap.toLowerCase()}/${yymmdd(p.d1)}/${yymmdd(d2)}/?adultsv2=${p.pax}${p.directOnly?"&preferdirects=true":""}" target="_blank" rel="noopener">Skyscanner</a><a href="https://www.booking.com/searchresults.en-gb.html?ss=${encodeURIComponent(r.n.replace(/ \(.*\)/,""))}&checkin=${p.d1}&checkout=${d2}&group_adults=${p.pax}&no_rooms=1" target="_blank" rel="noopener">Booking.com</a><a href="${abnb(r,p,d2)}" target="_blank" rel="noopener">Airbnb</a></div>
+    </div>`;
+  dlg.querySelector("[data-close]").addEventListener("click",()=>dlg.close());
+  dlg.showModal();
+}
+$("dt").addEventListener("click",e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
+$("depPick").addEventListener("input",e=>{const v=e.target.value; if(!v) return;
+  const sel=chosenDeps(); if(!sel.includes(v)) sel.push(v); $("deps").value=sel.join("|"); e.target.value="";});
+$("depChips").addEventListener("click",e=>{const b=e.target.closest("[data-rmdep]"); if(!b) return;
+  $("deps").value=chosenDeps().filter(c=>c!==b.dataset.rmdep).join("|"); $("sharebox").hidden=true; onFormChange();});
+$("resPick").addEventListener("input",e=>{const v=e.target.value; if(!v) return;
+  const sel=chosenResorts(); if(!sel.includes(v)) sel.push(v); $("resorts").value=sel.join("|"); e.target.value="";});
+$("resChips").addEventListener("click",e=>{const b=e.target.closest("[data-rm]"); if(!b) return;
+  $("resorts").value=chosenResorts().filter(n=>n!==b.dataset.rm).join("|"); $("sharebox").hidden=true; onFormChange();});
+$("f").addEventListener("input",onFormChange);
+["findBtn","readyBtn","staleBtn"].forEach(id=>$(id).addEventListener("click",showResults));
+function setCard(a,open){ a.classList.toggle("collapsed",!open); const t=a.querySelector("[data-toggle]"); if(t){t.firstChild.textContent=open?"Less":"More"; t.setAttribute("aria-expanded",String(open));}
+  const n=a.dataset.card; if(open) openCards.add(n); else openCards.delete(n); syncExpandAll(); }
+function syncExpandAll(){ const all=[...document.querySelectorAll("#list .card")]; $("expandAll").textContent=all.length&&all.every(a=>!a.classList.contains("collapsed"))?"Collapse all":"Expand all"; }
+$("list").addEventListener("click",e=>{const t=e.target.closest("[data-toggle]"); if(!t) return; const a=t.closest(".card"); setCard(a,a.classList.contains("collapsed"));});
+$("expandAll").addEventListener("click",()=>{const all=[...document.querySelectorAll("#list .card")]; const open=all.some(a=>a.classList.contains("collapsed")); all.forEach(a=>setCard(a,open));});
+$("list").addEventListener("click",e=>{const b=e.target.closest("[data-why]"); if(!b) return; const pn=$("why-"+b.dataset.why); if(!pn) return;
+  pn.hidden=!pn.hidden; b.setAttribute("aria-expanded",String(!pn.hidden)); b.textContent=pn.hidden?`Why ${b.dataset.pct}%?`:"Hide breakdown";});
+$("rb").addEventListener("input",()=>{$("sharebox").hidden=true; render();});
+// fold summaries + remembered open state
+function foldSummaries(p){
+  const tr=[]; if(p.deps.length>1) tr.push(`${p.deps.length} airports`); if(p.directOnly) tr.push("direct only");
+  tr.push(`max ${p.maxT} min transfer`); if(p.train) tr.push("train"); if(p.drive) tr.push("driving");
+  $("fs-travel").textContent=tr.join(" \u00b7 ");
+  const ab=[["beg","Beginner"],["int","Intermediate"],["adv","Advanced"],["exp","Expert"]].filter(([k])=>p.abil[k]).map(x=>x[1]);
+  const gr=[ab.join(", ")||"Any level"]; if(p.board) gr.push("boarders"); if(p.hire) gr.push("hiring"); if(p.avoidHols) gr.push("avoid holidays");
+  $("fs-group").textContent=gr.join(" \u00b7 ");
+  const wh=[]; if(p.countries.length) wh.push(`${p.cmode==="only"?"Only":"Prefer"} ${p.countries.join(", ")}`);
+  if(p.resorts.length) wh.push(`${p.resorts.length} resort${p.resorts.length>1?"s":""} in mind`);
+  $("fs-where").textContent=wh.join(" \u00b7 ")||"Anywhere";
+}
+document.querySelectorAll("details.fold").forEach(d=>{
+  try{ if(localStorage.getItem("pp-"+d.id)==="1") d.open=true; }catch(e){}
+  d.addEventListener("toggle",()=>{ try{localStorage.setItem("pp-"+d.id,d.open?"1":"0");}catch(e){} if(typeof fitForm==="function") fitForm(); });
+});
+$("adPrev").addEventListener("change",e=>{adOn=e.target.checked; try{localStorage.setItem("pp-adprev",adOn?"1":"0");}catch(err){} syncAds(); render();});
+$("f").addEventListener("scroll",()=>{const f=$("f"); f.classList.toggle("mb", f.scrollTop+f.clientHeight < f.scrollHeight-4);},{passive:true});
+$("cookiebar").addEventListener("click",e=>{if(e.target.closest("[data-cookie]")){cookieDone=true; syncAds();}});
+syncAds();
+$("list").addEventListener("click",e=>{const dd=e.target.closest("[data-detail]");if(dd){openDetail(+dd.dataset.detail);return;}
+  const b=e.target.closest("[data-train]");if(!b)return;
+  const [d,n]=b.dataset.train.split("|");$("d1").value=d;$("nights").value=n;render();});
+$("f").addEventListener("submit",e=>e.preventDefault());
+function searchName(p){const d=new Date(p.d1+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+  return `${p.deps.join("/")} · ${d} · ${p.nights} night${p.nights>1?"s":""}${last[0]?" · top pick "+last[0].r.n:""}`;}
+function renderSaved(){const a=readSaved();
+  $("savedCount").textContent=a.length?`(${a.length})`:"";
+  $("savedList").innerHTML=a.length?a.map((s,i)=>`<li><div class="sv"><b>${esc(String(s.name||"Saved search"))}</b><small>Saved ${new Date(s.at).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</small></div><button type="button" class="btn sm" data-load="${i}">Open</button><button type="button" class="btn sm ghost" data-del="${i}">Delete</button></li>`).join("")
+    :`<li class="none">No saved searches yet. Use Save search to keep one.</li>`;}
+const flash=(b,t,orig)=>{b.textContent=t;setTimeout(()=>b.textContent=orig,1600);};
+$("saveBtn").addEventListener("click",()=>{
+  const code=encodeTrip(), a=readSaved().filter(s=>s.code!==code);
+  a.unshift({name:searchName(params()),code,at:Date.now()});
+  if(writeSaved(a.slice(0,20))){renderSaved();$("saved").open=true;flash($("saveBtn"),"Saved","Save search");}
+  else flash($("saveBtn"),"This browser won't save","Save search");
+});
+$("savedList").addEventListener("click",e=>{const t=e.target.closest("button");if(!t)return;const a=readSaved();
+  if(t.dataset.load!==undefined){const s=a[+t.dataset.load];const d=s&&decodeTrip(s.code);if(d){openTrip(d);window.scrollTo({top:0,behavior:"smooth"});}}
+  if(t.dataset.del!==undefined){a.splice(+t.dataset.del,1);writeSaved(a);renderSaved();}
+});
+$("shareBtn").addEventListener("click",async()=>{
+  const code=shortCode(), box=$("sharebox"), inp=$("shareCode");
+  inp.value=code; box.hidden=false;
+  try{await navigator.clipboard.writeText(`Piste Picker trip code: ${code}`);
+    $("shareMsg").textContent="";
+    flash($("shareBtn"),"Code copied","Share trip code");}
+  catch(e){$("shareMsg").textContent="Select and copy";inp.focus();inp.select();}
+});
+$("codeOpen").addEventListener("click",()=>{const d=readCode($("codeIn").value), m=$("codeMsg");
+  if(!d){m.textContent="That code doesn't match. Check each letter and number and try again.";return;}
+  openTrip(d); m.textContent="Opened. Use Save search to keep it."; $("codeIn").value="";
+});
+$("codeIn").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("codeOpen").click();}});
+$("f").addEventListener("input",()=>{$("sharebox").hidden=true;});
+renderSaved();
+(function(){const h=decodeURIComponent((location.hash||"").slice(1)); if(/^trip-/i.test(h)){const d=decodeShort(h.slice(5)); if(d) openTrip(d);}})();
+
+$("copy").addEventListener("click",async()=>{
+  const p=params();
+  const txt=`Snowboard shortlist: ${p.nights} nights from ${depList(p.deps)}, ${p.d1}\n`+last.map((s,i)=>{const b=tripBudget(s.r,p.nights,s.days,p.hire,s.hols.length>0);
+    return `${i+1}. ${s.r.n} (${s.r.c}): ${s.pct}% match, fly ${s.dep||p.dep} to ${s.r.ap} then ${s.r.t} min, ${s.r.base}-${s.r.top} m, après ${APRES[s.r.av].toLowerCase()}, about £${b.lo}-£${b.hi} pp excl. flights`
+     +(s.r.city?`\n   Day trips: `+rankTrips(s.r,s.w).slice(0,3).map(x=>`${x.n} (${x.m} min)`).join(", "):"");}).join("\n")
+    +`\n\nOpen this search in Piste Picker with trip code: ${shortCode()}`;
+  const b=$("copy");
+  try{await navigator.clipboard.writeText(txt);b.textContent="Copied";}catch(e){b.textContent="Copy failed";}
+  setTimeout(()=>b.textContent="Copy shortlist",1600);
+});
+render();
+}
+</script>
+
+</body></html>
