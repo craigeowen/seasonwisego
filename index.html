@@ -1348,9 +1348,9 @@ const ACC={
 };
 function accFor(r){const o=ACC[r.n];return {lv:o?o[0]:(ACC_DEF[r.c]||[2,2,2,2,2]),note:o?o[1]:""};}
 // Stay22 (affiliate ID seasonwisego) wraps the Booking.com links and builds the Vrbo links, so accommodation bookings earn commission.
-const S22={aid:"seasonwisego",campaign:"pistepicker"};
-function s22wrap(provider,url){return `https://www.stay22.com/allez/${provider}?aid=${S22.aid}&link=${encodeURIComponent(url)}&campaign=${S22.campaign}`;}
-function vrbo(r,p,d2){const q=r.n.replace(/ \(.*\)/,"");return `https://www.stay22.com/allez/vrbo?aid=${S22.aid}&address=${encodeURIComponent(q+", "+r.c)}&checkin=${p.d1}&checkout=${d2}&adults=${p.pax}&campaign=${S22.campaign}`;}
+const S22={aid:"seasonwisego",campaign:"pistepicker",extra:"&currency=GBP&lang=en"}; // UK visitors: prices in pounds, pages in English
+function s22wrap(provider,url){return `https://www.stay22.com/allez/${provider}?aid=${S22.aid}&link=${encodeURIComponent(url)}&campaign=${S22.campaign}${S22.extra}`;}
+function vrbo(r,p,d2){const q=r.n.replace(/ \(.*\)/,"");return `https://www.stay22.com/allez/vrbo?aid=${S22.aid}&address=${encodeURIComponent(q+", "+r.c)}&checkin=${p.d1}&checkout=${d2}&adults=${p.pax}&campaign=${S22.campaign}${S22.extra}`;}
 const affTag='<span class="adtag" title="We may earn a commission if you book">Ad</span>';
 function abnb(r,p,d2){const q=r.n.replace(/ \(.*\)/,"");return `https://www.airbnb.co.uk/s/${encodeURIComponent(q+", "+r.c)}/homes?checkin=${p.d1}&checkout=${d2}&adults=${p.pax}`;}
 // Booking.com property-type filters (ht_id): 204 hotels, 228 chalets, 201 apartments, 220 holiday homes, 216 guest houses, 208 B&Bs
@@ -1358,7 +1358,7 @@ const ACC_HT=["204","228","201;220","216;208",null];
 // Booking.com through Stay22: the resort, dates and guests carry through. Stay22 doesn't pass on Booking.com's
 // property-type filters, so every "where people stay" box opens the resort's full list (ht is kept for later).
 function bkUrl(r,p,d2,ht){const q=r.n.replace(/ \(.*\)/,"");
-  return `https://www.stay22.com/allez/booking?aid=${S22.aid}&address=${encodeURIComponent(q+", "+r.c)}&checkin=${p.d1}&checkout=${d2}&adults=${p.pax}&campaign=${S22.campaign}`;}
+  return `https://www.stay22.com/allez/booking?aid=${S22.aid}&address=${encodeURIComponent(q+", "+r.c)}&checkin=${p.d1}&checkout=${d2}&adults=${p.pax}&campaign=${S22.campaign}${S22.extra}`;}
 // Kit and lessons: links go straight to each partner's own site, where the user picks the resort.
 // Add per-resort deep links in KIT_DEEP (from each partner's deep-link tool) and affiliate IDs in PARTNER once approved.
 const PARTNER={skiset:"",snowrental:"",checkyeti:""};
