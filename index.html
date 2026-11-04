@@ -541,7 +541,7 @@ a.acci .go{font-size:.72rem;color:var(--accent);font-weight:600}
         <div class="cbtn"><button type="button" class="btn" data-cookie>Reject</button><button type="button" class="btn" data-cookie>Accept</button></div>
       </div>
       <dialog id="dt" aria-labelledby="dtt"></dialog>
-      <p class="note">Resort figures (accommodation mix, altitudes, km, transfer times by road from the nearest practical airport, UK flight coverage, lift prices) are approximate and compiled for this prototype. Budgets are per person, excluding flights, assume two sharing, convert euros at about £0.86, and add 25% to beds in school holidays. </p>
+      <p class="note">Resort figures (accommodation mix, altitudes, km, transfer times by road from the nearest practical airport, lift prices) are approximate and compiled for this prototype. Budgets are per person, excluding flights, assume two sharing, convert euros at about £0.86, and add 25% to beds in school holidays. </p>
       <p class="note">Snow-sure figures come from 20 winters of snow data (2006/07 to 2025/26): the share of days each month with at least 50 cm of natural snow around the resort, then topped up for snowmaking. They describe the wider area rather than individual pistes. Sierra Nevada and Bansko use an estimate instead. Holiday dates are for 2026/27. UK windows cover every council's published dates across England, Wales, Scotland and Northern Ireland; academies and independent schools can set their own. French spring holidays aren't included yet. Check snow reports and live routes before booking. Flight and hotel links open a pre-filled search.</p>
     </section>
   </div>
@@ -558,6 +558,8 @@ a.acci .go{font-size:.72rem;color:var(--accent);font-weight:600}
   document.querySelectorAll(".themesw button").forEach(b=>b.addEventListener("click",()=>{ apply(b.dataset.th); try{localStorage.setItem("pp-theme",b.dataset.th);}catch(e){} }));
 })();
 // ---------- Data ----------
+// Flight coverage tiers are hidden (and don't affect the ranking) until live route data arrives with Skyscanner. Set to true to bring them back.
+const FLIGHT_COVERAGE=false;
 // UK flight coverage tier: 3 = most UK airports, 2 = London + some regionals (often seasonal), 1 = limited/charter
 const AIR = {
   GVA:{n:"Geneva",tier:3}, ZRH:{n:"Zurich",tier:3}, INN:{n:"Innsbruck",tier:2}, SZG:{n:"Salzburg",tier:2},
@@ -902,7 +904,7 @@ function scoreResort(r,p){
   const BIGREG = ["MAN","BHX","BRS","EDI","GLA","NCL"];
   const flyDirect = !!((direct&&direct.inSeason) || london || (tier===3 && BIGREG.includes(p.dep)));
   const directLikely = trainFits || driveFits || flyDirect;
-  const flightPen = trainFits || driveFits || (direct&&direct.inSeason) ? 0
+  const flightPen = !FLIGHT_COVERAGE || trainFits || driveFits || (direct&&direct.inSeason) ? 0
     : p.directOnly&&!directLikely ? (tier===1?15:8)
     : london ? (tier===1?3:0) : (tier===1?8:tier===2?3:0);
   const hols = p.d1 ? holsFor(r.c,p.d1,p.nights) : [];
@@ -972,8 +974,8 @@ function reasons(s,p){
   if(s.direct&&s.direct.inSeason) pro.unshift(`Direct ${s.direct.airline} flights from ${p.dep} (${dm(s.direct.from)}–${dm(s.direct.to)})`);
   else if(s.direct) con.push(`${s.direct.airline} ${p.dep} route only runs ${dm(s.direct.from)}–${dm(s.direct.to)}`);
   else if(p.directOnly && !s.directLikely) con.unshift(`No confirmed direct flights from ${p.dep} to ${AIR[r.ap].n}`);
-  else if(!s.london && s.tier<=2) con.push(`Fewer UK routes to ${AIR[r.ap].n}; check from your airport`);
-  if(s.london && s.tier===1) con.push(`${AIR[r.ap].n} flights are mostly weekend charters`);
+  else if(FLIGHT_COVERAGE && !s.london && s.tier<=2) con.push(`Fewer UK routes to ${AIR[r.ap].n}; check from your airport`);
+  if(FLIGHT_COVERAGE && s.london && s.tier===1) con.push(`${AIR[r.ap].n} flights are mostly weekend charters`);
   return {pro:pro.slice(0,4),con:con.slice(0,3)};
 }
 if(typeof module!=="undefined"){module.exports={R,AIR,scoreResort,rank,reasons,rideDays,snowScore,snowProfile,tripBudget,rankTrips};}
@@ -1275,7 +1277,7 @@ function render(opt){
           <div><dt>Altitude</dt><dd>${r.base}–${r.top} m</dd></div>
           <div><dt>Pistes</dt><dd>${r.km} km</dd></div>
           <div><dt>Après</dt><dd>${APRES[r.av]}</dd></div>
-          <div><dt>Fly from</dt><dd>${esc(depName(p.dep))}<span class="sub">${s.direct&&s.direct.inSeason?"direct with "+esc(s.direct.airline):s.flyDirect?"direct flights likely":tierTxt(s.tier).toLowerCase()+" UK coverage, may need a change"}</span></dd></div>
+          <div><dt>Fly from</dt><dd>${esc(depName(p.dep))}<span class="sub">${s.direct&&s.direct.inSeason?"direct with "+esc(s.direct.airline):FLIGHT_COVERAGE?(s.flyDirect?"direct flights likely":tierTxt(s.tier).toLowerCase()+" UK coverage, may need a change"):"to "+esc(AIR[r.ap].n)}</span></dd></div>
         </dl>
         ${snowStrip(r,p)}
         <div class="terrain">
@@ -1423,7 +1425,7 @@ function openDetail(i){
   const fmt=d=>new Date(d+"T12:00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
   const dr=s.direct||directRoute(p.dep,r.ap,p.d1);
   const known=dr?`${esc(dr.airline)} flies ${p.dep}–${r.ap} direct${dr.inSeason?" on your dates":", but not on your dates (season "+dr.from.split("-").reverse().join("/")+" to "+dr.to.split("-").reverse().join("/")+")"}.`
-    :`UK flight coverage to ${esc(apN)}: ${tierTxt(s.tier).toLowerCase()}.`;
+    :FLIGHT_COVERAGE?`UK flight coverage to ${esc(apN)}: ${tierTxt(s.tier).toLowerCase()}.`:"";
   const ph=w=>`<span class="ph" style="width:${w}px"></span>`;
   const rows=[0,1,2].map(()=>`<tr><td>${ph(70)}</td><td>${ph(48)}</td><td>${ph(40)}</td><td>${ph(40)}</td><td>${ph(56)}</td></tr>`).join("");
   const leg=(t,a,b,d)=>`<div class="leg"><div class="cityhead"><b>${t}</b><span>${a} → ${b} · ${fmt(d)}</span></div>
@@ -1442,7 +1444,7 @@ function openDetail(i){
       ${travelPanel(r,p,d2,apN)}
       ${adOn?partnerBox(r,apN):""}
       ${kitPanel(r)}
-      <p class="trline">${known}</p>
+      ${known?`<p class="trline">${known}</p>`:""}
       ${leg("Outbound",esc(depN),esc(apN),p.d1)}
       ${leg("Return",esc(apN),esc(depN),d2)}
       <p class="pend"><b>Scheduled flights arrive with live data.</b> Once the flight backend is connected, these tables list real departures with times, and whether you land in time to ride on arrival day or can ride before flying home.</p>
