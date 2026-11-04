@@ -322,7 +322,20 @@ dialog#dt::backdrop{background:rgba(13,19,26,.55)}
 .leg td{padding:6px 10px;border-top:1px solid var(--line);color:var(--muted)}
 .ph{display:inline-block;height:9px;border-radius:2px;background:var(--line);vertical-align:middle}
 .pend{border-left:3px solid var(--accent);padding:6px 10px;font-size:.84rem;margin:0;background:var(--soft)}
-.acc{display:grid;gap:6px}
+.acc{display:grid;gap:8px}
+.accmix{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.accmix li{display:inline-flex;align-items:baseline;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.82rem;background:var(--snow)}
+.accmix li b{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700}
+.accmix li.l3{border-color:var(--ink)}
+.accmix li.l3 b{color:var(--good)}
+.accmix li.l1{color:var(--muted)}
+.stays{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;margin-top:2px}
+.stays a{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:4px;padding:8px 10px;background:var(--card);color:var(--ink);text-decoration:none;font-weight:600;font-size:.9rem}
+.stays a:hover{border-color:var(--accent)}
+.stays a span{display:grid}
+.stays small{font-weight:400;font-size:.74rem;color:var(--muted)}
+.stays .adtag{margin-right:0}
+
 .acc h4{margin:0;font-size:.7rem;text-transform:uppercase;letter-spacing:.07em}
 .accg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px}
 .acci{border:1px solid var(--line);border-radius:4px;padding:6px 8px;display:grid;gap:4px;font-size:.84rem;background:var(--snow)}
@@ -1416,10 +1429,13 @@ function travelPanel(r,p,d2,apN){
   const box=(k,title,label,via)=>{const f=TRAVEL_PARTNER[k];
     return `<div class="kiti"><b>${title}</b>${f?`<a href="${f(r,p,d2)}" target="_blank" rel="noopener">${affTag}${label} ↗</a>`:`<span class="soon">Partner link coming</span>`}<span class="via">${via}</span></div>`;};
   const cn=carNote(r);
-  return `<div class="kit"><h4>Getting there and before you go</h4><div class="kitg">
-    ${box("transfers",r.city?"Into town":"Airport transfer",`Book ${apN} transfer`,`About ${r.t} min from ${esc(apN)}. Shared shuttles are cheaper; private suits groups or late flights.`)}
+  const car=cn?(()=>{const dc=dcUrl(r.ap),ky=TRAVEL_PARTNER.carhire(r,p,d2);return `<div class="kiti"><b>Car hire</b>${dc?`<a href="${dc}" target="_blank" rel="noopener">${affTag}Discover Cars at ${esc(apN)} ↗</a>`:""}<a href="${ky}" target="_blank" rel="noopener">${affTag}Compare on Kayak ↗</a><span class="via">${cn}</span></div>`;})():"";
+  return `<div class="kit"><h4>Getting there</h4><div class="kitg">
+    ${car}
+    ${box("transfers","Resort transfer",`Book ${apN} transfer`,`About ${r.t} min from ${esc(apN)}. Shared shuttles are cheaper; private suits groups or late flights.`)}
+  </div></div>
+  <div class="kit"><h4>Before you go</h4><div class="kitg">
     ${box("insurance","Winter sports insurance","Compare policies","Standard travel policies often exclude skiing and snowboarding. Check off-piste and your own board are covered.")}
-    ${cn?(()=>{const dc=dcUrl(r.ap),ky=TRAVEL_PARTNER.carhire(r,p,d2);return `<div class="kiti"><b>Car hire</b>${dc?`<a href="${dc}" target="_blank" rel="noopener">${affTag}Discover Cars at ${esc(apN)} ↗</a>`:""}<a href="${ky}" target="_blank" rel="noopener">${affTag}Compare on Kayak ↗</a><span class="via">${cn}</span></div>`;})():""}
   </div></div>`;}
 function openDetail(i){
   const s=last[i]; if(!s) return; const r=s.r,p0=params(),p={...p0,dep:s.dep||p0.dep},d2=addDays(p.d1,p.nights);
@@ -1442,7 +1458,10 @@ function openDetail(i){
         <div><dt>${r.city?"Into town":"Transfer"}</dt><dd>${r.t} min</dd></div>
         <div><dt>Ride days</dt><dd>Up to ${fmtDays(s.days)}</dd></div>
       </dl>
-      ${(()=>{const a=accFor(r);return `<div class="acc"><h4>Where people stay</h4><div class="accg">${ACC_T.map((t,k)=>{const u=ACC_HT[k]?bkUrl(r,p,d2,ACC_HT[k]):vrbo(r,p,d2),via=ACC_HT[k]?"Booking.com":"Vrbo";return `<a class="acci l${a.lv[k]}" href="${u}" target="_blank" rel="noopener" title="See places to stay on ${via}"><span>${t}</span><span class="lv">${["","Rare","Some","Common"][a.lv[k]]}</span><span class="go">${affTag}${via} ↗</span></a>`}).join("")}</div>${a.note?`<p class="trline">${esc(a.note)}</p>`:""}</div>`})()}
+      ${(()=>{const a=accFor(r),LV=["","Rare","Some","Common"];return `<div class="acc"><h4>Where people stay</h4>
+        <ul class="accmix">${ACC_T.map((t,k)=>`<li class="l${a.lv[k]}"><span>${t}</span><b>${LV[a.lv[k]]}</b></li>`).join("")}</ul>
+        ${a.note?`<p class="trline">${esc(a.note)}</p>`:""}
+        <div class="stays"><a href="${bkUrl(r,p,d2,null)}" target="_blank" rel="noopener">${affTag}<span>Booking.com<small>Hotels and apartments</small></span></a><a href="${hcom(r,p,d2)}" target="_blank" rel="noopener">${affTag}<span>Hotels.com<small>Hotels</small></span></a><a href="${vrbo(r,p,d2)}" target="_blank" rel="noopener">${affTag}<span>Vrbo<small>Holiday rentals</small></span></a></div></div>`})()}
       ${travelPanel(r,p,d2,apN)}
       ${adOn?partnerBox(r,apN):""}
       ${kitPanel(r)}
@@ -1450,7 +1469,7 @@ function openDetail(i){
       ${FLIGHT_TABLES?`${leg("Outbound",esc(depN),esc(apN),p.d1)}
       ${leg("Return",esc(apN),esc(depN),d2)}
       <p class="pend"><b>Scheduled flights arrive with live data.</b> Once the flight backend is connected, these tables list real departures with times, and whether you land in time to ride on arrival day or can ride before flying home.</p>`:""}
-      <div class="links"><span class="lbl">Search now</span><a href="${gf}" target="_blank" rel="noopener">Google Flights</a><a href="https://www.skyscanner.net/transport/flights/${p.dep.toLowerCase()}/${r.ap.toLowerCase()}/${yymmdd(p.d1)}/${yymmdd(d2)}/?adultsv2=${p.pax}${p.directOnly?"&preferdirects=true":""}" target="_blank" rel="noopener">Skyscanner</a><a href="${bkUrl(r,p,d2,null)}" target="_blank" rel="noopener">${affTag}Booking.com</a><a href="${hcom(r,p,d2)}" target="_blank" rel="noopener">${affTag}Hotels.com</a><a href="${vrbo(r,p,d2)}" target="_blank" rel="noopener">${affTag}Vrbo</a></div>
+      <div class="links"><span class="lbl">Flights</span><a href="${gf}" target="_blank" rel="noopener">Google Flights</a><a href="https://www.skyscanner.net/transport/flights/${p.dep.toLowerCase()}/${r.ap.toLowerCase()}/${yymmdd(p.d1)}/${yymmdd(d2)}/?adultsv2=${p.pax}${p.directOnly?"&preferdirects=true":""}" target="_blank" rel="noopener">Skyscanner</a></div>
     </div>`;
   dlg.querySelector("[data-close]").addEventListener("click",()=>dlg.close());
   dlg.showModal();
