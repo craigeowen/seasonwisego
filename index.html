@@ -1390,7 +1390,8 @@ const CAR_FIT={"Serre Chevalier":"Spread-out valley villages, so a car helps you
 function carNote(r){if(r.city) return "Gives you the choice of resorts each day, instead of bus timetables.";
   if(CAR_FIT[r.n]) return CAR_FIT[r.n];
   if(r.c==="France"&&r.ap==="GVA"&&r.n!=="Avoriaz") return "Hire from the French side of Geneva airport to avoid cross-border fees and get French winter kit.";
-  return null;}
+  if(r.n==="Avoriaz") return "Avoriaz is car-free: you'd park at the resort entrance. Handy for visiting Morzine or Les Gets.";
+  return "Useful for visiting nearby resorts or travelling at your own pace. Check snow-chain rules and resort parking first.";}
 function travelPanel(r,p,d2,apN){
   const box=(k,title,label,via)=>{const f=TRAVEL_PARTNER[k];
     return `<div class="kiti"><b>${title}</b>${f?`<a href="${f(r,p,d2)}" target="_blank" rel="noopener">${affTag}${label} ↗</a>`:`<span class="soon">Partner link coming</span>`}<span class="via">${via}</span></div>`;};
