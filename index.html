@@ -1293,6 +1293,7 @@ function render(opt){
           <a href="${gf}" target="_blank" rel="noopener">Google Flights</a>
           <a href="${sk}" target="_blank" rel="noopener">${adTag()}Skyscanner</a>
           <a href="${bk}" target="_blank" rel="noopener">${affTag}Booking.com in ${esc(r.n.replace(/ \(.*\)/,""))}</a>
+          <a href="${hcom(r,p,d2)}" target="_blank" rel="noopener">${affTag}Hotels.com</a>
           <a href="${vrbo(r,p,d2)}" target="_blank" rel="noopener">${affTag}Vrbo holiday rentals</a>
         </div>
       </div></article>`;
@@ -1356,7 +1357,16 @@ function accFor(r){const o=ACC[r.n];return {lv:o?o[0]:(ACC_DEF[r.c]||[2,2,2,2,2]
 // Stay22 (affiliate ID seasonwisego) wraps the Booking.com links and builds the Vrbo links, so accommodation bookings earn commission.
 const S22={aid:"seasonwisego",campaign:"pistepicker",extra:"&currency=GBP&lang=en"}; // UK visitors: prices in pounds, pages in English
 function s22wrap(provider,url){return `https://www.stay22.com/allez/${provider}?aid=${S22.aid}&link=${encodeURIComponent(url)}&campaign=${S22.campaign}${S22.extra}`;}
-function vrbo(r,p,d2){const q=r.n.replace(/ \(.*\)/,"");return `https://www.stay22.com/allez/vrbo?aid=${S22.aid}&address=${encodeURIComponent(q+", "+r.c)}&checkin=${p.d1}&checkout=${d2}&adults=${p.pax}&campaign=${S22.campaign}${S22.extra}`;}
+// Vrbo UK through the Expedia Group affiliate programme (tested 4 Nov 2026: lands on vrbo.com/en-gb with the resort, dates and guests).
+const EGV={camref:"1100l6yPQ5",creativeref:"1011l63085",adref:"PZ095zBlE3"};
+function vrbo(r,p,d2){const q=r.n.replace(/ \(.*\)/,"");
+  const land=`https://www.vrbo.com/en-gb/search?destination=${encodeURIComponent(q+", "+r.c)}&startDate=${p.d1}&endDate=${d2}&adults=${p.pax}`;
+  return `https://vrbo.com/affiliate?landingPage=${encodeURIComponent(land)}&camref=${EGV.camref}&creativeref=${EGV.creativeref}&adref=${EGV.adref}`;}
+// Hotels.com through the Expedia Group affiliate programme (codes from Craig's link tool, tested 4 Nov 2026).
+const EG={camref:"1110lSLvz",creativeref:"1011l66932",adref:"PZp8612cEs"};
+function hcom(r,p,d2){const q=r.n.replace(/ \(.*\)/,"");
+  const land=`https://uk.hotels.com/Hotel-Search?destination=${encodeURIComponent(q+", "+r.c)}&startDate=${p.d1}&endDate=${d2}&adults=${p.pax}`;
+  return `https://www.hotels.com/affiliate?landingPage=${encodeURIComponent(land)}&camref=${EG.camref}&creativeref=${EG.creativeref}&adref=${EG.adref}`;}
 const affTag='<span class="adtag" title="We may earn a commission if you book">Ad</span>';
 function abnb(r,p,d2){const q=r.n.replace(/ \(.*\)/,"");return `https://www.airbnb.co.uk/s/${encodeURIComponent(q+", "+r.c)}/homes?checkin=${p.d1}&checkout=${d2}&adults=${p.pax}`;}
 // Booking.com property-type filters (ht_id): 204 hotels, 228 chalets, 201 apartments, 220 holiday homes, 216 guest houses, 208 B&Bs
@@ -1436,7 +1446,7 @@ function openDetail(i){
       ${leg("Outbound",esc(depN),esc(apN),p.d1)}
       ${leg("Return",esc(apN),esc(depN),d2)}
       <p class="pend"><b>Scheduled flights arrive with live data.</b> Once the flight backend is connected, these tables list real departures with times, and whether you land in time to ride on arrival day or can ride before flying home.</p>
-      <div class="links"><span class="lbl">Search now</span><a href="${gf}" target="_blank" rel="noopener">Google Flights</a><a href="https://www.skyscanner.net/transport/flights/${p.dep.toLowerCase()}/${r.ap.toLowerCase()}/${yymmdd(p.d1)}/${yymmdd(d2)}/?adultsv2=${p.pax}${p.directOnly?"&preferdirects=true":""}" target="_blank" rel="noopener">Skyscanner</a><a href="${bkUrl(r,p,d2,null)}" target="_blank" rel="noopener">${affTag}Booking.com</a><a href="${vrbo(r,p,d2)}" target="_blank" rel="noopener">${affTag}Vrbo</a></div>
+      <div class="links"><span class="lbl">Search now</span><a href="${gf}" target="_blank" rel="noopener">Google Flights</a><a href="https://www.skyscanner.net/transport/flights/${p.dep.toLowerCase()}/${r.ap.toLowerCase()}/${yymmdd(p.d1)}/${yymmdd(d2)}/?adultsv2=${p.pax}${p.directOnly?"&preferdirects=true":""}" target="_blank" rel="noopener">Skyscanner</a><a href="${bkUrl(r,p,d2,null)}" target="_blank" rel="noopener">${affTag}Booking.com</a><a href="${hcom(r,p,d2)}" target="_blank" rel="noopener">${affTag}Hotels.com</a><a href="${vrbo(r,p,d2)}" target="_blank" rel="noopener">${affTag}Vrbo</a></div>
     </div>`;
   dlg.querySelector("[data-close]").addEventListener("click",()=>dlg.close());
   dlg.showModal();
