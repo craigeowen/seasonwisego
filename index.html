@@ -1377,7 +1377,15 @@ function kitPanel(r){const n=r.n.replace(/ \(.*\)/,""),dp=KIT_DEEP[r.n]||{};
     <div class="kiti"><b>Lift pass</b><a href="${siteFor(r)}" target="_blank" rel="noopener">Official resort site ↗</a><span class="via">Usually cheapest bought online in advance</span></div>
   </div></div>`;}
 // Transfers, insurance and car hire. Add each partner's link builder here once chosen; until then the box shows "Partner link coming".
-const TRAVEL_PARTNER={transfers:null,insurance:null,carhire:null}; // e.g. transfers:(r,p,d2)=>`https://partner.example/?from=${r.ap}&to=…&date=${p.d1}`
+// Car hire: Kayak's car search at the arrival airport, through Stay22 (checked 4 Nov 2026: lands on the airport with the trip dates).
+const TRAVEL_PARTNER={transfers:null,insurance:null,
+  carhire:(r,p,d2)=>s22wrap("kayak",`https://www.kayak.co.uk/cars/${r.ap}/${p.d1}/${d2}`)};
+// Discover Cars airport pages (checked 25 Oct 2026), with the SeasonWiseGo affiliate ID.
+const DC_AID="seasonwisego";
+const DC_AP={GVA:"switzerland/geneva/gva",ZRH:"switzerland/zurich/zrh",INN:"austria/innsbruck/inn",SZG:"austria/salzburg/szg",
+  TRN:"italy-mainland/turin/trn",GNB:"france/grenoble/gnb",CMF:"france/chambery/cmf",LYS:"france/lyon/lys",MXP:"italy-mainland/milan/mxp",
+  BGY:"italy-mainland/bergamo/bgy",VRN:"italy-mainland/verona/vrn",BCN:"spain/barcelona/bcn",TLS:"france/toulouse/tls",SOF:"bulgaria/sofia/sof"};
+function dcUrl(ap){const pth=DC_AP[ap];return pth?`https://www.discovercars.com/${pth}?a_aid=${DC_AID}`:null;} // e.g. transfers:(r,p,d2)=>`https://partner.example/?from=${r.ap}&to=…&date=${p.d1}`
 const CAR_FIT={"Serre Chevalier":"Spread-out valley villages, so a car helps you move between them.","Val Gardena":"Handy for exploring the wider Dolomiti Superski area.","Madonna di Campiglio":"Useful for reaching other Trentino resorts."};
 function carNote(r){if(r.city) return "Gives you the choice of resorts each day, instead of bus timetables.";
   if(CAR_FIT[r.n]) return CAR_FIT[r.n];
@@ -1385,12 +1393,12 @@ function carNote(r){if(r.city) return "Gives you the choice of resorts each day,
   return null;}
 function travelPanel(r,p,d2,apN){
   const box=(k,title,label,via)=>{const f=TRAVEL_PARTNER[k];
-    return `<div class="kiti"><b>${title}</b>${f?`<a href="${f(r,p,d2)}" target="_blank" rel="noopener">${label} ↗</a>`:`<span class="soon">Partner link coming</span>`}<span class="via">${via}</span></div>`;};
+    return `<div class="kiti"><b>${title}</b>${f?`<a href="${f(r,p,d2)}" target="_blank" rel="noopener">${affTag}${label} ↗</a>`:`<span class="soon">Partner link coming</span>`}<span class="via">${via}</span></div>`;};
   const cn=carNote(r);
   return `<div class="kit"><h4>Getting there and before you go</h4><div class="kitg">
     ${box("transfers",r.city?"Into town":"Airport transfer",`Book ${apN} transfer`,`About ${r.t} min from ${esc(apN)}. Shared shuttles are cheaper; private suits groups or late flights.`)}
     ${box("insurance","Winter sports insurance","Compare policies","Standard travel policies often exclude skiing and snowboarding. Check off-piste and your own board are covered.")}
-    ${cn?box("carhire","Car hire",`Compare car hire at ${esc(apN)}`,cn):""}
+    ${cn?(()=>{const dc=dcUrl(r.ap),ky=TRAVEL_PARTNER.carhire(r,p,d2);return `<div class="kiti"><b>Car hire</b>${dc?`<a href="${dc}" target="_blank" rel="noopener">${affTag}Discover Cars at ${esc(apN)} ↗</a>`:""}<a href="${ky}" target="_blank" rel="noopener">${affTag}Compare on Kayak ↗</a><span class="via">${cn}</span></div>`;})():""}
   </div></div>`;}
 function openDetail(i){
   const s=last[i]; if(!s) return; const r=s.r,p0=params(),p={...p0,dep:s.dep||p0.dep},d2=addDays(p.d1,p.nights);
