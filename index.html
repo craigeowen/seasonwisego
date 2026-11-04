@@ -529,10 +529,6 @@ a.acci .go{font-size:.72rem;color:var(--accent);font-weight:600}
           </div>
         </div>
       </details>
-      <div class="adbar">
-        <label class="toggle"><input type="checkbox" id="adPrev"> Show ad preview (mock-up)</label>
-        <p id="adnote" class="adnote" hidden><span class="adtag">Ad</span> marks partner links and sponsored spots: Piste Picker is paid a commission if you book through them. They never change your ranking.</p>
-      </div>
       <div id="list" class="results"></div>
       <div id="cookiebar" class="cookiebar" role="region" aria-label="Cookie choice" hidden>
         <p>We use cookies to track bookings made through partner links. No ad networks, no profiling.</p>
@@ -540,18 +536,6 @@ a.acci .go{font-size:.72rem;color:var(--accent);font-weight:600}
       </div>
       <dialog id="dt" aria-labelledby="dtt"></dialog>
       <p class="note">Resort figures (accommodation mix, altitudes, km, transfer times by road from the nearest practical airport, UK flight coverage, lift prices) are approximate and compiled for this prototype. Budgets are per person, excluding flights, assume two sharing, convert euros at about £0.86, and add 25% to beds in school holidays. </p>
-      <div class="plan"><b>Planned</b><ul>
-        <li>Real historical snow data: about 20 years of snow depth per resort from a weather archive, replacing the modelled snow-sure estimate.</li>
-        <li>Live scheduled flights in each resort's detail view (click the resort name), so ride days show whether you can ride on the travel days themselves.</li>
-        <li>Two or three arrival airports per resort (adding Chambéry, Lyon, Turin and Milan Malpensa), with the best one picked for your departure airport.</li>
-        <li>"My trip": save a resort and dates, then get a checklist (transfer, hire, lessons, lift pass, insurance), the snow forecast as the trip nears, and rest-day activities to book.</li>
-        <li>An optional “Starting from” box (town or first half of a postcode) that suggests your best UK airports by drive and train time.</li>
-        <li>Request a resort: a short form for resorts that aren't listed yet, so the most-wanted ones get added properly.</li>
-        <li>Plan from any country, not just the UK, to resorts anywhere in the world, in the user's own language, currency and units.</li>
-        <li>A route checker for independent multi-stop trips (for example A to B to C to D in Costa Rica, self-drive and self-catering) that flags season, timing and travel-time problems.</li>
-        <li>Campervans and caravans: aires (motorhome only) and winter campsites near the lifts, with hook-ups, plus towing and tunnel restrictions on the drive.</li>
-        <li>An all-year holiday finder beyond skiing, with affiliate links on the searches.</li>
-      </ul></div>
       <p class="note">Snow-sure figures are an estimate of how often each resort has good cover in that month, modelled from altitude, glacier, regional snowfall and snowmaking, not live data or a measured archive. Holiday dates are for 2026/27. UK windows cover every council's published dates across England, Wales, Scotland and Northern Ireland; academies and independent schools can set their own. French spring holidays aren't included yet. Check snow reports and live routes before booking. Flight and hotel links open a pre-filled search.</p>
     </section>
   </div>
@@ -1073,7 +1057,8 @@ function readSaved(){try{const a=JSON.parse(localStorage.getItem(SKEY)||"[]");re
 function writeSaved(a){try{localStorage.setItem(SKEY,JSON.stringify(a));return true}catch(e){return false}}
 
 // ---------- Ad preview (mock-up of how partner ads would sit in the page) ----------
-let adOn=true; try{adOn=localStorage.getItem("pp-adprev")!=="0";}catch(e){}
+// Ads and sponsored spots are switched off for launch. Set to true to bring them back (see the launch plan, phase 6).
+let adOn=false;
 let cookieDone=false;
 const adTag=()=>adOn?'<span class="adtag">Ad</span>':"";
 function sponsorCard(list){const pick=list.find(s=>accFor(s.r).lv[1]===3)||list.find(s=>accFor(s.r).lv[1]>=2)||list[0]; const n=pick.r.n.replace(/ \(.*\)/,"");
@@ -1084,7 +1069,7 @@ function sponsorCard(list){const pick=list.find(s=>accFor(s.r).lv[1]===3)||list.
 function partnerBox(r,apN){return `<div class="spon spon-sm" aria-label="Advertisement"><div class="sponhead"><span class="adtag">Ad</span><span>Partner</span></div>
     <div class="sponbody"><div class="spontext"><b class="sponname">Summit Shuttle</b><p>Shared and private transfers from ${esc(apN)}, with board bags carried free.</p><span class="sponfine">Example partner for this mock-up, not a real company.</span></div>
     <span class="btn sponcta" aria-disabled="true">Get a quote</span></div></div>`;}
-function syncAds(){$("adPrev").checked=adOn; $("adnote").hidden=!adOn; $("cookiebar").hidden=!adOn||cookieDone; document.body.classList.toggle("cbpad",!$("cookiebar").hidden); fitForm();}
+function syncAds(){$("cookiebar").hidden=!adOn||cookieDone; document.body.classList.toggle("cbpad",!$("cookiebar").hidden); fitForm();}
 // keep the settings panel inside the visible screen on desktop, whatever the scroll position
 function fitForm(){const f=$("f"); if(!f) return;
   if(innerWidth<=860){f.style.maxHeight="";f.classList.remove("mb");return;}
@@ -1465,7 +1450,6 @@ document.querySelectorAll("details.fold").forEach(d=>{
   try{ if(localStorage.getItem("pp-"+d.id)==="1") d.open=true; }catch(e){}
   d.addEventListener("toggle",()=>{ try{localStorage.setItem("pp-"+d.id,d.open?"1":"0");}catch(e){} if(typeof fitForm==="function") fitForm(); });
 });
-$("adPrev").addEventListener("change",e=>{adOn=e.target.checked; try{localStorage.setItem("pp-adprev",adOn?"1":"0");}catch(err){} syncAds(); render();});
 $("f").addEventListener("scroll",()=>{const f=$("f"); f.classList.toggle("mb", f.scrollTop+f.clientHeight < f.scrollHeight-4);},{passive:true});
 $("cookiebar").addEventListener("click",e=>{if(e.target.closest("[data-cookie]")){cookieDone=true; syncAds();}});
 syncAds();
