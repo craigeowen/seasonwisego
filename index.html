@@ -541,7 +541,7 @@ a.acci .go{font-size:.72rem;color:var(--accent);font-weight:600}
       </div>
       <dialog id="dt" aria-labelledby="dtt"></dialog>
       <p class="note">Resort figures (accommodation mix, altitudes, km, transfer times by road from the nearest practical airport, UK flight coverage, lift prices) are approximate and compiled for this prototype. Budgets are per person, excluding flights, assume two sharing, convert euros at about £0.86, and add 25% to beds in school holidays. </p>
-      <p class="note">Snow-sure figures are an estimate of how often each resort has good cover in that month, modelled from altitude, glacier, regional snowfall and snowmaking, not live data or a measured archive. Holiday dates are for 2026/27. UK windows cover every council's published dates across England, Wales, Scotland and Northern Ireland; academies and independent schools can set their own. French spring holidays aren't included yet. Check snow reports and live routes before booking. Flight and hotel links open a pre-filled search.</p>
+      <p class="note">Snow-sure figures come from 20 winters of snow data (2006/07 to 2025/26): the share of days each month with at least 50 cm of natural snow around the resort, then topped up for snowmaking. They describe the wider area rather than individual pistes. Sierra Nevada and Bansko use an estimate instead. Holiday dates are for 2026/27. UK windows cover every council's published dates across England, Wales, Scotland and Northern Ireland; academies and independent schools can set their own. French spring holidays aren't included yet. Check snow reports and live routes before booking. Flight and hotel links open a pre-filled search.</p>
     </section>
   </div>
   <footer class="sitefoot"><span>© 2026 SeasonWiseGo</span><a href="about.html">About and contact</a><a href="privacy.html">Privacy and cookies</a><a href="affiliate-disclosure.html">How we make money</a></footer>
@@ -693,11 +693,16 @@ const SF_LABEL=["","Dry area, relies on snowmaking","Below-average snowfall area
 // Month-by-month chance of good cover (0-100). Elevation thresholds per month for ~full natural cover,
 // shifted by regional snowfall, then topped up by snowmaking (less effective in Apr/Nov).
 const THR={10:2900,11:2300,0:1900,1:1800,2:2100,3:2600,4:3100};
+// Measured natural snow, 20 winters (2006/07 to 2025/26): % of days with at least 50 cm of snow on the ground, Nov to May,
+// then the median snow depth on 15 January in cm. ERA5-Land reanalysis via Open-Meteo, ~9 km grid cell at each resort.
+// Sierra Nevada and Bansko are left out: their grid cells don't represent the ski area, so they keep the modelled estimate.
+const SNOWH={"Val Thorens":[35,88,100,100,100,100,76,140],"Méribel":[14,75,98,100,100,94,53,125],"Courchevel":[30,87,100,100,100,100,82,142],"Val d'Isère":[45,89,100,100,100,100,92,150],"Tignes":[42,89,100,100,100,100,90,148],"Les Arcs":[30,86,100,100,100,100,88,148],"La Plagne":[26,85,100,100,100,100,79,141],"Chamonix":[25,84,100,100,100,99,73,150],"Avoriaz":[2,51,90,100,100,86,29,100],"Morzine":[1,44,84,96,96,72,17,88],"Flaine":[14,72,98,100,100,92,44,131],"Alpe d'Huez":[16,78,99,100,100,96,57,121],"Les 2 Alpes":[14,72,97,100,100,96,48,115],"Serre Chevalier":[28,82,99,100,100,98,62,116],"St Anton":[28,82,99,100,100,100,86,117],"Lech-Zürs":[14,65,97,100,100,95,52,97],"Ischgl":[33,84,99,100,100,100,91,121],"Mayrhofen":[12,60,86,100,99,86,31,86],"Sölden":[39,82,99,100,100,100,80,124],"Obergurgl":[26,72,90,100,100,92,51,107],"Innsbruck (city base)":[8,53,83,99,98,73,14,80],"Salzburg (city base)":[4,38,79,92,90,58,6,70],"Kitzbühel":[4,39,79,92,94,69,12,68],"Saalbach":[4,40,79,93,94,69,12,69],"Verbier":[25,85,100,100,100,99,68,132],"Zermatt":[48,92,100,100,100,100,96,147],"Laax":[20,72,95,100,100,89,44,106],"Engelberg":[7,61,94,100,100,82,25,94],"Andermatt":[48,92,100,100,100,100,91,158],"Davos-Klosters":[28,77,97,100,100,99,73,115],"Sauze d'Oulx":[16,71,95,100,100,96,40,98],"Cervinia":[48,93,100,100,100,100,96,148],"Courmayeur":[43,93,100,100,100,100,95,156],"Livigno":[50,82,98,100,100,99,80,128],"Val Gardena":[6,41,61,89,81,63,17,63],"Madonna di Campiglio":[8,46,64,92,84,63,15,70],"Soldeu (Grandvalira)":[4,22,52,69,73,48,11,45],"Les Gets":[0,42,76,84,76,40,1,77],"Les Menuires":[24,84,100,100,100,99,65,129],"La Rosière":[30,86,100,100,100,100,88,148],"Sainte-Foy":[39,89,100,100,100,100,91,150],"Montgenèvre":[28,76,99,100,100,97,54,110],"Obertauern":[10,53,80,97,97,78,20,76],"Zell am See-Kaprun":[6,45,79,93,93,69,10,72],"Schladming":[8,46,84,97,99,81,22,80],"Hintertux":[13,63,89,100,100,89,41,88],"St Moritz":[56,89,99,100,100,100,89,138],"Saas-Fee":[38,91,100,100,100,100,80,147],"Crans-Montana":[27,82,99,100,100,98,65,130],"Grindelwald-Wengen":[10,66,97,100,100,91,38,102],"Arosa-Lenzerheide":[25,74,92,100,100,90,50,112],"Cortina d'Ampezzo":[12,50,64,93,93,78,25,76],"Sestriere":[16,71,95,100,100,96,40,98],"Monterosa (Champoluc)":[27,79,98,100,100,95,61,110],"Passo Tonale":[32,69,81,98,100,90,52,97],"Baqueira-Beret":[3,15,38,53,49,29,3,28],"Garmisch-Partenkirchen":[4,35,76,94,90,48,5,65],"Hemsedal":[32,92,100,100,100,99,78,113],"Åre":[2,17,64,86,93,80,17,56],"Kranjska Gora":[0,20,23,41,36,10,0,16]};
+const SNOWH_IDX={10:0,11:1,0:2,1:3,2:4,3:5,4:6};
 function snowProfile(r){
   const [sf,mk]=SNOWC[r.n]||[3,50], E=r.base*0.5+r.top*0.5+(r.g?300:0)+(r.eo||0);
   const out={};
   for(const m of [10,11,0,1,2,3,4]){
-    let nat=clamp((E-(THR[m]-500))/700+(sf-3)*0.08,0,1);
+    const h=SNOWH[r.n]; let nat=h?h[SNOWH_IDX[m]]/100:clamp((E-(THR[m]-500))/700+(sf-3)*0.08,0,1);
     const k=(m===10||m===4)?0.1:m===3?0.3:0.75;
     out[m]=Math.round(clamp(nat+(1-nat)*mk/100*k,0.03,0.97)*100);
   }
@@ -1183,7 +1188,7 @@ function whyPanel(s,p,i){
   const q=s.parts, r=s.r, f=x=>(Math.round(x*10)/10).toFixed(1).replace(/\.0$/,"");
   const rows=[
     ["Riding fit",q.ride,50,"How the resort's terrain matches your Skip / Some / Keen / Must choices"],
-    ["Snow-sure",q.snow,15,`${Math.round(s.snow*100)}% snow-sure estimate for ${MONTHS[p.month]}`],
+    ["Snow-sure",q.snow,15,`${Math.round(s.snow*100)}% snow-sure for ${MONTHS[p.month]}${SNOWH[r.n]?" (20 winters of snow data)":" (estimate)"}`],
     ["Après",q.apres,10,`${APRES[r.av]} après; you asked for ${p.apres<=2?"low-key":p.apres>=4?"full-on":"sociable"}`],
     ["Budget",q.budget,8,p.maxPP?`Resort price level against your budget of under \u00a3${p.maxPP.toLocaleString("en-GB")}`:"Any budget, so every resort scores in full"],
     ["Transfer",q.transfer,q.tw,s.trainFits?`${TRAIN[r.n][1]} min from the station by train`:r.city?`~${s.commute} min each way to the slopes`:`${r.t} min from ${AIR[r.ap].n}`]
@@ -1206,7 +1211,7 @@ function snowStrip(r,p){
   const fc = daysOut<=10&&daysOut>=-1
     ? `<a class="fcl live" href="https://www.google.com/search?q=${q}" target="_blank" rel="noopener">Live forecast now useful: check it</a>`
     : `<a class="fcl" href="https://www.google.com/search?q=${q}" target="_blank" rel="noopener">Forecast</a><span class="fcn">reliable ~10 days out</span>`;
-  return `<div class="snow"><div class="snowhead"><b>Snow-sure by month</b><span>${SF_LABEL[sc[0]]} · ~${sc[1]}% snowmaking</span>${fc}</div>
+  return `<div class="snow"><div class="snowhead"><b>Snow-sure by month</b><span>${SNOWH[r.n]?`Typically ~${SNOWH[r.n][7]} cm of natural snow in mid-January · ~${sc[1]}% snowmaking`:`${SF_LABEL[sc[0]]} · ~${sc[1]}% snowmaking · estimate`}</span>${fc}</div>
     <div class="snowbody"><div class="months">${ms.map(m=>`<div class="mo${m===p.month?" on":""}"><span class="bar"><i style="height:${pr[m]}%" class="${pr[m]>=85?"hi":pr[m]>=65?"md":"lo"}"></i></span><span class="ml">${MONTHS[m]}</span><span class="mv">${pr[m]}%</span></div>`).join("")}</div>
     <ul class="skey" aria-label="Key"><li><i class="hi"></i>Reliable, 85%+</li><li><i class="md"></i>Fair, 65–84%</li><li><i class="lo"></i>Risky, under 65%</li><li><i class="cur"></i>Your month</li></ul></div></div>`;
 }
