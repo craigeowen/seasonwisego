@@ -541,7 +541,7 @@ a.acci .go{font-size:.72rem;color:var(--accent);font-weight:600}
         <div class="cbtn"><button type="button" class="btn" data-cookie>Reject</button><button type="button" class="btn" data-cookie>Accept</button></div>
       </div>
       <dialog id="dt" aria-labelledby="dtt"></dialog>
-      <p class="note">Resort figures (accommodation mix, altitudes, km, transfer times by road from the nearest practical airport, lift prices) are approximate and compiled for this prototype. Budgets are per person, excluding flights, assume two sharing, convert euros at about £0.86, and add 25% to beds in school holidays. </p>
+      <p class="note">Resort figures (accommodation mix, altitudes, km, transfer times by road from the nearest practical airport, UK flight coverage, lift prices) are approximate and compiled for this prototype. Budgets are per person, excluding flights, assume two sharing, convert euros at about £0.86, and add 25% to beds in school holidays. </p>
       <p class="note">Snow-sure figures come from 20 winters of snow data (2006/07 to 2025/26): the share of days each month with at least 50 cm of natural snow around the resort, then topped up for snowmaking. They describe the wider area rather than individual pistes. Sierra Nevada and Bansko use an estimate instead. Holiday dates are for 2026/27. UK windows cover every council's published dates across England, Wales, Scotland and Northern Ireland; academies and independent schools can set their own. French spring holidays aren't included yet. Check snow reports and live routes before booking. Flight and hotel links open a pre-filled search.</p>
     </section>
   </div>
@@ -558,8 +558,10 @@ a.acci .go{font-size:.72rem;color:var(--accent);font-weight:600}
   document.querySelectorAll(".themesw button").forEach(b=>b.addEventListener("click",()=>{ apply(b.dataset.th); try{localStorage.setItem("pp-theme",b.dataset.th);}catch(e){} }));
 })();
 // ---------- Data ----------
-// Flight coverage tiers are hidden (and don't affect the ranking) until live route data arrives with Skyscanner. Set to true to bring them back.
-const FLIGHT_COVERAGE=false;
+// Set FLIGHT_COVERAGE to false to hide the UK flight coverage tiers (and their effect on the ranking).
+const FLIGHT_COVERAGE=true;
+// The outbound and return flight tables stay hidden until live flight data is connected (phase 4). Set to true to show them.
+const FLIGHT_TABLES=false;
 // UK flight coverage tier: 3 = most UK airports, 2 = London + some regionals (often seasonal), 1 = limited/charter
 const AIR = {
   GVA:{n:"Geneva",tier:3}, ZRH:{n:"Zurich",tier:3}, INN:{n:"Innsbruck",tier:2}, SZG:{n:"Salzburg",tier:2},
@@ -1445,9 +1447,9 @@ function openDetail(i){
       ${adOn?partnerBox(r,apN):""}
       ${kitPanel(r)}
       ${known?`<p class="trline">${known}</p>`:""}
-      ${leg("Outbound",esc(depN),esc(apN),p.d1)}
+      ${FLIGHT_TABLES?`${leg("Outbound",esc(depN),esc(apN),p.d1)}
       ${leg("Return",esc(apN),esc(depN),d2)}
-      <p class="pend"><b>Scheduled flights arrive with live data.</b> Once the flight backend is connected, these tables list real departures with times, and whether you land in time to ride on arrival day or can ride before flying home.</p>
+      <p class="pend"><b>Scheduled flights arrive with live data.</b> Once the flight backend is connected, these tables list real departures with times, and whether you land in time to ride on arrival day or can ride before flying home.</p>`:""}
       <div class="links"><span class="lbl">Search now</span><a href="${gf}" target="_blank" rel="noopener">Google Flights</a><a href="https://www.skyscanner.net/transport/flights/${p.dep.toLowerCase()}/${r.ap.toLowerCase()}/${yymmdd(p.d1)}/${yymmdd(d2)}/?adultsv2=${p.pax}${p.directOnly?"&preferdirects=true":""}" target="_blank" rel="noopener">Skyscanner</a><a href="${bkUrl(r,p,d2,null)}" target="_blank" rel="noopener">${affTag}Booking.com</a><a href="${hcom(r,p,d2)}" target="_blank" rel="noopener">${affTag}Hotels.com</a><a href="${vrbo(r,p,d2)}" target="_blank" rel="noopener">${affTag}Vrbo</a></div>
     </div>`;
   dlg.querySelector("[data-close]").addEventListener("click",()=>dlg.close());
