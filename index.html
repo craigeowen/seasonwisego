@@ -1389,6 +1389,10 @@ function hcom(r,p,d2){const q=r.n.replace(/ \(.*\)/,"");
 const SKIWORLD={"Val Thorens":"rLC0e","Méribel":"nxcE3","Courchevel":"tKKMS","Val d'Isère":"BUARd","Tignes":"rgoHj","Les Arcs":"jlTWY",
   "La Plagne":"uauUd","Alpe d'Huez":"Uvwel","Les 2 Alpes":"wglZo","St Anton":"76aUK"};
 function skiworld(r){const c=SKIWORLD[r.n];return c?`https://skiworld.link/${c}`:null;}
+// CateredSkiChalets.com via TradeTracker (campaign 1992, site 519456). Uses TradeTracker's standard click link, because the
+// advertiser's own direct-link page returned "not found" when tested on 5 Nov 2026.
+const CSC={"St Anton":"/skichalets/","Les Menuires":"/skichalets/frankrijk-skichalet-blanchot/","Val Gardena":"/skichalets/italie-skichalet-selva-panorama/"};
+function csc(r){const u=CSC[r.n];return u?`https://tc.tradetracker.net/?c=1992&m=12&a=519456&r=pistepicker&u=${encodeURIComponent(u)}`:null;}
 const affTag='<span class="adtag" title="We may earn a commission if you book">Ad</span>';
 function abnb(r,p,d2){const q=r.n.replace(/ \(.*\)/,"");return `https://www.airbnb.co.uk/s/${encodeURIComponent(q+", "+r.c)}/homes?checkin=${p.d1}&checkout=${d2}&adults=${p.pax}`;}
 // Booking.com property-type filters (ht_id): 204 hotels, 228 chalets, 201 apartments, 220 holiday homes, 216 guest houses, 208 B&Bs
@@ -1470,7 +1474,7 @@ function openDetail(i){
         <div><dt>Ride days</dt><dd>Up to ${fmtDays(s.days)}</dd></div>
       </dl>
       ${(()=>`<div class="acc"><h4>Where to stay</h4>
-        <div class="stays"><a href="${bkUrl(r,p,d2,null)}" target="_blank" rel="noopener">${affTag}<span>Booking.com<small>Hotels and apartments</small></span></a><a href="${hcom(r,p,d2)}" target="_blank" rel="noopener">${affTag}<span>Hotels.com<small>Hotels</small></span></a><a href="${vrbo(r,p,d2)}" target="_blank" rel="noopener">${affTag}<span>Vrbo<small>Holiday rentals</small></span></a>${skiworld(r)?`<a href="${skiworld(r)}" target="_blank" rel="noopener">${affTag}<span>Skiworld<small>Catered chalets</small></span></a>`:""}</div></div>`)()}
+        <div class="stays"><a href="${bkUrl(r,p,d2,null)}" target="_blank" rel="noopener">${affTag}<span>Booking.com<small>Hotels and apartments</small></span></a><a href="${hcom(r,p,d2)}" target="_blank" rel="noopener">${affTag}<span>Hotels.com<small>Hotels</small></span></a><a href="${vrbo(r,p,d2)}" target="_blank" rel="noopener">${affTag}<span>Vrbo<small>Holiday rentals</small></span></a>${skiworld(r)?`<a href="${skiworld(r)}" target="_blank" rel="noopener">${affTag}<span>Skiworld<small>Catered chalets</small></span></a>`:""}${csc(r)?`<a href="${csc(r)}" target="_blank" rel="noopener">${affTag}<span>CateredSkiChalets<small>All-inclusive chalets</small></span></a>`:""}</div></div>`)()}
       ${travelPanel(r,p,d2,apN)}
       ${adOn?partnerBox(r,apN):""}
       ${kitPanel(r)}
