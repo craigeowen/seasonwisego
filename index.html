@@ -329,6 +329,8 @@ dialog#dt::backdrop{background:rgba(13,19,26,.55)}
 .accmix li.l3{border-color:var(--ink)}
 .accmix li.l3 b{color:var(--good)}
 .accmix li.l1{color:var(--muted)}
+.fb{margin:4px 0 0;font-size:.82rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px}
+.fb a{color:var(--ink);font-weight:600;text-decoration-color:var(--accent);text-underline-offset:3px}
 .stays{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;margin-top:2px}
 .stays a{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:4px;padding:8px 10px;background:var(--card);color:var(--ink);text-decoration:none;font-weight:600;font-size:.9rem}
 .stays a:hover{border-color:var(--accent)}
@@ -558,7 +560,7 @@ a.acci .go{font-size:.72rem;color:var(--accent);font-weight:600}
       <p class="note">Snow-sure figures come from 20 winters of snow data (2006/07 to 2025/26): the share of days each month with at least 50 cm of natural snow around the resort, then topped up for snowmaking. They describe the wider area rather than individual pistes. Sierra Nevada and Bansko use an estimate instead. Holiday dates are for 2026/27. UK windows cover every council's published dates across England, Wales, Scotland and Northern Ireland; academies and independent schools can set their own. French spring holidays aren't included yet. Check snow reports and live routes before booking. Flight and hotel links open a pre-filled search.</p>
     </section>
   </div>
-  <footer class="sitefoot"><span>© 2026 SeasonWiseGo</span><a href="about.html">About and contact</a><a href="privacy.html">Privacy and cookies</a><a href="affiliate-disclosure.html">How we make money</a></footer>
+  <footer class="sitefoot"><span>© 2026 SeasonWiseGo</span><a href="about.html">About and contact</a><a href="privacy.html">Privacy and cookies</a><a href="affiliate-disclosure.html">How we make money</a><a href="mailto:admin@seasonwisego.com?subject=Piste%20Picker%20feedback">Send feedback</a></footer>
 </div>
 
 <script>
@@ -591,7 +593,14 @@ const DEP = [["LGW","London Gatwick"],["LHR","London Heathrow"],["STN","London S
 const depName=c=>(DEP.find(x=>x[0]===c)||[c,c])[1];
 // Confirmed direct winter routes from regional airports (checked Oct 2026): [airline, from, to] as MM-DD
 const ROUTES = {BOH:{GVA:["easyJet","12-05","03-21"]}};
-function directRoute(dep,ap,d1){const r=ROUTES[dep]&&ROUTES[dep][ap]; if(!r) return null;
+// Direct routes from the busiest UK airports, [airlines all year, airlines seasonal]. Compiled 5 Nov 2026 from the
+// Wikipedia destination lists of both the UK and the arrival airports. Airlines change routes; refresh each season.
+const DIRECT={"LGW":{"GVA":[["easyJet"],["British Airways","Jet2","Swiss","TUI"]],"ZRH":[["Swiss","easyJet"],[]],"INN":[["easyJet"],["British Airways","TUI"]],"SZG":[["British Airways"],["Jet2","TUI","easyJet"]],"GNB":[[],["British Airways","Jet2","Wizz Air","easyJet"]],"TRN":[["British Airways","easyJet"],["Jet2","TUI"]]},"LHR":{"GVA":[["British Airways","Swiss"],[]],"ZRH":[["British Airways","Swiss"],[]],"INN":[[],["British Airways"]],"SZG":[[],["British Airways","Lufthansa"]]},"STN":{"GVA":[[],["British Airways","Jet2","easyJet"]],"ZRH":[[],["easyJet"]],"INN":[[],["Jet2","TUI"]],"SZG":[["Ryanair"],["Jet2"]],"GNB":[[],["Jet2","Ryanair"]],"TRN":[["Ryanair"],["TUI"]]},"LTN":{"GVA":[["easyJet"],["Jet2"]],"ZRH":[["easyJet"],[]],"INN":[[],["easyJet"]],"SZG":[[],["easyJet"]],"GNB":[[],["Ryanair","Wizz Air","easyJet"]],"TRN":[["Wizz Air"],["Ryanair","easyJet"]]},"MAN":{"GVA":[["easyJet"],["Jet2","TUI"]],"ZRH":[["Swiss","easyJet"],[]],"INN":[[],["Jet2","TUI","easyJet"]],"SZG":[[],["Jet2","Ryanair","TUI"]],"GNB":[[],["Jet2","Ryanair","easyJet"]],"TRN":[[],["Jet2","Ryanair","TUI","easyJet"]]},"BRS":{"GVA":[["easyJet"],["Jet2","TUI"]],"ZRH":[["easyJet"],["Edelweiss"]],"INN":[[],["Jet2","TUI","easyJet"]],"SZG":[[],["TUI","easyJet"]],"GNB":[[],["Ryanair","easyJet"]],"TRN":[[],["Ryanair","TUI","easyJet"]]},"EDI":{"GVA":[["easyJet"],["Jet2"]],"ZRH":[["Edelweiss","Swiss","easyJet"],[]],"INN":[[],["Jet2","TUI","easyJet"]],"SZG":[[],["Jet2"]],"GNB":[[],["easyJet"]],"TRN":[[],["Jet2"]]}};
+function directList(dep,ap){const x=DIRECT[dep]&&DIRECT[dep][ap];return x&&(x[0].length||x[1].length)?{yr:x[0],sea:x[1]}:null;}
+const listTxt=a=>a.length<=1?a.join(""):a.slice(0,-1).join(", ")+" and "+a.at(-1);
+function directRoute(dep,ap,d1){const r=ROUTES[dep]&&ROUTES[dep][ap];
+  if(!r){const L=directList(dep,ap); if(!L) return null; const all=[...L.yr,...L.sea];
+    return {airline:all.length>2?`${all.slice(0,2).join(", ")} +${all.length-2}`:all.join(" and "),inSeason:true,from:"",to:"",list:L};}
   const md=(d1||"").slice(5); const inSeason = r[1]<=r[2] ? (md>=r[1]&&md<=r[2]) : (md>=r[1]||md<=r[2]);
   return {airline:r[0],inSeason,from:r[1],to:r[2]};}
 const LONDON = new Set(["LGW","LHR","STN","LTN"]);
@@ -1309,6 +1318,7 @@ function render(opt){
         <div class="links"><span class="lbl">Search${p.directOnly?" · direct only":""}</span>
           <a href="${gf}" target="_blank" rel="noopener">Google Flights</a>
           <a href="${sk}" target="_blank" rel="noopener">${adTag()}Skyscanner</a>
+          <a href="${kayakFlights(r,p,d2)}" target="_blank" rel="noopener">${affTag}Kayak flights</a>
           <a href="${bk}" target="_blank" rel="noopener">${affTag}Booking.com in ${esc(r.n.replace(/ \(.*\)/,""))}</a>
           <a href="${hcom(r,p,d2)}" target="_blank" rel="noopener">${affTag}Hotels.com</a>
           <a href="${vrbo(r,p,d2)}" target="_blank" rel="noopener">${affTag}Vrbo holiday rentals</a>
@@ -1393,6 +1403,8 @@ function skiworld(r){const c=SKIWORLD[r.n];return c?`https://skiworld.link/${c}`
 // advertiser's own direct-link page returned "not found" when tested on 5 Nov 2026.
 const CSC={"St Anton":"/skichalets/","Les Menuires":"/skichalets/frankrijk-skichalet-blanchot/","Val Gardena":"/skichalets/italie-skichalet-selva-panorama/"};
 function csc(r){const u=CSC[r.n];return u?`https://tc.tradetracker.net/?c=1992&m=12&a=519456&r=pistepicker&u=${encodeURIComponent(u)}`:null;}
+// Kayak flight search through Stay22 (tested 5 Nov 2026: lands on the route with dates and passengers).
+function kayakFlights(r,p,d2){return s22wrap("kayak",`https://www.kayak.co.uk/flights/${p.dep}-${r.ap}/${p.d1}/${d2}/${p.pax}adults`);}
 const affTag='<span class="adtag" title="We may earn a commission if you book">Ad</span>';
 function abnb(r,p,d2){const q=r.n.replace(/ \(.*\)/,"");return `https://www.airbnb.co.uk/s/${encodeURIComponent(q+", "+r.c)}/homes?checkin=${p.d1}&checkout=${d2}&adults=${p.pax}`;}
 // Booking.com property-type filters (ht_id): 204 hotels, 228 chalets, 201 apartments, 220 holiday homes, 216 guest houses, 208 B&Bs
@@ -1425,6 +1437,11 @@ function kitPanel(r){const n=r.n.replace(/ \(.*\)/,""),dp=KIT_DEEP[r.n]||{};
 const AWIN_AFF="3144466";
 function awin(mid,url){return `https://www.awin1.com/cread.php?awinmid=${mid}&awinaffid=${AWIN_AFF}&clickref=pistepicker&ued=${encodeURIComponent(url)}`;}
 const ST_PAGE={"Val Thorens":"geneva-airport-to-val-thorens","Méribel":"geneva-airport-to-meribel","Courchevel":"geneva-airport-to-courchevel","Val d'Isère":"geneva-airport-to-val-disere","Tignes":"geneva-airport-to-tignes","Les Arcs":"geneva-airport","La Plagne":"geneva-airport-to-la-plagne","Chamonix":"geneva-airport-to-chamonix","Avoriaz":"geneva-airport","Morzine":"geneva-airport-to-morzine","Flaine":"geneva-airport-to-flaine","Alpe d'Huez":"grenoble-airport-to-lalpe-dhuez","Les 2 Alpes":"grenoble-airport-to-les-deux-alpes","Serre Chevalier":"turin-airport","St Anton":"innsbruck-airport-to-st-anton-am-arlberg","Lech-Zürs":"innsbruck-airport-to-lech-am-arlberg","Ischgl":"innsbruck-airport-to-ischgl","Mayrhofen":"innsbruck-airport","Sölden":"innsbruck-airport-to-solden","Obergurgl":"innsbruck-airport-to-obergurgl","Innsbruck (city base)":"innsbruck-airport","Salzburg (city base)":"salzburg-airport","Kitzbühel":"salzburg-airport-to-kitzbuhel","Saalbach":"salzburg-airport-to-saalbach","Verbier":"geneva-airport-to-verbier","Zermatt":"geneva-airport-to-tasch","Laax":"zurich-airport-to-laax","Engelberg":"zurich-airport-to-engelberg","Andermatt":"zurich-airport-to-andermatt","Davos-Klosters":"zurich-airport-to-davos","Sauze d'Oulx":"turin-airport-to-sauze-doulx","Cervinia":"turin-airport-to-breuil-cervinia","Courmayeur":"geneva-airport-to-courmayeur","Livigno":"milan-bergamo-airport-to-livigno","Val Gardena":"innsbruck-airport-to-selva-di-val-gardena","Madonna di Campiglio":"verona-villafranca-airport-to-madonna-di-campiglio","Soldeu (Grandvalira)":"toulouse-airport-to-andorra-la-vella","Bansko":"sofia-airport-to-bansko","Les Gets":"geneva-airport-to-les-gets","Les Menuires":"geneva-airport-to-les-menuires","La Rosière":"geneva-airport","Sainte-Foy":"geneva-airport-to-sainte-foy-tarentaise","Montgenèvre":"turin-airport-to-montgenevre","Obertauern":"salzburg-airport-to-obertauern","Zell am See-Kaprun":"salzburg-airport-to-zell-am-see","Schladming":"salzburg-airport-to-schladming","Hintertux":"innsbruck-airport-to-hintertux","St Moritz":"zurich-airport-to-st-moritz","Saas-Fee":"geneva-airport-to-saas-fee","Crans-Montana":"geneva-airport-to-crans-montana","Grindelwald-Wengen":"zurich-airport-to-grindelwald","Arosa-Lenzerheide":"zurich-airport-to-arosa","Cortina d'Ampezzo":"venice-marco-polo-airport-to-cortina-dampezzo","Sestriere":"turin-airport-to-sestriere","Monterosa (Champoluc)":"turin-airport-to-champoluc","Passo Tonale":"milan-bergamo-airport-to-passo-del-tonale","Baqueira-Beret":"toulouse-airport-to-baqueira-beret","Sierra Nevada":"malaga-airport-to-monachil","Garmisch-Partenkirchen":"munich-airport-to-garmisch-partenkirchen","Hemsedal":"oslo-gardermoen-airport-to-hemsedal","Åre":"are-ostersund-airport","Kranjska Gora":"ljubljana-airport-to-kranjska-gora"};
+// Holiday Extras (via Adtraction) will supply the UK airport parking, hotel, lounge, insurance and travel money links.
+// Fill these in once approved; until then each box shows "Partner link coming".
+// Boxes without a live partner link are hidden. Set SHOW_COMING to true to show them with "Partner link coming".
+const SHOW_COMING=false;
+const HX={parking:null,hotel:null,lounge:null,insurance:null,money:null}; // e.g. parking:(dep,p,d2)=>`https://…`
 const TRAVEL_PARTNER={insurance:null,
   transfers:(r,p,d2)=>ST_PAGE[r.n]?awin("111238",`https://www.suntransfers.com/${ST_PAGE[r.n]}`):null,
   carhire:(r,p,d2)=>s22wrap("kayak",`https://www.kayak.co.uk/cars/${r.ap}/${p.d1}/${d2}`)};
@@ -1442,22 +1459,31 @@ function carNote(r){if(r.city) return "Gives you the choice of resorts each day,
   return "Useful for visiting nearby resorts or travelling at your own pace. Check snow-chain rules and resort parking first.";}
 function travelPanel(r,p,d2,apN){
   const box=(k,title,label,via)=>{const f0=TRAVEL_PARTNER[k],f=f0&&f0(r,p,d2)?f0:null;
-    return `<div class="kiti"><b>${title}</b>${f?`<a href="${f(r,p,d2)}" target="_blank" rel="noopener">${affTag}${label} ↗</a>`:`<span class="soon">Partner link coming</span>`}<span class="via">${via}</span></div>`;};
+    if(!f&&!SHOW_COMING) return ""; return `<div class="kiti"><b>${title}</b>${f?`<a href="${f(r,p,d2)}" target="_blank" rel="noopener">${affTag}${label} ↗</a>`:`<span class="soon">Partner link coming</span>`}<span class="via">${via}</span></div>`;};
   const cn=carNote(r);
   const car=cn?(()=>{const dc=dcUrl(r.ap),ky=TRAVEL_PARTNER.carhire(r,p,d2);return `<div class="kiti"><b>Car hire</b>${dc?`<a href="${dc}" target="_blank" rel="noopener">${affTag}Discover Cars at ${esc(apN)} ↗</a>`:""}<a href="${ky}" target="_blank" rel="noopener">${affTag}Compare on Kayak ↗</a><span class="via">${cn}</span></div>`;})():"";
-  return `<div class="kit"><h4>Getting there</h4><div class="kitg">
+  const depN=(DEP.find(x=>x[0]===p.dep)||[p.dep,p.dep])[1];
+  const fmtD=d=>new Date(d+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+  const hx=(k,label)=>HX[k]?`<a href="${HX[k](p.dep,p,d2)}" target="_blank" rel="noopener">${affTag}${label} ↗</a>`:"";
+  const ukLinks=hx("parking","Airport parking")+hx("hotel","Hotel the night before")+hx("lounge","Airport lounge");
+  const ukBox=!ukLinks&&!SHOW_COMING?"":`<div class="kiti"><b>UK airport</b>${ukLinks||`<span class="soon">Partner link coming</span>`}<span class="via">Parking, a hotel the night before or a lounge at ${esc(depN)}, ${fmtD(p.d1)} to ${fmtD(d2)}.</span></div>`;
+  const moneyBox=!HX.money&&!SHOW_COMING?"":`<div class="kiti"><b>Travel money</b>${hx("money","Order euros or francs")||`<span class="soon">Partner link coming</span>`}<span class="via">${r.c==="Switzerland"?"Switzerland uses Swiss francs.":r.c==="Bulgaria"?"Bulgaria uses the euro from 2026.":r.c==="Norway"?"Norway uses Norwegian kroner.":r.c==="Sweden"?"Sweden uses Swedish kronor.":"The resort uses euros."} Many places take cards, but some mountain huts are cash only.</span></div>`;
+  const sec=(h,inner)=>inner.trim()?`<div class="kit"><h4>${h}</h4><div class="kitg">${inner}</div></div>`:"";
+  return sec("Getting there",`
+    ${ukBox}
     ${car}
     ${box("transfers","Resort transfer",ST_PAGE[r.n]&&ST_PAGE[r.n].includes("-to-")?`Book ${esc(apN)} to ${esc(r.n.replace(/ \(.*\)/,""))} on Suntransfers`:`Transfers from ${esc(apN)} on Suntransfers`,`About ${r.t} min from ${esc(apN)}. Shared shuttles are cheaper; private suits groups or late flights.`)}
-  </div></div>
-  <div class="kit"><h4>Before you go</h4><div class="kitg">
+`)+sec("Before you go",`
     ${box("insurance","Winter sports insurance","Compare policies","Standard travel policies often exclude skiing and snowboarding. Check off-piste and your own board are covered.")}
-  </div></div>`;}
+    ${moneyBox}
+`);}
 function openDetail(i){
   const s=last[i]; if(!s) return; const r=s.r,p0=params(),p={...p0,dep:s.dep||p0.dep},d2=addDays(p.d1,p.nights);
   const depN=(DEP.find(x=>x[0]===p.dep)||[p.dep,p.dep])[1], apN=AIR[r.ap].n;
   const fmt=d=>new Date(d+"T12:00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
   const dr=s.direct||directRoute(p.dep,r.ap,p.d1);
-  const known=dr?`${esc(dr.airline)} flies ${p.dep}–${r.ap} direct${dr.inSeason?" on your dates":", but not on your dates (season "+dr.from.split("-").reverse().join("/")+" to "+dr.to.split("-").reverse().join("/")+")"}.`
+  const DL=directList(p.dep,r.ap);
+  const known=DL?`Direct flights ${esc((DEP.find(x=>x[0]===p.dep)||[0,p.dep])[1])} to ${esc(apN)}: ${DL.yr.length?listTxt(DL.yr)+" all year":""}${DL.yr.length&&DL.sea.length?"; ":""}${DL.sea.length?listTxt(DL.sea)+" in season":""}. Check days and times on Kayak or Skyscanner.`:dr?`${esc(dr.airline)} flies ${p.dep}–${r.ap} direct${dr.inSeason?" on your dates":", but not on your dates (season "+dr.from.split("-").reverse().join("/")+" to "+dr.to.split("-").reverse().join("/")+")"}.`
     :FLIGHT_COVERAGE?`UK flight coverage to ${esc(apN)}: ${tierTxt(s.tier).toLowerCase()}.`:"";
   const ph=w=>`<span class="ph" style="width:${w}px"></span>`;
   const rows=[0,1,2].map(()=>`<tr><td>${ph(70)}</td><td>${ph(48)}</td><td>${ph(40)}</td><td>${ph(40)}</td><td>${ph(56)}</td></tr>`).join("");
@@ -1473,16 +1499,18 @@ function openDetail(i){
         <div><dt>${r.city?"Into town":"Transfer"}</dt><dd>${r.t} min</dd></div>
         <div><dt>Ride days</dt><dd>Up to ${fmtDays(s.days)}</dd></div>
       </dl>
+      <div class="acc"><h4>Flights</h4>
+        ${known?`<p class="trline">${known}</p>`:""}
+      ${FLIGHT_TABLES?`${leg("Outbound",esc(depN),esc(apN),p.d1)}
+      ${leg("Return",esc(apN),esc(depN),d2)}
+      <p class="pend"><b>Scheduled flights arrive with live data.</b> Once the flight backend is connected, these tables list real departures with times, and whether you land in time to ride on arrival day or can ride before flying home.</p>`:""}
+        <div class="stays"><a href="${kayakFlights(r,p,d2)}" target="_blank" rel="noopener">${affTag}<span>Kayak<small>Compare flights</small></span></a><a href="https://www.skyscanner.net/transport/flights/${p.dep.toLowerCase()}/${r.ap.toLowerCase()}/${yymmdd(p.d1)}/${yymmdd(d2)}/?adultsv2=${p.pax}${p.directOnly?"&preferdirects=true":""}" target="_blank" rel="noopener"><span>Skyscanner<small>Compare flights</small></span></a><a href="${gf}" target="_blank" rel="noopener"><span>Google Flights<small>Compare flights</small></span></a></div></div>
       ${(()=>`<div class="acc"><h4>Where to stay</h4>
         <div class="stays"><a href="${bkUrl(r,p,d2,null)}" target="_blank" rel="noopener">${affTag}<span>Booking.com<small>Hotels and apartments</small></span></a><a href="${hcom(r,p,d2)}" target="_blank" rel="noopener">${affTag}<span>Hotels.com<small>Hotels</small></span></a><a href="${vrbo(r,p,d2)}" target="_blank" rel="noopener">${affTag}<span>Vrbo<small>Holiday rentals</small></span></a>${skiworld(r)?`<a href="${skiworld(r)}" target="_blank" rel="noopener">${affTag}<span>Skiworld<small>Catered chalets</small></span></a>`:""}${csc(r)?`<a href="${csc(r)}" target="_blank" rel="noopener">${affTag}<span>CateredSkiChalets<small>All-inclusive chalets</small></span></a>`:""}</div></div>`)()}
       ${travelPanel(r,p,d2,apN)}
       ${adOn?partnerBox(r,apN):""}
       ${kitPanel(r)}
-      ${known?`<p class="trline">${known}</p>`:""}
-      ${FLIGHT_TABLES?`${leg("Outbound",esc(depN),esc(apN),p.d1)}
-      ${leg("Return",esc(apN),esc(depN),d2)}
-      <p class="pend"><b>Scheduled flights arrive with live data.</b> Once the flight backend is connected, these tables list real departures with times, and whether you land in time to ride on arrival day or can ride before flying home.</p>`:""}
-      <div class="links"><span class="lbl">Flights</span><a href="${gf}" target="_blank" rel="noopener">Google Flights</a><a href="https://www.skyscanner.net/transport/flights/${p.dep.toLowerCase()}/${r.ap.toLowerCase()}/${yymmdd(p.d1)}/${yymmdd(d2)}/?adultsv2=${p.pax}${p.directOnly?"&preferdirects=true":""}" target="_blank" rel="noopener">Skyscanner</a></div>
+      <p class="fb">Is something missing or have you spotted a mistake? <a href="mailto:admin@seasonwisego.com?subject=${encodeURIComponent("Piste Picker feedback: "+r.n)}">Please tell us.</a></p>
     </div>`;
   dlg.querySelector("[data-close]").addEventListener("click",()=>dlg.close());
   dlg.showModal();
