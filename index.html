@@ -997,7 +997,9 @@ function reasons(s,p){
   }
   if(s.bdiff>0) con.push("Pricier than your budget");
   const dm=d=>{const [m,dd]=d.split("-");return `${+dd} ${MONTHS[+m-1]}`};
-  if(s.direct&&s.direct.inSeason) pro.unshift(`Direct ${s.direct.airline} flights from ${p.dep} (${dm(s.direct.from)}–${dm(s.direct.to)})`);
+  if(s.direct&&s.direct.inSeason){const D=s.direct, L=D.list;
+    const when=D.from?`${dm(D.from)}–${dm(D.to)}`:L?(L.sea.length?(L.yr.length?`${L.yr.join(" and ")} all year, ${L.sea.join(" and ")} in winter`:"winter season"):"all year"):"";
+    pro.unshift(`Direct ${D.airline} flights from ${p.dep}${when?` (${when})`:""}`);}
   else if(s.direct) con.push(`${s.direct.airline} ${p.dep} route only runs ${dm(s.direct.from)}–${dm(s.direct.to)}`);
   else if(p.directOnly && !s.directLikely) con.unshift(`No confirmed direct flights from ${p.dep} to ${AIR[r.ap].n}`);
   else if(FLIGHT_COVERAGE && !s.london && s.tier<=2) con.push(`Fewer UK routes to ${AIR[r.ap].n}; check from your airport`);
