@@ -589,14 +589,14 @@ const AIR = {
 };
 const DEP = [["LGW","London Gatwick"],["LHR","London Heathrow"],["STN","London Stansted"],["LTN","London Luton"],
   ["MAN","Manchester"],["BHX","Birmingham"],["BRS","Bristol"],["EMA","East Midlands"],["LBA","Leeds Bradford"],
-  ["NCL","Newcastle"],["EDI","Edinburgh"],["GLA","Glasgow"],["BFS","Belfast"],
+  ["NCL","Newcastle"],["EDI","Edinburgh"],["GLA","Glasgow"],["BFS","Belfast International"],["DUB","Dublin"],["ORK","Cork"],["SNN","Shannon"],
   ["BOH","Bournemouth"],["SOU","Southampton"],["EXT","Exeter"],["CWL","Cardiff"],["LPL","Liverpool"],["ABZ","Aberdeen"]].sort((a,b)=>a[1].localeCompare(b[1]));
 const depName=c=>(DEP.find(x=>x[0]===c)||[c,c])[1];
 // Confirmed direct winter routes from regional airports (checked Oct 2026): [airline, from, to] as MM-DD
 const ROUTES = {BOH:{GVA:["easyJet","12-05","03-21"]}};
-// Direct routes from the busiest UK airports, [airlines all year, airlines seasonal]. Compiled 5 Nov 2026 from the
+// Direct routes from UK and Irish airports, [airlines all year, airlines seasonal]. Compiled 5 Nov 2026 from the
 // Wikipedia destination lists of both the UK and the arrival airports. Airlines change routes; refresh each season.
-const DIRECT={"LGW":{"GVA":[["easyJet"],["British Airways","Jet2","Swiss","TUI"]],"ZRH":[["Swiss","easyJet"],[]],"INN":[["easyJet"],["British Airways","TUI"]],"SZG":[["British Airways"],["Jet2","TUI","easyJet"]],"GNB":[[],["British Airways","Jet2","Wizz Air","easyJet"]],"TRN":[["British Airways","easyJet"],["Jet2","TUI"]],"CMF":[[],["British Airways","Jet2"]]},"LHR":{"GVA":[["British Airways","Swiss"],[]],"ZRH":[["British Airways","Swiss"],[]],"INN":[[],["British Airways"]],"SZG":[[],["British Airways","Lufthansa"]]},"STN":{"GVA":[[],["British Airways","Jet2","easyJet"]],"ZRH":[[],["easyJet"]],"INN":[[],["Jet2","TUI"]],"SZG":[["Ryanair"],["Jet2"]],"GNB":[[],["Jet2","Ryanair"]],"TRN":[["Ryanair"],["TUI"]],"CMF":[[],["British Airways","Jet2","TUI"]]},"LTN":{"GVA":[["easyJet"],["Jet2"]],"ZRH":[["easyJet"],[]],"INN":[[],["easyJet"]],"SZG":[[],["easyJet"]],"GNB":[[],["Ryanair","Wizz Air","easyJet"]],"TRN":[["Wizz Air"],["Ryanair","easyJet"]]},"MAN":{"GVA":[["easyJet"],["Jet2","TUI"]],"ZRH":[["Swiss","easyJet"],[]],"INN":[[],["Jet2","TUI","easyJet"]],"SZG":[[],["Jet2","Ryanair","TUI"]],"GNB":[[],["Jet2","Ryanair","easyJet"]],"TRN":[[],["Jet2","Ryanair","TUI","easyJet"]],"CMF":[[],["Jet2","TUI"]]},"BRS":{"GVA":[["easyJet"],["Jet2","TUI"]],"ZRH":[["easyJet"],["Edelweiss"]],"INN":[[],["Jet2","TUI","easyJet"]],"SZG":[[],["TUI","easyJet"]],"GNB":[[],["Ryanair","easyJet"]],"TRN":[[],["Ryanair","TUI","easyJet"]],"CMF":[[],["Jet2","TUI"]]},"EDI":{"GVA":[["easyJet"],["Jet2"]],"ZRH":[["Edelweiss","Swiss","easyJet"],[]],"INN":[[],["Jet2","TUI","easyJet"]],"SZG":[[],["Jet2"]],"GNB":[[],["easyJet"]],"TRN":[[],["Jet2"]],"CMF":[[],["Jet2","TUI"]]}};
+const DIRECT={"LGW":{"GVA":[["easyJet"],["British Airways","Jet2","Swiss","TUI"]],"ZRH":[["Swiss","easyJet"],[]],"INN":[["easyJet"],["British Airways","TUI"]],"SZG":[["British Airways"],["Jet2","TUI","easyJet"]],"GNB":[[],["British Airways","Jet2","Wizz Air","easyJet"]],"TRN":[["British Airways","easyJet"],["Jet2","TUI"]],"CMF":[[],["British Airways","Jet2"]]},"LHR":{"GVA":[["British Airways","Swiss"],[]],"ZRH":[["British Airways","Swiss"],[]],"INN":[[],["British Airways"]],"SZG":[[],["British Airways","Lufthansa"]]},"STN":{"GVA":[[],["British Airways","Jet2","easyJet"]],"ZRH":[[],["easyJet"]],"INN":[[],["Jet2","TUI"]],"SZG":[["Ryanair"],["Jet2"]],"GNB":[[],["Jet2","Ryanair"]],"TRN":[["Ryanair"],["TUI"]],"CMF":[[],["British Airways","Jet2","TUI"]]},"LTN":{"GVA":[["easyJet"],["Jet2"]],"ZRH":[["easyJet"],[]],"INN":[[],["easyJet"]],"SZG":[[],["easyJet"]],"GNB":[[],["Ryanair","Wizz Air","easyJet"]],"TRN":[["Wizz Air"],["Ryanair","easyJet"]]},"MAN":{"GVA":[["easyJet"],["Jet2","TUI"]],"ZRH":[["Swiss","easyJet"],[]],"INN":[[],["Jet2","TUI","easyJet"]],"SZG":[[],["Jet2","Ryanair","TUI"]],"GNB":[[],["Jet2","Ryanair","easyJet"]],"TRN":[[],["Jet2","Ryanair","TUI","easyJet"]],"CMF":[[],["Jet2","TUI"]]},"BRS":{"GVA":[["easyJet"],["Jet2","TUI"]],"ZRH":[["easyJet"],["Edelweiss"]],"INN":[[],["Jet2","TUI","easyJet"]],"SZG":[[],["TUI","easyJet"]],"GNB":[[],["Ryanair","easyJet"]],"TRN":[[],["Ryanair","TUI","easyJet"]],"CMF":[[],["Jet2","TUI"]]},"EDI":{"GVA":[["easyJet"],["Jet2"]],"ZRH":[["Edelweiss","Swiss","easyJet"],[]],"INN":[[],["Jet2","TUI","easyJet"]],"SZG":[[],["Jet2"]],"GNB":[[],["easyJet"]],"TRN":[[],["Jet2"]],"CMF":[[],["Jet2","TUI"]]},"BHX":{"GVA":[["easyJet"],["Jet2"]],"ZRH":[["Swiss"],[]],"INN":[[],["Jet2","TUI","easyJet"]],"SZG":[[],["Jet2","Ryanair","TUI"]],"GNB":[[],["Jet2","Ryanair","easyJet"]],"TRN":[[],["Jet2","Ryanair","TUI"]],"CMF":[[],["Jet2","TUI"]]},"GLA":{"GVA":[[],["Jet2","easyJet"]],"ZRH":[[],["Edelweiss"]],"SZG":[[],["TUI"]],"TRN":[[],["TUI"]],"CMF":[[],["TUI"]]},"NCL":{"GVA":[[],["Jet2","TUI","easyJet"]],"INN":[[],["TUI"]],"SZG":[[],["TUI"]],"GNB":[[],["Jet2"]],"TRN":[[],["TUI"]]},"LBA":{"GVA":[[],["Jet2","easyJet"]],"SZG":[[],["Jet2"]],"CMF":[[],["Jet2"]]},"EMA":{"GVA":[[],["Jet2"]],"TRN":[[],["TUI"]]},"LPL":{"GVA":[[],["easyJet"]],"SZG":[[],["easyJet"]],"TRN":[[],["Ryanair"]]},"BFS":{"GVA":[[],["easyJet"]],"SZG":[[],["Jet2","TUI"]],"TRN":[[],["Ryanair","TUI"]]},"ABZ":{"GVA":[[],["easyJet"]]},"SOU":{"GVA":[[],["easyJet"]]},"BOH":{"GVA":[[],["easyJet"]],"INN":[[],["TUI"]]},"EXT":{"CMF":[[],["TUI"]]},"CWL":{"SZG":[[],["TUI"]],"TRN":[[],["TUI"]],"CMF":[[],["TUI"]]},"DUB":{"GVA":[["Aer Lingus"],["Swiss","TUI"]],"ZRH":[["Aer Lingus","Swiss"],[]],"INN":[[],["TUI"]],"SZG":[[],["Aer Lingus","Ryanair","TUI"]],"GNB":[[],["Ryanair"]],"TRN":[["Ryanair"],["Aer Lingus","TUI"]]},"ORK":{"GVA":[[],["Aer Lingus","Swiss"]],"ZRH":[[],["Edelweiss"]],"SZG":[[],["Aer Lingus"]]},"SNN":{"TRN":[[],["Ryanair"]]}};
 function directList(dep,ap){const x=DIRECT[dep]&&DIRECT[dep][ap];return x&&(x[0].length||x[1].length)?{yr:x[0],sea:x[1]}:null;}
 const listTxt=a=>a.length<=1?a.join(""):a.slice(0,-1).join(", ")+" and "+a.at(-1);
 function directRoute(dep,ap,d1){const r=ROUTES[dep]&&ROUTES[dep][ap];
@@ -605,6 +605,7 @@ function directRoute(dep,ap,d1){const r=ROUTES[dep]&&ROUTES[dep][ap];
   const md=(d1||"").slice(5); const inSeason = r[1]<=r[2] ? (md>=r[1]&&md<=r[2]) : (md>=r[1]||md<=r[2]);
   return {airline:r[0],inSeason,from:r[1],to:r[2]};}
 const LONDON = new Set(["LGW","LHR","STN","LTN"]);
+const IE = new Set(["DUB","ORK","SNN"]); // Irish departures: no Channel Tunnel/Eurostar options or UK school-holiday checks
 
 // pw powder/off-piste, pi groomed pistes, pk park, st steeps, tr trees, bg beginner terrain,
 // bd board-friendliness (few flats/drags), av après 1 quiet..5 party, $ cost 1..3, g glacier
@@ -1037,7 +1038,7 @@ function decodeTrip(txt){const m=String(txt||"").match(/PP1-([A-Za-z0-9_-]+)/); 
 // Field order and lists are frozen: only ever APPEND to these lists, or old codes break.
 const SC = {
   A:"0123456789ABCDEFGHJKMNPQRSTVWXYZ",
-  DEPS:["ABZ","BFS","BHX","BOH","BRS","CWL","EMA","EDI","EXT","GLA","LBA","LPL","LGW","LHR","LTN","STN","MAN","NCL","SOU"],
+  DEPS:["ABZ","BFS","BHX","BOH","BRS","CWL","EMA","EDI","EXT","GLA","LBA","LPL","LGW","LHR","LTN","STN","MAN","NCL","SOU","DUB","ORK","SNN"],
   NIGHTS:["2","3","4","5","6","7","8","9","10","14"], COUNTS:["3","5","8","10","15"], PPS:["0","400","600","800","1000","1500"],
   APRES:["1.5","3","5"], SORTS:["match","airport","country"],
   CTRY:["c-fr","c-at","c-ch","c-it","c-ad","c-bg","c-es","c-de","c-no","c-se","c-si"],
@@ -1130,11 +1131,11 @@ function params(){
   const w={}; WEIGHTS.forEach(([k])=>{const v=+document.querySelector(`input[name=w-${k}]:checked`).value; if(v) w[k]=v;});
   const d1=$("d1").value||"2027-01-14";
   return {dep:depSel.value,pax:+$("pax").value||2,d1,nights:+$("nights").value,maxT:+$("maxT").value,
-    month:new Date(d1+"T12:00:00").getMonth(),w,board:$("board").checked,hire:$("hire").checked,avoidHols:$("avoidHols").checked,
+    month:new Date(d1+"T12:00:00").getMonth(),w,board:$("board").checked,hire:$("hire").checked,avoidHols:$("avoidHols").checked&&!IE.has(depSel.value),
     abil:{beg:$("ab-beg").checked,int:$("ab-int").checked,adv:$("ab-adv").checked,exp:$("ab-exp").checked},
     apres:+$("apres").value,budget:(()=>{const m=+$("maxPP").value||0;return m===0?3:m<=500?1:m<=900?2:3;})(),maxPP:+$("maxPP").value||0,count:+$("count").value||5,
     countries:[...document.querySelectorAll("#ctry input:checked")].map(x=>x.value),cmode:$("cmode").value,
-    directOnly:$("direct").checked,train:$("train").checked,drive:$("drive").checked,
+    directOnly:$("direct").checked,train:$("train").checked&&!IE.has(depSel.value),drive:$("drive").checked&&!IE.has(depSel.value),
     resorts:chosenResorts(),rmode:$("rmode").value,
     deps:[depSel.value,...chosenDeps().filter(d=>d!==depSel.value)]};
 }
@@ -1263,7 +1264,7 @@ function render(opt){
   const {list,relaxed,ronly}=rank(p,p.count); last=list;
   const d2=addDays(p.d1,p.nights);
   $("summary").textContent = ronly ? `Comparing your ${list.length} chosen resort${list.length===1?"":"s"} for ${p.nights} nights from ${depList(p.deps)}, ${new Date(p.d1+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}` : `${list.length} ${list.length===1?"pick":"picks"}${list.length<p.count&&!relaxed?` (only ${list.length} within your transfer limit)`:""} for ${p.nights} nights from ${depList(p.deps)}, ${new Date(p.d1+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}${p.maxPP?`, under £${p.maxPP.toLocaleString("en-GB")} per person`:""}`+(relaxed?" (transfer limit relaxed: too few resorts within it)":"");
-  const ukh=ukHols(p.d1,p.nights), hw=$("holwarn");
+  const ukh=IE.has(p.dep)?[]:ukHols(p.d1,p.nights), hw=$("holwarn");
   if(ukh.length){
     const groups=[...new Set(ukh.map(h=>h.g))].map(g=>`${UKH[g]}: ${ukh.filter(h=>h.g===g).map(h=>esc(h.l)).join(", ")}`);
     const core=ukh.some(h=>h.core), alt=nearestClear(p.d1,p.nights);
