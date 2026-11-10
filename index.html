@@ -1448,7 +1448,8 @@ const ST_PAGE={"Val Thorens":"geneva-airport-to-val-thorens","Méribel":"geneva-
 // Boxes without a live partner link are hidden. Set SHOW_COMING to true to show them with "Partner link coming".
 const SHOW_COMING=false;
 const HX={parking:null,hotel:null,lounge:null,insurance:null,money:null}; // e.g. parking:(dep,p,d2)=>`https://…`
-const TRAVEL_PARTNER={insurance:null,
+// Coverwise (Awin 3622, approved 10 Nov 2026): UK residents only, so not offered for Irish departures.
+const TRAVEL_PARTNER={insurance:(r,p,d2)=>IE.has(p.dep)?null:awin("3622","https://www.coverwise.co.uk/travel-insurance/ski-insurance.aspx"),
   transfers:(r,p,d2)=>!r.viaAlt&&ST_PAGE[r.n]?awin("111238",`https://www.suntransfers.com/${ST_PAGE[r.n]}`):null,
   carhire:(r,p,d2)=>s22wrap("kayak",`https://www.kayak.co.uk/cars/${r.ap}/${p.d1}/${d2}`)};
 // Discover Cars airport pages (checked 25 Oct 2026), with the SeasonWiseGo affiliate ID.
@@ -1480,7 +1481,7 @@ function travelPanel(r,p,d2,apN){
     ${car}
     ${box("transfers","Resort transfer",ST_PAGE[r.n]&&ST_PAGE[r.n].includes("-to-")?`Book ${esc(apN)} to ${esc(r.n.replace(/ \(.*\)/,""))} on Suntransfers`:`Transfers from ${esc(apN)} on Suntransfers`,`About ${r.t} min from ${esc(apN)}. Shared shuttles are cheaper; private suits groups or late flights.`)}
 `)+sec("Before you go",`
-    ${box("insurance","Winter sports insurance","Compare policies","Standard travel policies often exclude skiing and snowboarding. Check off-piste and your own board are covered.")}
+    ${box("insurance","Winter sports insurance","Get a quote on Coverwise","Standard travel policies often exclude skiing and snowboarding. Check the policy covers what you'll do, such as off-piste and your own board. We don't give insurance advice.")}
     ${moneyBox}
 `);}
 function openDetail(i){
