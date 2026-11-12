@@ -656,6 +656,14 @@ function flyAlt(deps,r,d1,d2){const base=R.find(x=>x.n===r.n)||r, aps=[base.ap,.
   const known=deps.every(d=>aps.every(ap=>!directList(d,ap)||flyOK(d,ap,d1)===false||flyOK(d,ap,d2)===false));
   return `<div class="flyalt"><p>${known?"Your airports don't fly here on both your dates.":"Your airports aren't confirmed for both your dates."} ${out.length>1?"These nearby airports are":"This nearby airport is"}:</p>
     ${out.map(([n,ap])=>`<p class="fa"><span>✅ <b>${depName(n)}</b> → ${ap} flies both days</span><button type="button" class="btn sm" data-adddep="${n}">Add ${depName(n)} to my search</button></p>`).join("")}</div>`;}
+// one-line flying-day status for the result card's "Fly from" box
+function flyBadge(dep,ap,d1,n){if(!FLYDAYS[dep+"-"+ap]||!d1) return "";
+  const x=new Date(d1+"T12:00:00"); x.setDate(x.getDate()+n); const d2=x.toISOString().slice(0,10);
+  const o=flyOK(dep,ap,d1), b=flyOK(dep,ap,d2), oth=flyOthers(dep,ap);
+  if(o===true&&b===true) return `<span class="fb ok">✅ flies on your dates</span>`;
+  const miss=o!==true&&b!==true?"your dates":o!==true?"your out date":"your back date";
+  return oth.length?`<span class="fb warn">⚠️ No easyJet on ${miss} · check ${listTxt(oth)}</span>`
+    :`<span class="fb warn">⚠️ Doesn't fly on ${miss}</span>`;}
 function directList(dep,ap){const x=DIRECT[dep]&&DIRECT[dep][ap];return x&&(x[0].length||x[1].length)?{yr:x[0],sea:x[1]}:null;}
 const listTxt=a=>a.length<=1?a.join(""):a.slice(0,-1).join(", ")+" and "+a.at(-1);
 function directRoute(dep,ap,d1){const r=ROUTES[dep]&&ROUTES[dep][ap];
@@ -1368,7 +1376,7 @@ function render(opt){
           <div><dt>Altitude</dt><dd>${r.base}–${r.top} m</dd></div>
           <div><dt>Pistes</dt><dd>${r.km} km</dd></div>
           <div><dt>Après</dt><dd>${APRES[r.av]}</dd></div>
-          <div><dt>Fly from</dt><dd>${esc(depName(p.dep))}<span class="sub">${s.direct&&s.direct.inSeason?"direct with "+esc(s.direct.airline):FLIGHT_COVERAGE?(s.flyDirect?"direct flights likely":tierTxt(s.tier).toLowerCase()+" UK coverage, may need a change"):"to "+esc(AIR[r.ap].n)}</span></dd></div>
+          <div><dt>Fly from</dt><dd>${esc(depName(s.dep||p.dep))}<span class="sub">${s.direct&&s.direct.inSeason?"direct with "+esc(s.direct.airline):FLIGHT_COVERAGE?(s.flyDirect?"direct flights likely":tierTxt(s.tier).toLowerCase()+" UK coverage, may need a change"):"to "+esc(AIR[r.ap].n)}${flyBadge(s.dep||p.dep,r.ap,p.d1,p.nights)}</span></dd></div>
         </dl>
         ${snowStrip(r,p)}
         <div class="terrain">
