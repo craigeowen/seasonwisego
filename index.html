@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
+.sub .fb{display:block;margin-top:2px}.sub .fb.warn{color:var(--accent)}.flyalt{margin:8px 0;padding:8px 10px;border-left:3px solid var(--accent);background:color-mix(in srgb,var(--accent) 7%,transparent)}.flyalt p{margin:4px 0}.flyalt .fa{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:space-between}.flycmp table{width:100%;border-collapse:collapse;font-size:.92rem;border:1px solid color-mix(in srgb,currentColor 18%,transparent)}.flycmp th,.flycmp td{text-align:left;padding:10px 12px;border-bottom:1px solid color-mix(in srgb,currentColor 18%,transparent);vertical-align:middle}.flycmp thead th{background:color-mix(in srgb,currentColor 6%,transparent);vertical-align:bottom}.flycmp th small{display:block;font-weight:400;font-size:.85em;white-space:nowrap}.flycmp th:not(:first-child),.flycmp td:not(:first-child){text-align:center;width:24%;border-left:1px solid color-mix(in srgb,currentColor 18%,transparent)}.flycmp tbody tr:nth-child(even) td{background:color-mix(in srgb,currentColor 3%,transparent)}.flycmp td small{color:var(--muted,#666)}.flycmp .fch{font-weight:700;margin:6px 0 4px}.flycmp .fdq{color:var(--muted,#666);font-size:.85em}.flycmp .via{font-size:.8rem;color:var(--muted,#666)}.flydays ul{margin:.4em 0 .2em;padding-left:1.1em}.flydays li{margin:.25em 0;line-height:1.4}.flydays .via a{margin-left:.4em}
 /* Layout: trail-map utility — form panel left (sticky on desktop), ranked resort cards right; stacks on phones. */
 :root{
   --sky:#E3ECF5; --r1:#C9D7E6; --r2:#9FB4CB; --r3:#5F7792; --cap:#FFFFFF;
@@ -621,6 +622,7 @@ function flyDays(dep,ap,d1,d2){const R=FLYDAYS[dep+"-"+ap]; if(!R) return "";
   return `<div class="flydays"><ul>${rows}</ul><p class="via">Checked ${FLYDAYS_CHECKED} on the airline's site; days can change. ${links}</p></div>`;}
 // flying days on a specific date: true / false, or null when we have no day-level data for the route
 const listOr=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+" or "+a[a.length-1];
+const apShort=ap=>{const n=(AIR[ap]&&AIR[ap].n)||ap; return n.replace(/\s*\(.*\)/,"").replace("Åre Östersund","Östersund");};
 const fdYmd=d=>d.slice(2).replace(/-/g,"");
 // union of flying days across the airlines we have day data for on this route ("all" when any flies daily)
 function fdSet(R){const set=new Set(); for(const v of Object.values(R)){if(v==="daily") return "all"; if(v!=="none") v.split(" ").forEach(x=>set.add(x));} return set;}
@@ -639,10 +641,10 @@ function flyCompare(deps,r,d1,d2){const base=R.find(x=>x.n===r.n)||r, aps=[base.
     const oth=flyOthers(d,ap), hasEJ=!!FLYDAYS[d+"-"+ap], known=hasEJ?listOr(Object.keys(FLYDAYS[d+"-"+ap])):"";
     const cell=ok=>ok===true?`✅`:hasEJ?`⚠️`:`<span class="fdq">–</span>`;
     const rank=o===true&&b===true?0:(o===true||b===true)?1:o===null?2:3;
-    rows.push({rank,h:`<tr><td><b>${depName(d)}</b> → ${ap}${hasEJ?`<br><small>${known.replace(/, | or /g,", ")}</small>`:""}</td><td>${cell(o)}</td><td>${cell(b)}</td></tr>`});}
+    rows.push({rank,h:`<tr><td><b>${depName(d)}</b> → ${apShort(ap)}${hasEJ?`<br><small>${known.replace(/, | or /g,", ")}</small>`:""}</td><td>${cell(o)}</td><td>${cell(b)}</td></tr>`});}
   if(rows.length<2) return "";
   rows.sort((a,b)=>a.rank-b.rank);
-  return `<div class="flycmp"><p class="fch">Your airports compared</p><div class="tscroll"><table><thead><tr><th>From</th><th>Out ${f(d1)}</th><th>Back ${f(d2)}</th></tr></thead><tbody>${rows.map(x=>x.h).join("")}</tbody></table></div><p class="via">✅ flies that day · ⚠️ not that day · Checked ${FLYDAYS_CHECKED}.</p></div>`;}
+  return `<div class="flycmp"><p class="fch">Your airports compared</p><div class="tscroll"><table><thead><tr><th>From</th><th>Out<small>${f(d1)}</small></th><th>Back<small>${f(d2)}</small></th></tr></thead><tbody>${rows.map(x=>x.h).join("")}</tbody></table></div><p class="via">✅ flies that day · ⚠️ not that day · Checked ${FLYDAYS_CHECKED}.</p></div>`;}
 // nearby UK and Irish airports, closest first, for "try this airport instead" suggestions
 const NEAR={BRS:["CWL","EXT","BHX","SOU","BOH","LHR","LGW"],CWL:["BRS","EXT","BHX"],EXT:["BRS","BOH","SOU","CWL"],BOH:["SOU","BRS","EXT","LGW","LHR"],
   SOU:["BOH","LHR","LGW","BRS"],LGW:["LHR","LTN","STN","SOU"],LHR:["LGW","LTN","STN","SOU"],LTN:["STN","LHR","LGW","BHX","EMA"],STN:["LTN","LHR","LGW"],
@@ -658,7 +660,7 @@ function flyAlt(deps,r,d1,d2){const base=R.find(x=>x.n===r.n)||r, aps=[base.ap,.
   if(!out.length) return "";
   const known=deps.every(d=>aps.every(ap=>!directList(d,ap)||flyOK(d,ap,d1)===false||flyOK(d,ap,d2)===false));
   return `<div class="flyalt"><p>${known?"Your airports don't fly here on both your dates.":"Your airports aren't confirmed for both your dates."} ${out.length>1?"These nearby airports are":"This nearby airport is"}:</p>
-    ${out.map(([n,ap])=>`<p class="fa"><span>✅ <b>${depName(n)}</b> → ${ap} flies both days</span><button type="button" class="btn sm" data-adddep="${n}">Add ${depName(n)} to my search</button></p>`).join("")}</div>`;}
+    ${out.map(([n,ap])=>`<p class="fa"><span>✅ <b>${depName(n)}</b> → ${apShort(ap)} flies both days</span><button type="button" class="btn sm" data-adddep="${n}">Add ${depName(n)} to my search</button></p>`).join("")}</div>`;}
 // one-line flying-day status for the result card's "Fly from" box
 function flyBadge(dep,ap,d1,n){if(!FLYDAYS[dep+"-"+ap]||!d1) return "";
   const x=new Date(d1+"T12:00:00"); x.setDate(x.getDate()+n); const d2=x.toISOString().slice(0,10);
