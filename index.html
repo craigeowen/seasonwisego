@@ -619,7 +619,7 @@ function flyDays(dep,ap,d1,d2){const R=FLYDAYS[dep+"-"+ap]; if(!R) return "";
     const chk=(lbl,d)=>set.has(ymd(d))?`✅ ${lbl} ${f(d)}`:`⚠️ no flight on ${f(d)}${near(d)?`, nearest ${near(d)}`:""}`;
     return `<li><b>${al}</b> · usually ${days} · ${f(iso(ds[0]))} to ${f(iso(ds[ds.length-1]))}<br>${chk("out",d1)} · ${chk("back",d2)}</li>`;}).join("");
   const links=Object.keys(R).filter(al=>AIRLINE_URL[al]&&AIRLINE_URL[al](dep,ap)).map(al=>`<a href="${AIRLINE_URL[al](dep,ap)}" target="_blank" rel="noopener">${al} timetable ↗</a>`).join(" ");
-  return `<div class="flydays"><ul>${rows}</ul><p class="via">Checked ${FLYDAYS_CHECKED} on the airline's site; days can change. ${links}</p></div>`;}
+  return `<div class="flydays"><ul>${rows}</ul><p class="via">Checked ${FLYDAYS_CHECKED} on the airline's site; days can change.</p></div>`;}
 // flying days on a specific date: true / false, or null when we have no day-level data for the route
 const listOr=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+" or "+a[a.length-1];
 const apShort=ap=>{const n=(AIR[ap]&&AIR[ap].n)||ap; return n.replace(/\s*\(.*\)/,"").replace("Åre Östersund","Östersund");};
@@ -641,10 +641,10 @@ function flyCompare(deps,r,d1,d2){const base=R.find(x=>x.n===r.n)||r, aps=[base.
     const oth=flyOthers(d,ap), hasEJ=!!FLYDAYS[d+"-"+ap], known=hasEJ?listOr(Object.keys(FLYDAYS[d+"-"+ap])):"";
     const cell=ok=>ok===true?`✅`:hasEJ?`⚠️`:`<span class="fdq">–</span>`;
     const rank=o===true&&b===true?0:(o===true||b===true)?1:o===null?2:3;
-    rows.push({rank,h:`<tr><td><b>${depName(d)}</b> → ${apShort(ap)}${hasEJ?`<br><small>${known.replace(/, | or /g,", ")}</small>`:""}</td><td>${cell(o)}</td><td>${cell(b)}</td></tr>`});}
-  if(rows.length<2) return "";
+    rows.push({rank,data:hasEJ,h:`<tr><td><b>${depName(d)}</b> → ${apShort(ap)}${hasEJ?`<br><small>${known.replace(/, | or /g,", ")}</small>`:""}</td><td>${cell(o)}</td><td>${cell(b)}</td></tr>`});}
+  if(!rows.some(x=>x.data)) return "";
   rows.sort((a,b)=>a.rank-b.rank);
-  return `<div class="flycmp"><p class="fch">Your airports compared</p><div class="tscroll"><table><thead><tr><th>From</th><th>Out<small>${f(d1)}</small></th><th>Back<small>${f(d2)}</small></th></tr></thead><tbody>${rows.map(x=>x.h).join("")}</tbody></table></div><p class="via">✅ flies that day · ⚠️ not that day · Checked ${FLYDAYS_CHECKED}.</p></div>`;}
+  return `<div class="flycmp"><p class="fch">Flying days</p><div class="tscroll"><table><thead><tr><th>From</th><th>Out<small>${f(d1)}</small></th><th>Back<small>${f(d2)}</small></th></tr></thead><tbody>${rows.map(x=>x.h).join("")}</tbody></table></div><p class="via">✅ flies that day · ⚠️ not that day · Checked ${FLYDAYS_CHECKED}.</p></div>`;}
 // nearby UK and Irish airports, closest first, for "try this airport instead" suggestions
 const NEAR={BRS:["CWL","EXT","BHX","SOU","BOH","LHR","LGW"],CWL:["BRS","EXT","BHX"],EXT:["BRS","BOH","SOU","CWL"],BOH:["SOU","BRS","EXT","LGW","LHR"],
   SOU:["BOH","LHR","LGW","BRS"],LGW:["LHR","LTN","STN","SOU"],LHR:["LGW","LTN","STN","SOU"],LTN:["STN","LHR","LGW","BHX","EMA"],STN:["LTN","LHR","LGW"],
