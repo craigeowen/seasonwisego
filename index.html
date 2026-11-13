@@ -637,13 +637,12 @@ function flyCompare(deps,r,d1,d2){const base=R.find(x=>x.n===r.n)||r, aps=[base.
   const rows=[]; for(const d of deps) for(const ap of aps){const L=directList(d,ap); if(!L) continue;
     const o=flyOK(d,ap,d1), b=flyOK(d,ap,d2), al=listTxt([...L.yr,...L.sea]);
     const oth=flyOthers(d,ap), hasEJ=!!FLYDAYS[d+"-"+ap], known=hasEJ?listOr(Object.keys(FLYDAYS[d+"-"+ap])):"";
-    const cell=(ok,dt)=>ok===true?`✅`:ok===false?`⚠️${flyNear(d,ap,dt)?` <small>nearest ${flyNear(d,ap,dt)}</small>`:` <small>nothing within 4 days</small>`}`
-      :hasEJ?`<span class="fdq">no ${known}${flyNear(d,ap,dt)?` (nearest ${flyNear(d,ap,dt)})`:""}; check ${listTxt(oth)}</span>`:`<span class="fdq">check days</span>`;
+    const cell=ok=>ok===true?`✅`:hasEJ?`⚠️`:`<span class="fdq">–</span>`;
     const rank=o===true&&b===true?0:(o===true||b===true)?1:o===null?2:3;
-    rows.push({rank,h:`<tr><td><b>${depName(d)}</b> → ${ap}<br><small>${al}</small></td><td>${cell(o,d1)}</td><td>${cell(b,d2)}</td></tr>`});}
+    rows.push({rank,h:`<tr><td><b>${depName(d)}</b> → ${ap}${hasEJ?`<br><small>${known.replace(/, | or /g,", ")}</small>`:""}</td><td>${cell(o)}</td><td>${cell(b)}</td></tr>`});}
   if(rows.length<2) return "";
   rows.sort((a,b)=>a.rank-b.rank);
-  return `<div class="flycmp"><p class="fch">Your airports compared</p><div class="tscroll"><table><thead><tr><th>From</th><th>Out ${f(d1)}</th><th>Back ${f(d2)}</th></tr></thead><tbody>${rows.map(x=>x.h).join("")}</tbody></table></div><p class="via">✅ flies that day · ⚠️ not that day · Day-by-day data covers easyJet, Ryanair and Jet2 so far; for other airlines, check their timetable. Checked ${FLYDAYS_CHECKED}.</p></div>`;}
+  return `<div class="flycmp"><p class="fch">Your airports compared</p><div class="tscroll"><table><thead><tr><th>From</th><th>Out ${f(d1)}</th><th>Back ${f(d2)}</th></tr></thead><tbody>${rows.map(x=>x.h).join("")}</tbody></table></div><p class="via">✅ flies that day · ⚠️ not that day · Checked ${FLYDAYS_CHECKED}.</p></div>`;}
 // nearby UK and Irish airports, closest first, for "try this airport instead" suggestions
 const NEAR={BRS:["CWL","EXT","BHX","SOU","BOH","LHR","LGW"],CWL:["BRS","EXT","BHX"],EXT:["BRS","BOH","SOU","CWL"],BOH:["SOU","BRS","EXT","LGW","LHR"],
   SOU:["BOH","LHR","LGW","BRS"],LGW:["LHR","LTN","STN","SOU"],LHR:["LGW","LTN","STN","SOU"],LTN:["STN","LHR","LGW","BHX","EMA"],STN:["LTN","LHR","LGW"],
