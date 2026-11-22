@@ -298,6 +298,8 @@ body.cbpad{padding-bottom:140px}
 .notlist li:first-child{border-top:0;padding-top:0}
 .notlist .fx{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .notlist .muted{color:var(--muted)}
+.whyhow{margin:8px 0 0;font-size:.8rem}
+.mini .strong{color:var(--good,var(--ink));font-weight:600}
 .holwarn .holalt{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
 .btn.sm{padding:3px 9px;font-size:.78rem}
 .stats dd .sub{display:block;font-family:var(--f-body);font-size:.7rem;color:var(--muted);line-height:1.3}
@@ -562,7 +564,7 @@ a.acci .go{font-size:.72rem;color:var(--accent);font-weight:600}
           </div>
         </div>
       </details>
-      <p class="affnote"><span class="adtag">Ad</span>marks links that may earn us a commission if you book, at no extra cost to you. It never changes the ranking. <a href="https://seasonwisego.com/affiliate-disclosure" target="_blank" rel="noopener">How we make money</a></p>
+      <p class="affnote"><span class="adtag">Ad</span>marks links that may earn us a commission if you book, at no extra cost to you. It never changes the ranking. <a href="https://seasonwisego.com/how-we-rank" target="_blank" rel="noopener">How we rank</a> · <a href="https://seasonwisego.com/affiliate-disclosure" target="_blank" rel="noopener">How we make money</a></p>
       <div id="list" class="results"></div>
       <div id="notlist" class="notlist" hidden></div>
       <div id="cookiebar" class="cookiebar" role="region" aria-label="Cookie choice" hidden>
@@ -574,7 +576,7 @@ a.acci .go{font-size:.72rem;color:var(--accent);font-weight:600}
       <p class="note">Snow-sure figures come from 20 winters of snow data (2006/07 to 2025/26): the share of days each month with at least 50 cm of natural snow around the resort, then topped up for snowmaking. They describe the wider area rather than individual pistes. Sierra Nevada and Bansko use an estimate instead. Holiday dates are for 2026/27. UK windows cover every council's published dates across England, Wales, Scotland and Northern Ireland; academies and independent schools can set their own. French spring holidays aren't included yet. Check snow reports and live routes before booking. Flight and hotel links open a pre-filled search.</p>
     </section>
   </div>
-  <footer class="sitefoot"><span>© 2026 SeasonWiseGo</span><a href="about.html">About and contact</a><a href="privacy.html">Privacy and cookies</a><a href="affiliate-disclosure.html">How we make money</a><a href="mailto:admin@seasonwisego.com?subject=Piste%20Picker%20feedback">Send feedback</a></footer>
+  <footer class="sitefoot"><span>© 2026 SeasonWiseGo</span><a href="how-we-rank.html">How we rank</a><a href="about.html">About and contact</a><a href="privacy.html">Privacy and cookies</a><a href="affiliate-disclosure.html">How we make money</a><a href="mailto:admin@seasonwisego.com?subject=Piste%20Picker%20feedback">Send feedback</a></footer>
 </div>
 
 <script>
@@ -1039,7 +1041,8 @@ function scoreResort(r,p){
   // driving: only for week-long trips, and only where the drive fits in one (long) day
   const driveFits = !!(p.drive && p.nights>=5 && DRIVE[r.n] && driveInfo(r,p).oneDay);
   const transfer = r.city ? clamp(1-(commute*1.5-45)/(p.maxT*1.5),0,1) : clamp(1-(effT-45)/(p.maxT*1.5),0,1);
-  const tw = p.nights<=3?15:8;
+  // transfer matters most on short trips: every hour in a minibus is an hour off the hill
+  const tw = p.nights<=3?15:p.nights<=4?12:p.nights<=6?10:8;
   const tier = AIR[r.ap].tier, london = LONDON.has(p.dep);
   const direct = directRoute(p.dep,r.ap,p.d1);
   // direct flights: confirmed routes count; London and the big regionals also get the benefit of the doubt
@@ -1057,10 +1060,10 @@ function scoreResort(r,p){
   const rpref = p.resorts&&p.resorts.length&&p.rmode!=="only", inRes = !!(rpref&&p.resorts.includes(r.n));
   // "Not everyone's on the slopes": up to 8 points for resorts with plenty to do off the slopes (NONSKI 1 = 0, 5 = 8)
   const offOn = !!p.offslope, offPts = offOn ? 8*((NONSKI[r.n]||2)-1)/4 : 0;
-  const max = 50+15+10+8+tw+(pref?8:0)+(rpref?12:0)+(offOn?8:0);
-  const raw = act*50 + snow*15 + apres*10 + budget*8 + transfer*tw + (inPref?8:0) + (inRes?12:0) + offPts - flightPen - holPen;
-  const parts = {ride:act*50, snow:snow*15, apres:apres*10, budget:budget*8, transfer:transfer*tw, tw, pref:inPref?8:0, prefOn:!!pref, res:inRes?12:0, resOn:!!rpref, off:offPts, offOn, flight:-flightPen, hol:-holPen, max, raw};
-  return {r, parts, pct:Math.round(clamp(raw/max,0,1)*100), commute, direct, directLikely, flyDirect, trainFits, driveFits, hols, localHol, inPref, inRes, act, snow, apres, bdiff, transfer, w, tier, london, over:!driveFits&&effT>p.maxT,
+  const max = 50+25+10+8+tw+(pref?8:0)+(rpref?12:0)+(offOn?8:0);
+  const raw = act*50 + snow*25 + apres*10 + budget*8 + transfer*tw + (inPref?8:0) + (inRes?12:0) + offPts - flightPen - holPen;
+  const parts = {ride:act*50, snow:snow*25, apres:apres*10, budget:budget*8, transfer:transfer*tw, tw, pref:inPref?8:0, prefOn:!!pref, res:inRes?12:0, resOn:!!rpref, off:offPts, offOn, flight:-flightPen, hol:-holPen, max, raw};
+  return {r, parts, exact:clamp(raw/max,0,1)*100, pct:Math.round(clamp(raw/max,0,1)*100), commute, direct, directLikely, flyDirect, trainFits, driveFits, hols, localHol, inPref, inRes, act, snow, apres, bdiff, transfer, w, tier, london, over:!driveFits&&effT>p.maxT,
           days:rideDays(r.t,p.nights)};
 }
 // try each UK airport the user will fly from and keep the best-scoring one (main airport wins ties)
@@ -1068,17 +1071,31 @@ function scoreBest(r,p){const deps=p.deps&&p.deps.length?p.deps:[p.dep]; let bes
   // a resort's second airport (e.g. Chambéry) only counts from UK airports with a confirmed direct route there
   const alt=r.ap2?{...r,ap:r.ap2,t:r.t2,viaAlt:true}:null;
   // small nudge towards the airport whose route actually flies on both chosen dates (day-level data only, so it picks between airports rather than reranking resorts)
-  const d2=p.d1?(x=>{x.setDate(x.getDate()+p.nights);return x.toISOString().slice(0,10);})(new Date(p.d1+"T12:00:00")):null, key=s=>{const o=flyOK(s.dep,s.r.ap,p.d1), b=flyOK(s.dep,s.r.ap,d2); return s.pct+(o===true&&b===true?3:(o===false&&b===false)?-3:0)-(s.over?20:0)-(p.directOnly&&!s.directLikely?20:0);};
+  const d2=p.d1?(x=>{x.setDate(x.getDate()+p.nights);return x.toISOString().slice(0,10);})(new Date(p.d1+"T12:00:00")):null, key=s=>{const o=flyOK(s.dep,s.r.ap,p.d1), b=flyOK(s.dep,s.r.ap,d2); return s.exact+(o===true&&b===true?3:(o===false&&b===false)?-3:0)-(s.over?20:0)-(p.directOnly&&!s.directLikely?20:0);};
   for(const d of deps) for(const v of (alt&&directList(d,r.ap2)?[r,alt]:[r])){const s=scoreResort(v,{...p,dep:d}); s.dep=d; if(!best||key(s)>key(best)) best=s;}
   return best;}
+// Display only: when neighbours round to the same %, nudge the shown numbers apart so the list reads in order.
+// The order itself comes from the exact score. We find the smallest nudge (never more than 2 points) that keeps
+// every shown % strictly falling; if a cluster is too tight for that, the honest tie stays.
+function neatPct(list){
+  const x=list.map(s=>s.exact), n=x.length, eps=1e-9;
+  const fit=D=>{const d=[];for(let i=0;i<n;i++){let v=Math.floor(x[i]+D+eps); if(i) v=Math.min(v,d[i-1]-1); if(v<Math.ceil(x[i]-D-eps)) return null; d.push(v);} return d;};
+  let d=null; for(let D=0.5;D<=2+eps&&!d;D+=0.05) d=fit(D);
+  if(d){ d[n-1]=Math.min(d[n-1],Math.round(x[n-1])); // then pull each back towards its own rounding where there's room
+    for(let i=n-2;i>=0;i--) d[i]=Math.max(d[i+1]+1,Math.min(d[i],Math.round(x[i]))); }
+  else { d=[]; for(let i=0;i<n;i++){let v=Math.round(x[i]); if(i&&v>=d[i-1]) v=(d[i-1]-1>=Math.ceil(x[i]-2))?d[i-1]-1:d[i-1]; d.push(v);} }
+  list.forEach((s,i)=>s.pct=Math.max(0,Math.min(100,d[i])));
+  return list;}
+// exact score first; a genuine tie goes to the shorter transfer, then the snowier resort
+const byScore=(a,b)=>(Math.round(b.exact*100)-Math.round(a.exact*100))||(a.r.t-b.r.t)||(b.snow-a.snow);
 function rank(p,n=5){
   const ronly = p.resorts&&p.resorts.length&&p.rmode==="only";
   if(ronly){ // compare exactly the chosen resorts, whatever the filters
-    const mine=R.filter(r=>p.resorts.includes(r.n)).map(r=>scoreBest(r,p)).sort((a,b)=>b.pct-a.pct);
-    return {list:mine, relaxed:false, ronly:true};
+    const mine=R.filter(r=>p.resorts.includes(r.n)).map(r=>scoreBest(r,p)).sort(byScore);
+    return {list:neatPct(mine), relaxed:false, ronly:true};
   }
   const pool = p.countries&&p.countries.length&&p.cmode==="only" ? R.filter(r=>p.countries.includes(r.c)) : R;
-  const scored = pool.map(r=>scoreBest(r,p)).sort((a,b)=>b.pct-a.pct);
+  const scored = pool.map(r=>scoreBest(r,p)).sort(byScore); // exact score, so near-ties rank the right way round
   // "Direct flights only" is a filter: no confirmed (or very likely) direct flight, no place on the list
   const direct = p.directOnly ? scored.filter(s=>s.directLikely||s.inRes) : scored;
   const budgetOK = s=>!p.maxPP||s.inRes||tripBudget(s.r,p.nights,s.days,p.hire,s.hols.length>0).lo<=p.maxPP;
@@ -1091,8 +1108,12 @@ function rank(p,n=5){
   const missing = scored.filter(s=>!shown.has(s.r.n)&&(want.has(s.r.c)||want.has(s.r.n))).map(s=>{
     const why = p.directOnly&&!s.directLikely&&!s.inRes ? "direct" : !budgetOK(s) ? "budget" : (s.over&&!s.inRes) ? "transfer" : "rank";
     return {s, why, pos: why==="rank" ? fit.indexOf(s)+1 : 0};});
-  return {list, relaxed:fit.length<3&&all.length>0, missing};
+  return {list:neatPct(list), relaxed:fit.length<3&&all.length>0, missing};
 }
+const STRONG={pw:"Strong powder",pi:"Big groomed network",pk:"Standout parks",st:"Proper steeps",tr:"Good tree runs",bg:"Great for beginners",bd:"Board-friendly"};
+function topStrength(s){ // the terrain you weighted most that this resort does well (4 or 5 out of 5)
+  let best=null,bw=0; for(const k in STRONG){const wt=s.w[k]||0; if(wt>=1.5&&s.r[k]>=4&&(wt*s.r[k])>bw){bw=wt*s.r[k];best=k;}}
+  return best?STRONG[best]:"";}
 function reasons(s,p){
   const pro=[],con=[]; const r=s.r;
   for(const k of ["pw","pi","pk","st","tr","bg","bd"]){
@@ -1352,7 +1373,7 @@ function whyPanel(s,p,i){
   const q=s.parts, r=s.r, f=x=>(Math.round(x*10)/10).toFixed(1).replace(/\.0$/,"");
   const rows=[
     ["Riding fit",q.ride,50,"How the resort's terrain matches your Skip / Some / Keen / Must choices"],
-    ["Snow-sure",q.snow,15,`${Math.round(s.snow*100)}% snow-sure for ${MONTHS[p.month]}${SNOWH[r.n]?" (20 winters of snow data)":" (estimate)"}`],
+    ["Snow-sure",q.snow,25,`${Math.round(s.snow*100)}% snow-sure for ${MONTHS[p.month]}${SNOWH[r.n]?" (20 winters of snow data)":" (estimate)"}`],
     ["Après",q.apres,10,`${APRES[r.av]} après; you asked for ${p.apres<=2?"low-key":p.apres>=4?"full-on":"sociable"}`],
     ["Budget",q.budget,8,p.maxPP?`Resort price level against your budget of under \u00a3${p.maxPP.toLocaleString("en-GB")}`:"Any budget, so every resort scores in full"],
     ["Transfer",q.transfer,q.tw,s.trainFits?`${TRAIN[r.n][1]} min from the station by train`:r.city?`~${s.commute} min each way to the slopes`:`${r.t} min from ${AIR[r.ap].n}`]
@@ -1367,7 +1388,7 @@ function whyPanel(s,p,i){
   return `<div class="whyp" id="why-${i}" hidden><table><thead><tr><th>Factor</th><th>Points</th><th></th><th>Because</th></tr></thead><tbody>`+
     rows.map(x=>`<tr><td>${x[0]}</td><td class="num">${f(x[1])} / ${x[2]}</td><td>${bar(x[1],x[2])}</td><td>${esc(x[3])}</td></tr>`).join("")+
     minus.map(x=>`<tr class="neg"><td>${x[0]}</td><td class="num">${f(x[1])}</td><td></td><td>${esc(x[2])}</td></tr>`).join("")+
-    `<tr class="tot"><td>Total</td><td class="num">${f(Math.max(0,q.raw))} / ${q.max}</td><td></td><td>= ${s.pct}% match${s.dep&&p.deps&&p.deps.length>1?`, scored from ${depName(s.dep)}, your best airport for this resort`:""}</td></tr></tbody></table></div>`;
+    `<tr class="tot"><td>Total</td><td class="num">${f(Math.max(0,q.raw))} / ${q.max}</td><td></td><td>= ${(Math.round(s.exact*10)/10).toFixed(1)}% match${Math.round(s.exact)!==s.pct?` (shown as ${s.pct}% so the list reads in order)`:""}${s.dep&&p.deps&&p.deps.length>1?`, scored from ${depName(s.dep)}, your best airport for this resort`:""}</td></tr></tbody></table><p class="whyhow"><a href="https://seasonwisego.com/how-we-rank" target="_blank" rel="noopener">How we rank resorts</a></p></div>`;
 }
 function snowStrip(r,p){
   const pr=snowProfile(r), sc=SNOWC[r.n]||[3,50], ms=[11,0,1,2,3];
@@ -1469,7 +1490,7 @@ function render(opt){
           <a class="site" href="${siteFor(r)}" target="_blank" rel="noopener">${SITE[r.n]?"Resort website":"Find resort website"} ↗</a>${PISTEMAP[r.n]?`<a class="site" href="${PISTEMAP[r.n]}" target="_blank" rel="noopener">Piste map ↗</a>`:""}
           <span class="sx"><span class="score"><b>${s.pct}</b><small>% match</small><button type="button" class="whyb" aria-expanded="false" data-why="${i}" data-pct="${s.pct}">Why ${s.pct}%?</button></span>
           <button type="button" class="xpand" data-toggle aria-expanded="${isOpen}">${isOpen?"Less":"More"}<span aria-hidden="true"></span></button></span></div>
-        <p class="mini"><span>${s.trainFits?`${TRAIN[r.n][1]} min from ${TRAIN[r.n][0]} by train`:r.city?`City base, ~${s.commute} min to the slopes`:`${r.t} min from ${AIR[r.ap].n}`}</span><span>£${b.lo}–£${b.hi} pp</span><span>${Math.round(s.snow*100)}% snow-sure in ${MONTHS[p.month]}</span><span>${APRES[r.av]} après</span></p>
+        <p class="mini">${topStrength(s)?`<span class="strong">${topStrength(s)}</span>`:""}<span>${s.trainFits?`${TRAIN[r.n][1]} min from ${TRAIN[r.n][0]} by train`:r.city?`City base, ~${s.commute} min to the slopes`:`${r.t} min from ${AIR[r.ap].n}`}</span><span>£${b.lo}–£${b.hi} pp</span><span>${Math.round(s.snow*100)}% snow-sure in ${MONTHS[p.month]}</span><span>${APRES[r.av]} après</span></p>
         ${whyPanel(s,p,i)}
         <dl class="stats">
           <div><dt>${r.city?"From airport":"Transfer"}</dt><dd>${r.t} min · ${r.ap}</dd></div>
