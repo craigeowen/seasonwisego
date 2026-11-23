@@ -393,6 +393,11 @@ a.acci .go{font-size:.72rem;color:var(--accent);font-weight:600}
 .dogbox ul{margin:6px 0 8px;padding-left:18px;display:grid;gap:4px}
 .dogbox a{color:var(--ink);text-decoration-color:var(--accent);text-underline-offset:3px}
 .hint{margin:0;font-size:.8rem;color:var(--muted)}
+.ff{display:grid;gap:6px;font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.seg.big{display:grid;grid-template-columns:1fr 1fr;width:100%}
+.seg.big label{font-size:.9rem;padding:8px 10px;text-align:center;text-transform:none;letter-spacing:0}
+input[type=text]{font:inherit;font-size:.95rem;color:var(--ink);background:var(--snow);border:1px solid var(--line);border-radius:4px;padding:7px 8px;width:100%;min-width:0;text-transform:none;letter-spacing:0}
+#driveFields{display:grid;gap:6px}#driveFields[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -415,13 +420,24 @@ a.acci .go{font-size:.72rem;color:var(--accent);font-weight:600}
     <form id="f" autocomplete="off" onsubmit="return false">
       <fieldset>
         <legend>Your trip</legend>
-        <div class="row">
+        <div class="ff"><span id="lb-mode">Getting there</span>
+          <div class="seg big" id="modeSel" role="radiogroup" aria-labelledby="lb-mode">
+            <input type="radio" name="mode" id="m-fly" value="fly" checked><label for="m-fly">Fly</label><input type="radio" name="mode" id="m-drive" value="drive"><label for="m-drive">Drive</label>
+          </div>
+        </div>
+        <div class="row" id="flyFields">
           <label class="f">Flying from
             <select id="dep"></select>
           </label>
           <label class="f">Or also from
             <select id="dep2"><option value="">None</option></select>
           </label>
+        </div>
+        <div id="driveFields" hidden>
+          <label class="f">Driving from
+            <input type="text" id="start" placeholder="Town or postcode, e.g. Manchester" autocomplete="off">
+          </label>
+          <p class="hint">We rank on the drive from Folkestone through the Channel Tunnel. The route links on each card start from here, so you can see your own distance, time and costs.</p>
         </div>
         <div class="row">
           <label class="f">Going out
@@ -444,7 +460,7 @@ a.acci .go{font-size:.72rem;color:var(--accent);font-weight:600}
         </label>
         <label class="toggle"><input type="checkbox" id="cool"> Not too hot, please</label>
         <label class="toggle"><input type="checkbox" id="dog"> Bringing the dog</label>
-        <p class="hint" id="doghint" hidden>Ryanair, easyJet and Jet2 don't carry pet dogs, so with the dog we rank on the drive from Folkestone instead of flights.</p>
+        <p class="hint" id="doghint" hidden>Ryanair, easyJet and Jet2 don't carry pet dogs, and most UK holidays with a dog are by car, so we've switched you to Drive. You can switch back to Fly if you've found an airline that takes your dog.</p>
       </fieldset>
       <div class="findbar"><button type="button" class="btn primary" id="go">Find my summer</button></div>
     </form>
@@ -502,7 +518,7 @@ const h=m=>{const x=Math.round(m/30)/2;return (x%1?x.toFixed(1):x)+" h";};
 for(const [c,n] of DEP){$("dep").add(new Option(n,c));$("dep2").add(new Option(n,c));}
 $("dep").value="MAN";
 $("acts").innerHTML=ACTS.map(([k,l])=>`<span class="chip"><input type="checkbox" id="a-${k}" value="${k}"${k==="walk"||k==="water"?" checked":""}><label for="a-${k}">${l}</label></span>`).join("");
-function params(){return{deps:[$("dep").value,$("dep2").value].filter((x,i,a)=>x&&a.indexOf(x)===i),d1:$("d1").value||"2027-07-17",nights:+$("nights").value||7,acts:[...document.querySelectorAll("#acts input:checked")].map(i=>i.value),who:$("who").value,level:$("level").value,cool:$("cool").checked,dog:$("dog").checked,count:+$("count").value||8};}
+function params(){return{deps:[$("dep").value,$("dep2").value].filter((x,i,a)=>x&&a.indexOf(x)===i),d1:$("d1").value||"2027-07-17",nights:+$("nights").value||7,acts:[...document.querySelectorAll("#acts input:checked")].map(i=>i.value),who:$("who").value,level:$("level").value,cool:$("cool").checked,dog:$("dog").checked,drive:document.querySelector("input[name=mode]:checked").value==="drive",start:($("start").value||"").trim(),count:+$("count").value||8};}
 function flightsFor(deps,ap){const out=[];for(const d of deps){const f=(FL[d]||{})[ap];if(f)out.push({dep:d,al:f});}return out;}
 const SHOULDER=m=>m<=5||m>=10;
 function glacierOpen(n,m){if(n==="Zermatt")return true;if(n==="Mayrhofen")return m>=4&&m<=7||m>=9;if(n==="Zell am See")return m>=6&&m<=10;return false;}
@@ -516,7 +532,7 @@ function score(r,p){
   for(const [ap,t] of r.g){const f=flightsFor(p.deps,ap);if(!f.length)continue;const al=new Set(f.flatMap(x=>Object.keys(x.al)));
     const s=Math.max(0,1-(t-40)/220)*0.8+Math.min(al.size,3)/3*0.2; if(!best||s>best.s)best={ap,t,f,al:[...al],s};}
   const di=driveInfo(r);
-  const get=p.dog?(di.far?0:Math.max(0,Math.min(1,1-(di.total-540)/720))*20):(best?best.s*20:0);
+  const get=p.drive?(di.far?0:Math.max(0,Math.min(1,1-(di.total-540)/720))*20):(best?best.s*20:0);
   const sel=p.acts.length?p.acts:ACTS.map(a=>a[0]);
   const A=k=>actVal(r,k,m,p.dog);
   let act=sel.reduce((s,k)=>s+A(k),0)/sel.length/5;
@@ -544,17 +560,18 @@ const depName=c=>(DEP.find(x=>x[0]===c)||[c,c])[1];
 function pips(v){return `<span class="pips">${[1,2,3,4,5].map(i=>`<i class="${i<=v?"on":""}"></i>`).join("")}</span>`}
 function topStrength(s,p){let best=null,bv=0;for(const k of s.sel){const v=actVal(s.r,k,s.m,p.dog);if(v>=4&&v>bv){bv=v;best=k;}}return best?STRONG[best]:"";}
 function getLine(s,p){const r=s.r;
-  if(p.dog) return s.di.far?"Not a practical drive":`Drive ~${h(s.di.total)} from Folkestone`;
+  if(p.drive) return s.di.far?"Not a practical drive":`Drive ~${h(s.di.total)} from Folkestone`;
   return s.best?`${s.best.t} min from ${AIR[s.best.ap]}`:"No direct flight";}
 function reasons(s,p){const r=s.r,m=s.m,w=s.w,pro=[],con=[];
   for(const k of s.sel){const v=actVal(r,k,m,p.dog),l=ACTS.find(a=>a[0]===k)[1];
     if(v>=4)pro.push(`${STRONG[k]}`);else if(!v&&r.a[k]&&(k==="bike"||k==="glacier"))con.push(`${l}: closed in ${MON[m]}`);else if(v<=2)con.push(`Not the place for ${l.toLowerCase()}`);}
   if(w){const b=band(w[0],p.cool);if(b==="hi")pro.push(`Comfortable in ${MON[m]}: about ${w[0]}°C highs`);else if(b==="lo")con.push(`Warm in town in ${MON[m]}: about ${w[0]}°C highs`);else con.push(`Cool in ${MON[m]}: about ${w[0]}°C highs`);
     if(w[1]>=15)con.push(`Rain on about ${w[1]} days in ${MON[m]}, so pack a waterproof`);}
-  if(p.dog){if(s.di.far)con.push(DOG_NOTE[r.n]?DOG_NOTE[r.n][0]:"Not a practical drive from the UK");
-    else if(s.di.oneDay)pro.push(`Drivable in a day: about ${h(s.di.total)} from Folkestone`);else con.push(`A long drive (about ${h(s.di.total)}), so plan an overnight stop`);
-    if(DOG_NOTE[r.n]&&DOG_NOTE[r.n][1])con.push(DOG_NOTE[r.n][0]);}
-  else{if(!s.best)con.push(`No direct summer flight from ${p.deps.map(depName).join(" or ")}`);
+  if(p.drive){if(s.di.far)con.push(DOG_NOTE[r.n]?DOG_NOTE[r.n][0]:"Not a practical drive from the UK");
+    else if(s.di.oneDay)pro.push(`Drivable in a day: about ${h(s.di.total)} from Folkestone`);else con.push(`A long drive (about ${h(s.di.total)}), so plan an overnight stop`);}
+  if(p.dog&&DOG_NOTE[r.n]&&DOG_NOTE[r.n][1])con.push(DOG_NOTE[r.n][0]);
+  if(p.dog&&!p.drive)con.push("Check your airline carries dogs: Ryanair, easyJet and Jet2 don't");
+  if(!p.drive){if(!s.best)con.push(`No direct summer flight from ${p.deps.map(depName).join(" or ")}`);
     else{if(s.best.t<=90)pro.push(`Short ${s.best.t} min transfer from ${AIR[s.best.ap]}`);else if(s.best.t>=150)con.push(`Long ${s.best.t} min transfer from ${AIR[s.best.ap]}`);
       if(s.best.al.length>=2)pro.push(`Direct with ${s.best.al.join(" and ")}`);}}
   if(r.card&&/free/i.test(r.card))pro.push("Free guest card with your stay");
@@ -563,7 +580,7 @@ function whyPanel(s,p,i){const q=s.parts,r=s.r,f=x=>(Math.round(x*10)/10).toFixe
   const selTxt=s.sel.map(k=>ACTS.find(a=>a[0]===k)[1].toLowerCase()).join(", ");
   const rows=[["Things to do",q.act,40,`How well it does ${selTxt} in ${MON[s.m]}${p.level!=="moderate"?`, at ${p.level==="easy"?"an easy":"a challenging"} level`:""}`],
     ["Weather",q.wx,20,s.w?`About ${s.w[0]}°C highs, ${s.w[1]} wet days and ${s.w[2]} h of sun a day in ${MON[s.m]}${p.cool?"; you asked for not too hot":""}`:"No weather data yet, so it scores halfway"],
-    [p.dog?"Driving":"Getting there",q.get,20,p.dog?(s.di.far?"Not a practical drive from the UK":`About ${h(s.di.total)} from Folkestone via the Channel Tunnel`):(s.best?`${s.best.t} min from ${AIR[s.best.ap]}, direct with ${s.best.al.join(", ")}`:"No direct flight from your airport")],
+    [p.drive?"Driving":"Getting there",q.get,20,p.drive?(s.di.far?"Not a practical drive from the UK":`About ${h(s.di.total)} from Folkestone via the Channel Tunnel`):(s.best?`${s.best.t} min from ${AIR[s.best.ap]}, direct with ${s.best.al.join(", ")}`:"No direct flight from your airport")],
     ["Value",q.value,10,`${["","Good value","Mid-range","Pricey"][r.price]}${r.card&&/free/i.test(r.card)?", plus a free guest card":""}`],
     ["Who's going",q.who,10,{adults:"Couple or friends",young:"Family with young children",grown:"Adult family group"}[p.who]]];
   const bar=(v,m)=>`<span class="wbar"><i style="width:${m?Math.max(0,Math.min(100,v/m*100)):0}%"></i></span>`;
@@ -584,7 +601,7 @@ function card(s,i,p){const r=s.r,m=s.m,w=s.w,isOpen=openCards.has(r.n);const {pr
   const acts=ACTS.map(([k,l])=>{const v=actVal(r,k,m,p.dog);if(!v&&r.a[k]&&(k==="bike"||k==="glacier"))return `<span class="${sel.has(k)?"sel":""}">${l} <i class="closed">closed in ${MON[m]}</i></span>`;return v?`<span class="${sel.has(k)?"sel":""}">${l} ${pips(v)}</span>`:"";}).join("");
   const alts=r.g.filter(([ap])=>!s.best||ap!==s.best.ap).map(([ap,t])=>`${AIR[ap]} ${t} min`).join(", ");
   const flySub=s.best?`direct with ${s.best.f.map(x=>Object.entries(x.al).map(([a,n])=>a+(n?` (~${n}/wk)`:"")).join(", ")+(p.deps.length>1?` from ${depName(x.dep)}`:"")).join("; ")}`:"no direct summer flight, so you'd need a connection";
-  const tr=p.dog?(s.di.far?`<div><dt>Driving</dt><dd>Not practical<span class="sub">no car ferry from the UK</span></dd></div>`:`<div><dt>Driving</dt><dd>~${h(s.di.total)}<span class="sub">from Folkestone via the Channel Tunnel${s.di.oneDay?"":", best with an overnight stop"}</span></dd></div>`)
+  const tr=p.drive?(s.di.far?`<div><dt>Driving</dt><dd>Not practical<span class="sub">no car ferry from the UK</span></dd></div>`:`<div><dt>Driving</dt><dd>~${h(s.di.total)}<span class="sub">from Folkestone via the Channel Tunnel${s.di.oneDay?"":", best with an overnight stop"}</span></dd></div>`)
     :`<div><dt>Transfer</dt><dd>${s.best?`${s.best.t} min · ${s.best.ap}`:`${r.g[0][1]} min · ${r.g[0][0]}`}${alts?`<span class="sub">also ${esc(alts)}</span>`:""}</dd></div>`;
   const gf=`https://www.google.com/travel/flights?q=${encodeURIComponent(`Flights from ${p.deps[0]} to ${(s.best||{ap:r.g[0][0]}).ap} on ${p.d1}`)}`;
   return `<article class="card nr${i===0?" top":""}${isOpen?"":" collapsed"}" data-card="${esc(r.n)}">
@@ -592,13 +609,13 @@ function card(s,i,p){const r=s.r,m=s.m,w=s.w,isOpen=openCards.has(r.n);const {pr
       <div class="head"><span class="rank">#${i+1}</span><h2>${esc(r.n)}</h2><span class="ctry">${esc(r.c)}</span>
         <span class="sx"><span class="score"><b>${s.pct}</b><small>% match</small><button type="button" class="whyb" aria-expanded="false" data-why="${i}" data-pct="${s.pct}">Why ${s.pct}%?</button></span>
         <button type="button" class="xpand" data-toggle aria-expanded="${isOpen}">${isOpen?"Less":"More"}<span aria-hidden="true"></span></button></span></div>
-      <p class="mini">${topStrength(s,p)?`<span class="strong">${topStrength(s,p)}</span>`:""}<span>${getLine(s,p)}</span><span>${w?`${w[0]}°C in ${MON[m]}`:"Weather to follow"}</span><span>${"£".repeat(r.price)} ${["","good value","mid-range","pricey"][r.price]}</span>${p.dog&&!s.di.far?`<span>Dog-friendly drive</span>`:""}</p>
+      <p class="mini">${topStrength(s,p)?`<span class="strong">${topStrength(s,p)}</span>`:""}<span>${getLine(s,p)}</span><span>${w?`${w[0]}°C in ${MON[m]}`:"Weather to follow"}</span><span>${"£".repeat(r.price)} ${["","good value","mid-range","pricey"][r.price]}</span></p>
       ${whyPanel(s,p,i)}
       <dl class="stats">
         ${tr}
         <div class="bud"><dt>Price level</dt><dd>${"£".repeat(r.price)}<span class="sub">${["","Good value","Mid-range","Pricey"][r.price]}</span></dd></div>
         <div><dt>${MON[m]} weather</dt><dd>${w?`${w[0]}°C · ${w[1]} wet days`:"To follow"}<span class="sub">${w?`about ${w[2]} h sun a day${s.hot?", hot in town":""}`:""}</span></dd></div>
-        ${p.dog?"":`<div><dt>Fly from</dt><dd>${esc(p.deps.map(depName).join(" or "))}<span class="sub">${flySub}</span></dd></div>`}
+        ${p.drive?"":`<div><dt>Fly from</dt><dd>${esc(p.deps.map(depName).join(" or "))}<span class="sub">${flySub}</span></dd></div>`}
       </dl>
       ${wxStrip(s,p)}
       <div class="terrain acts">${acts}</div>
@@ -606,14 +623,19 @@ function card(s,i,p){const r=s.r,m=s.m,w=s.w,isOpen=openCards.has(r.n);const {pr
       ${r.card?`<p class="offs"><b>Guest card:</b> ${esc(r.card)}</p>`:""}
       ${p.dog?`<p class="offs dogl"><b>With your dog:</b> ${esc(DOG_LIFTS[r.c]||DOG_LIFTS_ANY)}${DOG_NOTE[r.n]&&DOG_NOTE[r.n][1]?" "+esc(DOG_NOTE[r.n][0]):""} Check the lift company's rules before you go.</p>`:""}
       <div class="why"><ul class="pro">${pro.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><ul class="con">${con.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
-      <div class="links"><span class="lbl">Search</span>${p.dog?`<a href="https://www.leshuttle.com/uk-en/support/articles/what-documentation-does-my-pet-need-to-travel-207857029" target="_blank" rel="noopener">LeShuttle with pets</a>`:`<a href="${gf}" target="_blank" rel="noopener">Google Flights</a>`}<a href="https://www.booking.com/searchresults.html?ss=${encodeURIComponent(r.n)}${p.dog?"&nflt=hotelfacility%3D4":""}" target="_blank" rel="noopener">${p.dog?"Pet-friendly stays":"Places to stay"}</a><a href="https://www.getyourguide.com/s/?q=${encodeURIComponent(r.n)}" target="_blank" rel="noopener">Things to do</a></div>
+      <div class="links"><span class="lbl">${p.drive?"Plan the drive":"Search"}</span>${p.drive&&!s.di.far?routeLinks(r,p):""}${p.drive?"":`<a href="${gf}" target="_blank" rel="noopener">Google Flights</a>`}<a href="https://www.booking.com/searchresults.html?ss=${encodeURIComponent(r.n)}${p.dog?"&nflt=hotelfacility%3D4":""}" target="_blank" rel="noopener">${p.dog?"Pet-friendly stays":"Places to stay"}</a><a href="https://www.getyourguide.com/s/?q=${encodeURIComponent(r.n)}" target="_blank" rel="noopener">Things to do</a></div>
     </div></article>`;}
-function run(){const p=params();
+function routeLinks(r,p){const from=p.start||"Folkestone",to=`${r.n.replace(/ \(.*\)$/,"")}, ${r.c}`;
+  const vm=`https://www.viamichelin.co.uk/web/Routes?departure=${encodeURIComponent(from)}&arrival=${encodeURIComponent(to)}`;
+  const gm=`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`;
+  return `<a href="${vm}" target="_blank" rel="noopener">ViaMichelin: distance, time, tolls and fuel</a><a href="${gm}" target="_blank" rel="noopener">Google Maps</a><a href="${p.dog?"https://www.leshuttle.com/uk-en/support/articles/what-documentation-does-my-pet-need-to-travel-207857029":"https://www.leshuttle.com/uk-en"}" target="_blank" rel="noopener">${p.dog?"LeShuttle with pets":"LeShuttle crossings"}</a>`;}
+function syncMode(){const drive=document.querySelector("input[name=mode]:checked").value==="drive";$("flyFields").hidden=drive;$("driveFields").hidden=!drive;}
+function run(){syncMode();const p=params();
   const all=DEST.map(r=>score(r,p)).sort((a,b)=>(b.exact-a.exact));
   const list=neatPct(all.slice(0,p.count));
   const m=+p.d1.slice(5,7);
-  $("summary").textContent=`${list.length} of ${all.length} destinations for ${p.nights} nights in ${MON[m]} 2027 ${p.dog?"driving with your dog":"from "+p.deps.map(depName).join(" and ")}, best match first.`+(SHOULDER(m)?` ${MON[m]} is outside the main summer season: most lifts and bike parks are closed, so we rank on lakes, walks and towns.`:"");
-  $("dogbox").hidden=!p.dog; $("doghint").hidden=!p.dog;
+  $("summary").textContent=`${list.length} of ${all.length} destinations for ${p.nights} nights in ${MON[m]} 2027 ${p.drive?(p.dog?"driving with your dog":"driving"+(p.start?" from "+p.start:"")):"flying from "+p.deps.map(depName).join(" and ")+(p.dog?", with your dog":"")}, best match first.`+(SHOULDER(m)?` ${MON[m]} is outside the main summer season: most lifts and bike parks are closed, so we rank on lakes, walks and towns.`:"");
+  $("dogbox").hidden=!p.dog;
   $("list").innerHTML=list.map((s,i)=>card(s,i,p)).join("");syncExpandAll();}
 function setCard(a,open){a.classList.toggle("collapsed",!open);const t=a.querySelector("[data-toggle]");if(t){t.firstChild.textContent=open?"Less":"More";t.setAttribute("aria-expanded",String(open));}
   const n=a.dataset.card;if(open)openCards.add(n);else openCards.delete(n);syncExpandAll();}
@@ -623,6 +645,8 @@ $("list").addEventListener("click",e=>{const b=e.target.closest("[data-why]");if
   pn.hidden=!pn.hidden;b.setAttribute("aria-expanded",String(!pn.hidden));b.textContent=pn.hidden?`Why ${b.dataset.pct}%?`:"Hide breakdown";});
 $("expandAll").addEventListener("click",()=>{const all=[...document.querySelectorAll("#list .card")];const open=all.some(a=>a.classList.contains("collapsed"));all.forEach(a=>setCard(a,open));});
 $("go").addEventListener("click",run);
+$("dog").addEventListener("change",()=>{const fly=$("m-fly").checked;if($("dog").checked&&fly){$("m-drive").checked=true;$("doghint").hidden=false;}else if(!$("dog").checked)$("doghint").hidden=true;run();});
+document.querySelectorAll("input[name=mode]").forEach(e=>e.addEventListener("change",()=>{if($("m-fly").checked)$("doghint").hidden=true;}));
 document.querySelectorAll("#f select,#f input,#rb select").forEach(e=>e.addEventListener("change",run));
 run();
 </script>
