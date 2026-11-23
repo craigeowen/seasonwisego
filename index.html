@@ -1521,6 +1521,8 @@ function render(opt){
           <a href="${bk}" target="_blank" rel="noopener">${affTag}Booking.com in ${esc(r.n.replace(/ \(.*\)/,""))}</a>
           <a href="${hcom(r,p,d2)}" target="_blank" rel="noopener">${affTag}Hotels.com</a>
           <a href="${vrbo(r,p,d2)}" target="_blank" rel="noopener">${affTag}Vrbo holiday rentals</a>
+          <a href="${viatorUrl(r)}" target="_blank" rel="noopener">${affTag}Things to do (Viator)</a>
+          <a href="${gygUrl(r)}" target="_blank" rel="noopener">${affTag}GetYourGuide</a>
         </div>
       </div></article>`;
   });
@@ -1606,6 +1608,11 @@ function csc(r){const u=CSC[r.n];return u?`https://tc.tradetracker.net/?c=1992&m
 // Kayak flight search through Stay22 (tested 5 Nov 2026: lands on the route with dates and passengers).
 function kayakFlights(r,p,d2){return s22wrap("kayak",`https://www.kayak.co.uk/flights/${p.dep}-${r.ap}/${p.d1}/${d2}/${p.pax}adults`);}
 const affTag='<span class="adtag" title="We may earn a commission if you book">Ad</span>';
+// Tours and activities (23 Nov 2026): Viator P00333552 (codes from Craig's link builder) and GetYourGuide M1TUEIW (from his tracking link).
+// Both open the partner's search for the resort; the partner ID is recorded on that first page.
+const actQ=r=>r.n.replace(/ \(.*\)/,"")+(r.city?"":" "+r.c);
+const viatorUrl=r=>`https://www.viator.com/searchResults/all?text=${encodeURIComponent(actQ(r))}&pid=P00333552&mcid=42383&medium=link`;
+const gygUrl=r=>`https://www.getyourguide.com/en-gb/s/?q=${encodeURIComponent(actQ(r))}&partner_id=M1TUEIW&utm_medium=online_publisher`;
 function abnb(r,p,d2){const q=r.n.replace(/ \(.*\)/,"");return `https://www.airbnb.co.uk/s/${encodeURIComponent(q+", "+r.c)}/homes?checkin=${p.d1}&checkout=${d2}&adults=${p.pax}`;}
 // Booking.com property-type filters (ht_id): 204 hotels, 228 chalets, 201 apartments, 220 holiday homes, 216 guest houses, 208 B&Bs
 const ACC_HT=["204","228","201;220","216;208",null];
@@ -1710,6 +1717,9 @@ function openDetail(i){
         <div class="stays"><a href="${kayakFlights(r,p,d2)}" target="_blank" rel="noopener">${affTag}<span>Kayak<small>Compare flights</small></span></a><a href="https://www.skyscanner.net/transport/flights/${p.dep.toLowerCase()}/${r.ap.toLowerCase()}/${yymmdd(p.d1)}/${yymmdd(d2)}/?adultsv2=${p.pax}${p.directOnly?"&preferdirects=true":""}" target="_blank" rel="noopener"><span>Skyscanner<small>Compare flights</small></span></a><a href="${gf}" target="_blank" rel="noopener"><span>Google Flights<small>Compare flights</small></span></a></div></div>
       ${(()=>`<div class="acc"><h4>Where to stay</h4>
         <div class="stays"><a href="${bkUrl(r,p,d2,null)}" target="_blank" rel="noopener">${affTag}<span>Booking.com<small>Hotels and apartments</small></span></a><a href="${hcom(r,p,d2)}" target="_blank" rel="noopener">${affTag}<span>Hotels.com<small>Hotels</small></span></a><a href="${vrbo(r,p,d2)}" target="_blank" rel="noopener">${affTag}<span>Vrbo<small>Holiday rentals</small></span></a>${skiworld(r)?`<a href="${skiworld(r)}" target="_blank" rel="noopener">${affTag}<span>Skiworld<small>Catered chalets</small></span></a>`:""}${csc(r)?`<a href="${csc(r)}" target="_blank" rel="noopener">${affTag}<span>CateredSkiChalets<small>All-inclusive chalets</small></span></a>`:""}</div></div>`)()}
+      <div class="acc"><h4>Things to do</h4>
+        ${NONSKI_ACT[r.n]?`<p class="trline"><b>Off the slopes:</b> ${esc(NONSKI_ACT[r.n])}</p>`:""}
+        <div class="stays"><a href="${viatorUrl(r)}" target="_blank" rel="noopener">${affTag}<span>Viator<small>Tours and activities</small></span></a><a href="${gygUrl(r)}" target="_blank" rel="noopener">${affTag}<span>GetYourGuide<small>Tours and activities</small></span></a></div></div>
       ${travelPanel(r,p,d2,apN)}
       ${adOn?partnerBox(r,apN):""}
       ${kitPanel(r)}
