@@ -632,7 +632,10 @@ function score(r,p){
   const vals=sel.map(A), mean=vals.reduce((x,y)=>x+y,0)/vals.length;
   let act=(p.acts.length>=2?0.6*mean+0.4*Math.min(...vals):mean)/5;
   if(p.level==="easy")act=act*0.85+((A("walk")+A("family"))/10)*0.15;
-  if(p.level==="hard")act=act*0.85+((A("hike")+Math.max(A("ferrata"),A("raft"),A("para")))/10)*0.15;
+  // Challenging: judged on the demanding activities you picked (a cyclist isn't marked down for a lack of via ferratas);
+  // if you only picked gentle ones, fall back to hiking and the adventure sports
+  const HARD=["hike","bike","road","ferrata","raft","para","glacier"], hp=p.acts.filter(k=>HARD.includes(k));
+  if(p.level==="hard")act=act*0.85+(hp.length?Math.max(...hp.map(A))/5:(A("hike")+Math.max(A("ferrata"),A("raft"),A("para")))/10)*0.15;
   let wx=0.5,hot=false;
   if(w){const [tx,rain,sun]=w; const ideal=p.cool?20:24; const tol=p.cool?5:6;
     const tScore=Math.max(0,1-Math.max(0,Math.abs(tx-ideal)-2)/tol); hot=tx>=(p.cool?25:28);
@@ -683,7 +686,7 @@ function reasons(s,p){const r=s.r,m=s.m,w=s.w,pro=[],con=[];
   return {pro:pro.slice(0,5),con:con.slice(0,4)};}
 function whyPanel(s,p,i){const q=s.parts,r=s.r,f=x=>(Math.round(x*10)/10).toFixed(1).replace(/\.0$/,"");
   const selTxt=s.sel.map(k=>ACTS.find(a=>a[0]===k)[1].toLowerCase()).join(", ");
-  const rows=[["Things to do",q.act,40,`How well it does ${selTxt} in ${MON[s.m]}${p.acts.length>=2?" (your weakest pick counts extra)":""}${p.level!=="moderate"?`, at ${p.level==="easy"?"an easy":"a challenging"} level`:""}`],
+  const rows=[["Things to do",q.act,40,`How well it does ${selTxt} in ${MON[s.m]}${p.acts.length>=2?" (your weakest pick counts extra)":""}${p.level==="easy"?", at an easy level (gentle walks and family options count too)":p.level==="hard"?", at a challenging level":""}`],
     ["Weather",q.wx,20,s.w?`About ${s.w[0]}°C highs, ${s.w[1]} wet days and ${s.w[2]} h of sun a day in ${MON[s.m]}${p.cool?"; you asked for not too hot":""}`:"No weather data yet, so it scores halfway"],
     [p.drive?"Driving":"Getting there",q.get,20,p.drive?(s.di.far?"Not a practical drive from the UK":`About ${h(s.di.total)} from Folkestone via the Channel Tunnel`):(s.best?`${s.best.t} min from ${AIR[s.best.ap]}, direct with ${s.best.al.join(", ")}`:"No direct flight from your airport")],
     ["Value",q.value,10,`${["","Good value","Mid-range","Pricey"][r.price]}${r.card&&/free/i.test(r.card)?", plus a free guest card":""}`],
