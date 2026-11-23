@@ -437,7 +437,7 @@ input[type=text]{font:inherit;font-size:.95rem;color:var(--ink);background:var(-
           <label class="f">Driving from
             <input type="text" id="start" placeholder="Town or postcode, e.g. Manchester" autocomplete="off">
           </label>
-          <p class="hint">We rank on the drive from Folkestone through the Channel Tunnel. The route links on each card start from here, so you can see your own distance, time and costs.</p>
+          <p class="hint">We rank on the drive from Folkestone through the Channel Tunnel. The Google Maps link on each card starts from here, so you can see your own distance and time. For tolls and fuel costs, the ViaMichelin link opens its planner for you to type the route in.</p>
         </div>
         <div class="row">
           <label class="f">Going out
@@ -626,9 +626,8 @@ function card(s,i,p){const r=s.r,m=s.m,w=s.w,isOpen=openCards.has(r.n);const {pr
       <div class="links"><span class="lbl">${p.drive?"Plan the drive":"Search"}</span>${p.drive&&!s.di.far?routeLinks(r,p):""}${p.drive?"":`<a href="${gf}" target="_blank" rel="noopener">Google Flights</a>`}<a href="https://www.booking.com/searchresults.html?ss=${encodeURIComponent(r.n)}${p.dog?"&nflt=hotelfacility%3D4":""}" target="_blank" rel="noopener">${p.dog?"Pet-friendly stays":"Places to stay"}</a><a href="https://www.getyourguide.com/s/?q=${encodeURIComponent(r.n)}" target="_blank" rel="noopener">Things to do</a></div>
     </div></article>`;}
 function routeLinks(r,p){const from=p.start||"Folkestone",to=`${r.n.replace(/ \(.*\)$/,"")}, ${r.c}`;
-  const vm=`https://www.viamichelin.co.uk/web/Routes?departure=${encodeURIComponent(from)}&arrival=${encodeURIComponent(to)}`;
   const gm=`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`;
-  return `<a href="${vm}" target="_blank" rel="noopener">ViaMichelin: distance, time, tolls and fuel</a><a href="${gm}" target="_blank" rel="noopener">Google Maps</a><a href="${p.dog?"https://www.leshuttle.com/uk-en/support/articles/what-documentation-does-my-pet-need-to-travel-207857029":"https://www.leshuttle.com/uk-en"}" target="_blank" rel="noopener">${p.dog?"LeShuttle with pets":"LeShuttle crossings"}</a>`;}
+  return `<a href="${gm}" target="_blank" rel="noopener">Route on Google Maps</a><a href="https://www.viamichelin.co.uk/" target="_blank" rel="noopener" title="Type in your start and ${esc(to)}">Tolls and fuel cost (ViaMichelin)</a><a href="${p.dog?"https://www.leshuttle.com/uk-en/support/articles/what-documentation-does-my-pet-need-to-travel-207857029":"https://www.leshuttle.com/uk-en"}" target="_blank" rel="noopener">${p.dog?"LeShuttle with pets":"LeShuttle crossings"}</a>`;}
 function syncMode(){const drive=document.querySelector("input[name=mode]:checked").value==="drive";$("flyFields").hidden=drive;$("driveFields").hidden=!drive;}
 function run(){syncMode();const p=params();
   const all=DEST.map(r=>score(r,p)).sort((a,b)=>(b.exact-a.exact));
