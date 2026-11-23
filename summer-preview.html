@@ -605,7 +605,9 @@ function score(r,p){
   const get=p.drive?(di.far?0:Math.max(0,Math.min(1,1-(di.total-540)/720))*20):(best?best.s*20:0);
   const sel=p.acts.length?p.acts:ACTS.map(a=>a[0]);
   const A=k=>actVal(r,k,m,p.dog);
-  let act=sel.reduce((s,k)=>s+A(k),0)/sel.length/5;
+  // two or more picks: the weakest one counts extra (60% average, 40% weakest), so a place has to do all your picks well
+  const vals=sel.map(A), mean=vals.reduce((x,y)=>x+y,0)/vals.length;
+  let act=(p.acts.length>=2?0.6*mean+0.4*Math.min(...vals):mean)/5;
   if(p.level==="easy")act=act*0.85+((A("walk")+A("family"))/10)*0.15;
   if(p.level==="hard")act=act*0.85+((A("hike")+Math.max(A("ferrata"),A("raft"),A("para")))/10)*0.15;
   let wx=0.5,hot=false;
@@ -656,7 +658,7 @@ function reasons(s,p){const r=s.r,m=s.m,w=s.w,pro=[],con=[];
   return {pro:pro.slice(0,5),con:con.slice(0,4)};}
 function whyPanel(s,p,i){const q=s.parts,r=s.r,f=x=>(Math.round(x*10)/10).toFixed(1).replace(/\.0$/,"");
   const selTxt=s.sel.map(k=>ACTS.find(a=>a[0]===k)[1].toLowerCase()).join(", ");
-  const rows=[["Things to do",q.act,40,`How well it does ${selTxt} in ${MON[s.m]}${p.level!=="moderate"?`, at ${p.level==="easy"?"an easy":"a challenging"} level`:""}`],
+  const rows=[["Things to do",q.act,40,`How well it does ${selTxt} in ${MON[s.m]}${p.acts.length>=2?" (your weakest pick counts extra)":""}${p.level!=="moderate"?`, at ${p.level==="easy"?"an easy":"a challenging"} level`:""}`],
     ["Weather",q.wx,20,s.w?`About ${s.w[0]}°C highs, ${s.w[1]} wet days and ${s.w[2]} h of sun a day in ${MON[s.m]}${p.cool?"; you asked for not too hot":""}`:"No weather data yet, so it scores halfway"],
     [p.drive?"Driving":"Getting there",q.get,20,p.drive?(s.di.far?"Not a practical drive from the UK":`About ${h(s.di.total)} from Folkestone via the Channel Tunnel`):(s.best?`${s.best.t} min from ${AIR[s.best.ap]}, direct with ${s.best.al.join(", ")}`:"No direct flight from your airport")],
     ["Value",q.value,10,`${["","Good value","Mid-range","Pricey"][r.price]}${r.card&&/free/i.test(r.card)?", plus a free guest card":""}`],
