@@ -1665,6 +1665,19 @@ function carNote(r){if(r.city) return "Gives you the choice of resorts each day,
   if(r.c==="France"&&r.ap==="GVA"&&r.n!=="Avoriaz") return "Hire from the French side of Geneva airport to avoid cross-border fees and get French winter kit.";
   if(r.n==="Avoriaz") return "Avoriaz is car-free: you'd park at the resort entrance. Handy for visiting Morzine or Les Gets.";
   return "Useful for visiting nearby resorts or travelling at your own pace. Check snow-chain rules and resort parking first.";}
+// Before you go extras (23 Nov 2026): GHIC (NHSBSA list: EU, Switzerland, Norway; Andorra not listed), border checks (EES running; ETIAS not yet,
+// no start date as of Oct 2026), and official vignette sellers for drivers.
+const VIG_LINK={swiss:["Swiss e-vignette","https://via.admin.ch/shop/dashboard","Needed on Swiss motorways; valid for the calendar year."],
+  austria:["Austrian digital vignette","https://shop.asfinag.at/","Bought online, it usually starts 18 days later (the cooling-off period), so buy it early or get one at a petrol station near the border."],
+  slovenia:["Slovenian e-vignette","https://evinjeta.dars.si/","A 7-day one is available."],
+  france:["French tolls (péage)","https://www.bipandgo.com/en/","Pay at the booths by card, or get a Bip&Go tag for the fast lanes."]};
+const VIG_BY_ROUTE={FRN:["france"],FRT:["france"],FRS:["france"],CH:["france","swiss"],AT:["austria"],DE:[],ITMB:["france"],ITFR:["france"],ITCH:["france","swiss"],ITAT:["austria"],PYR:["france"],SI:["austria","slovenia"]};
+function beforeExtra(r,p){
+  const ghic=`<div class="kiti"><b>GHIC health card</b><a href="https://www.gov.uk/global-health-insurance-card" target="_blank" rel="noopener">Apply free on GOV.UK ↗</a><span class="via">${r.c==="Andorra"?"Andorra isn't listed as accepting the UK GHIC, so make sure your insurance covers medical care there.":"Covers state healthcare in the EU, Switzerland and Norway. It's free, but it doesn't replace insurance: mountain rescue and helicopter lifts usually aren't covered."}</span></div>`;
+  const border=`<div class="kiti"><b>Border checks</b><a href="https://www.gov.uk/foreign-travel-advice" target="_blank" rel="noopener">GOV.UK travel advice ↗</a><span class="via">The EU's Entry/Exit System takes fingerprints and a photo at the border, so allow extra time, especially at half-term. ETIAS, the EU's travel permit, isn't running yet: don't pay any site that says you need one.</span></div>`;
+  const di=p.drive?driveInfo(r,p):null;
+  const vig=di&&!di.far?(VIG_BY_ROUTE[di.code]||[]).map(k=>{const [t,u,n]=VIG_LINK[k],fr=k==="france";return `<div class="kiti"><b>${t}</b><a href="${u}" target="_blank" rel="noopener">${fr?"Bip&amp;Go toll tags":"Official site"} ↗</a><span class="via">${n}${fr?"":" Buy from the official site: lookalike sites charge extra."}</span></div>`;}).join(""):"";
+  return (IE.has(p.dep)?"":ghic)+border+vig;}
 function travelPanel(r,p,d2,apN){
   const box=(k,title,label,via)=>{const f0=TRAVEL_PARTNER[k],f=f0&&f0(r,p,d2)?f0:null;
     if(!f&&!SHOW_COMING) return ""; return `<div class="kiti"><b>${title}</b>${f?`<a href="${f(r,p,d2)}" target="_blank" rel="noopener">${affTag}${label} ↗</a>`:`<span class="soon">Partner link coming</span>`}<span class="via">${via}</span></div>`;};
@@ -1683,6 +1696,7 @@ function travelPanel(r,p,d2,apN){
     ${box("transfers","Resort transfer",ST_PAGE[r.n]&&ST_PAGE[r.n].includes("-to-")?`Book ${esc(apN)} to ${esc(r.n.replace(/ \(.*\)/,""))} on Suntransfers`:`Transfers from ${esc(apN)} on Suntransfers`,`About ${r.t} min from ${esc(apN)}. Shared shuttles are cheaper; private suits groups or late flights.`)}
 `)+sec("Before you go",`
     ${box("insurance","Winter sports insurance","Get a quote on Coverwise","Standard travel policies often exclude skiing and snowboarding. Check the policy covers what you'll do, such as off-piste and your own board. We don't give insurance advice.")}
+    ${beforeExtra(r,p)}
     ${moneyBox}
 `);}
 function openDetail(i){
