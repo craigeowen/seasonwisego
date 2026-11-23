@@ -1,151 +1,630 @@
 <!doctype html>
-<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SeasonWiseGo Summer · test version</title>
 <meta name="robots" content="noindex,nofollow,noarchive">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23142030'/%3E%3Cpath d='M5 25 L14 9 L19 17 L22 13 L27 25 Z' fill='%23F2F5F8'/%3E%3Cpath d='M14 9 L16.5 13 L13 14 Z' fill='%23D3480F'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <style>
-:root{--sky:#E8F1EA;--snow:#F5F7F4;--card:#FFFFFF;--ink:#142030;--muted:#566476;--line:#D5DDE6;--soft:#EAF0EC;
---accent:#D3480F;--accent-ink:#FFFFFF;--good:#237A36;--warn:#9A5200;--lake:#1C6FD1;
---f-display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;--f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sky:#15221B;--snow:#0D1310;--card:#15201A;--ink:#E4EAF1;--muted:#97A5B5;--line:#2A3A30;--soft:#1C2A22;--accent:#FF7B3F;--accent-ink:#1A0B02;--good:#6FD889;--warn:#FFB65C;--lake:#4D9BF0;color-scheme:dark}}
-:root[data-theme="dark"]{--sky:#15221B;--snow:#0D1310;--card:#15201A;--ink:#E4EAF1;--muted:#97A5B5;--line:#2A3A30;--soft:#1C2A22;--accent:#FF7B3F;--accent-ink:#1A0B02;--good:#6FD889;--warn:#FFB65C;--lake:#4D9BF0;color-scheme:dark}
+.sub .fb{display:block;margin-top:2px}.sub .fb.warn{color:var(--accent)}.flyalt{margin:8px 0;padding:8px 10px;border-left:3px solid var(--accent);background:color-mix(in srgb,var(--accent) 7%,transparent)}.flyalt p{margin:4px 0}.flyalt .fa{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:space-between}.flycmp table{width:100%;border-collapse:collapse;font-size:.92rem;border:1px solid color-mix(in srgb,currentColor 18%,transparent)}.flycmp th,.flycmp td{text-align:left;padding:10px 12px;border-bottom:1px solid color-mix(in srgb,currentColor 18%,transparent);vertical-align:middle}.flycmp thead th{background:color-mix(in srgb,currentColor 6%,transparent);vertical-align:bottom}.flycmp th small{display:block;font-weight:400;font-size:.85em;white-space:nowrap}.flycmp th:not(:first-child),.flycmp td:not(:first-child){text-align:center;width:24%;border-left:1px solid color-mix(in srgb,currentColor 18%,transparent)}.flycmp tbody tr:nth-child(even) td{background:color-mix(in srgb,currentColor 3%,transparent)}.flycmp td small{color:var(--muted,#666)}.flycmp .fch{font-weight:700;margin:6px 0 4px}.flycmp .fdq{color:var(--muted,#666);font-size:.85em}.flycmp .via{font-size:.8rem;color:var(--muted,#666)}.flydays ul{margin:.4em 0 .2em;padding-left:1.1em}.flydays li{margin:.25em 0;line-height:1.4}.flydays .via a{margin-left:.4em}
+.offs{margin:.5rem 0 0;font-size:.86rem;line-height:1.45}.offs b{font-weight:600}
+.head .site+.site{margin-left:.6rem}
+/* Layout: trail-map utility — form panel left (sticky on desktop), ranked resort cards right; stacks on phones. */
+:root{
+  --sky:#E3ECF5; --r1:#C9D7E6; --r2:#9FB4CB; --r3:#5F7792; --cap:#FFFFFF;
+  --snow:#F4F6F9; --card:#FFFFFF; --ink:#142030; --muted:#566476; --line:#D5DDE6; --soft:#E8EDF3;
+  --accent:#D3480F; --accent-ink:#FFFFFF;
+  --good:#237A36; --warn:#9A5200;
+  --p-green:#2F9E44; --p-blue:#1C6FD1; --p-red:#D92B2B; --p-black:#142030;
+  --f-display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --sky:#16212D; --r1:#1D2A38; --r2:#253546; --r3:#30445A; --cap:#C9D6E3;
+  --snow:#0D131A; --card:#151F2A; --ink:#E4EAF1; --muted:#97A5B5; --line:#2A3746; --soft:#1C2834;
+  --accent:#FF7B3F; --accent-ink:#1A0B02; --good:#6FD889; --warn:#FFB65C;
+  --p-green:#4CC266; --p-blue:#4D9BF0; --p-red:#FF5C5C; --p-black:#E4EAF1; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --sky:#16212D; --r1:#1D2A38; --r2:#253546; --r3:#30445A; --cap:#C9D6E3;
+  --snow:#0D131A; --card:#151F2A; --ink:#E4EAF1; --muted:#97A5B5; --line:#2A3746; --soft:#1C2834;
+  --accent:#FF7B3F; --accent-ink:#1A0B02; --good:#6FD889; --warn:#FFB65C;
+  --p-green:#4CC266; --p-blue:#4D9BF0; --p-red:#FF5C5C; --p-black:#E4EAF1; color-scheme:dark}
+
 *{box-sizing:border-box}
-body{margin:0;background:var(--snow);color:var(--ink);font:15px/1.5 var(--f-body)}
-.draft{background:var(--accent);color:var(--accent-ink);text-align:center;font-weight:600;padding:6px 16px;font-size:13px}
-header{background:var(--sky);padding:28px 16px 22px;border-bottom:1px solid var(--line)}
-header .in,main{max-width:1180px;margin:0 auto}
-h1{font:800 clamp(34px,6vw,56px)/1 var(--f-display);margin:0;letter-spacing:.5px;text-transform:uppercase}
+body{background:var(--snow);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:24px}
+header{position:relative;overflow:hidden;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:8px 24px;background:var(--sky);border-radius:10px;padding:22px 24px 92px;border:1px solid var(--line)}
+header > *{position:relative;z-index:1}
+.themesw{position:absolute;top:12px;right:14px;display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--card)}
+.themesw button{font:inherit;font-size:.72rem;font-weight:600;border:0;background:transparent;color:var(--muted);padding:4px 10px;cursor:pointer}
+.themesw button[aria-pressed="true"]{background:var(--ink);color:var(--card)}
+.themesw button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+header .tag{margin-top:26px}
+@media (max-width:600px){.themesw{position:static;order:-1;align-self:flex-end;margin-left:auto}header .tag{margin-top:0}}
+.ridges{position:absolute;left:0;right:0;bottom:0;width:100%;height:84px;z-index:0;display:block}
+@media (max-width:600px){header{padding:18px 18px 76px}.ridges{height:68px}}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(2.2rem,5vw,3.2rem);line-height:.9;margin:0;letter-spacing:.01em;text-transform:uppercase}
 h1 span{color:var(--accent)}
-.lede{margin:8px 0 0;color:var(--muted);max-width:640px}
-main{display:grid;grid-template-columns:330px 1fr;gap:24px;padding:22px 16px 60px}
-@media (max-width:860px){main{grid-template-columns:1fr}}
-form{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;align-self:start;position:sticky;top:12px}
+.tag{color:var(--muted);max-width:52ch;margin:0;font-size:.92rem}
+.grid{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+
+form{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:18px;display:grid;gap:18px;position:sticky;top:max(16px,env(safe-area-inset-top,0px))}
+/* desktop: the settings panel scrolls on its own so every control is reachable while it stays in view */
+@media (min-width:861px){
+  form{max-height:calc(100vh - 140px);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+  form.mb{box-shadow:inset 0 -28px 18px -18px rgba(20,32,48,.22)}
+  form::-webkit-scrollbar{width:10px;-webkit-appearance:none}
+  form::-webkit-scrollbar-track{background:var(--soft);border-radius:6px}
+  form::-webkit-scrollbar-thumb{background:var(--muted);border-radius:6px;border:2px solid var(--soft)}
+}
+@supports not selector(::-webkit-scrollbar){@media (min-width:861px){form{scrollbar-width:thin;scrollbar-color:var(--muted) var(--soft)}}}
 @media (max-width:860px){form{position:static}}
-label.f{display:block;font-weight:600;font-size:13px;margin:12px 0 4px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
-select,input[type=date],input[type=number]{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
-.row2{display:grid;grid-template-columns:1fr 90px;gap:8px}
+fieldset{border:0;margin:0;padding:0;display:grid;gap:10px;min-width:0}
+legend{font-family:var(--f-display);font-weight:700;font-size:1.1rem;text-transform:uppercase;letter-spacing:.06em;padding:0;margin-bottom:6px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}.row>.f{min-width:0}
+input[type=date]{-webkit-appearance:none;appearance:none;display:block;box-sizing:border-box;max-width:100%;min-height:2.3em}input[type=date]::-webkit-date-and-time-value{text-align:left}
+label.f{display:grid;gap:4px;font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+select,input[type=date],input[type=number]{font:inherit;font-size:.95rem;color:var(--ink);background:var(--snow);border:1px solid var(--line);border-radius:4px;padding:7px 8px;width:100%;min-width:0;text-transform:none;letter-spacing:0}
+input[type=range]{width:100%;accent-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.wt{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}
+.wt .nm{font-size:.9rem;font-weight:500}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{font-size:.72rem;font-weight:600;padding:5px 8px;cursor:pointer;color:var(--muted);border-left:1px solid var(--line);user-select:none}
+.seg label:first-of-type{border-left:0}
+.seg input:checked+label{background:var(--ink);color:var(--snow)}
+.seg input:focus-visible+label{outline:2px solid var(--accent);outline-offset:-2px}
+
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chips label{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:13.5px;cursor:pointer;background:var(--soft)}
-.chips input{accent-color:var(--accent)}
-.toggle{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:14px}
-button.go{margin-top:16px;width:100%;padding:12px;border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);font:700 16px var(--f-body);cursor:pointer}
-.note{font-size:12.5px;color:var(--muted);margin-top:10px}
-#sum{color:var(--muted);margin:0 0 12px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
-.head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
-.rank{font:500 13px var(--f-mono);color:var(--muted)}
-.card h2{font:800 30px/1 var(--f-display);margin:0;text-transform:uppercase}
-.cty{color:var(--muted)}
-.score{margin-left:auto;font:800 34px/1 var(--f-display);color:var(--accent)}
-.score small{font:500 12px var(--f-mono);color:var(--muted);margin-left:4px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 18px;margin:12px 0;padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.stats dt{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
-.stats dd{margin:2px 0 0;font:500 14px var(--f-mono)}
-.stats dd .s{display:block;font:13px var(--f-body);color:var(--muted)}
-.acts{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13.5px}
-.acts span b{display:inline-block;letter-spacing:1px;color:var(--good)}
-.acts .sel{font-weight:600}.acts .closed{color:var(--muted)}.acts .closed i{font-style:normal;color:var(--warn)}
-.hi{margin:10px 0 0}
-.cardnote{margin:8px 0 0;padding:8px 10px;border-left:3px solid var(--good);background:color-mix(in srgb,var(--good) 8%,transparent);font-size:14px}
-.wx{display:flex;gap:4px;margin-top:10px;overflow-x:auto}
-.wx div{flex:1;min-width:44px;text-align:center;font-size:12px;padding:6px 2px;border-radius:8px;background:var(--soft);color:var(--muted)}
-.wx div.on{outline:2px solid var(--accent);color:var(--ink);font-weight:600}
-.wx b{display:block;font:500 13px var(--f-mono);color:var(--ink)}
-.warn{color:var(--warn)}
-.links{margin-top:10px;font-size:14px}.links a{color:var(--ink);margin-right:14px}
-footer{max-width:1180px;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:13px}footer a{color:var(--muted);text-underline-offset:3px;text-decoration-color:var(--accent)}
-</style></head><body>
-<div class="draft">Test version, not public yet. Spotted something? <a href="mailto:admin@seasonwisego.com?subject=Summer%20test%20feedback" style="color:inherit">Email feedback</a></div>
-<header><div class="in"><h1>SeasonWise<span>Go</span> Summer</h1>
-<p class="lede">Lakes and mountains from your nearest airport. Pick your dates and what you love doing, and we rank destinations by direct flights, weather in your month and what there is to do.</p></div></header>
-<main>
-<form id="f" onsubmit="return false">
-  <label class="f" for="dep">Fly from</label>
-  <select id="dep"></select>
-  <label class="f" for="dep2">Or also from (optional)</label>
-  <select id="dep2"><option value="">None</option></select>
-  <label class="f" for="d1">Going out</label>
-  <div class="row2"><input type="date" id="d1" value="2027-07-17" min="2027-04-01" max="2027-10-31"><input type="number" id="nights" value="7" min="2" max="21" aria-label="Nights"></div>
-  <label class="f">What do you want to do?</label>
-  <div class="chips" id="acts"></div>
-  <label class="f" for="who">Who's going</label>
-  <select id="who"><option value="adults">Couple or friends</option><option value="young">Family, young children</option><option value="grown">Adult family group (grown-up children)</option></select>
-  <label class="f" for="level">Level</label>
-  <select id="level"><option value="easy">Easy: gentle walks and rides</option><option value="moderate" selected>Moderate</option><option value="hard">Challenging: big days out</option></select>
-  <label class="toggle"><input type="checkbox" id="cool"> Not too hot, please</label>
-  <button class="go" id="go" type="button">Find my summer</button>
-  <p class="note">Flights: Ryanair, easyJet and Jet2 timetables for summer 2027 (checked 17 Nov 2026), plus main airlines to Geneva, Zurich, Munich, Kraków, Oslo and Bergen. Weather: 10-year averages, 2016 to 2025.</p>
-</form>
-<section><p id="sum"></p><div id="out"></div></section>
-</main>
-<footer>© 2026 SeasonWiseGo. Test version: transfer times are approximate; always check flights and guest-card terms before booking. <a href="privacy.html">Privacy and cookies</a> · <a href="affiliate-disclosure.html">How we make money</a> · <a href="mailto:admin@seasonwisego.com?subject=Summer%20test%20feedback">Send feedback</a></footer>
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 11px 5px 8px;font-size:.85rem;cursor:pointer;user-select:none}
+.chip input:checked+label{border-color:var(--ink);background:var(--soft);font-weight:600}
+.chip input:focus-visible+label{outline:2px solid var(--accent)}
+.mk{width:12px;height:12px;flex:none;display:inline-block}
+.mk.g{background:var(--p-green);border-radius:50%}
+.mk.b{background:var(--p-blue)}
+.mk.r{background:var(--p-red);transform:rotate(45deg) scale(.85)}
+.mk.k{background:var(--p-black);transform:rotate(45deg) scale(.85)}
+.toggle{display:flex;align-items:center;gap:8px;font-size:.9rem}
+.toggle input{accent-color:var(--accent);width:16px;height:16px}
+.hint{font-size:.78rem;color:var(--muted);margin:0}
+.out{font-family:var(--f-mono);font-size:.85rem;color:var(--ink);text-transform:none;letter-spacing:0}
+
+.results{display:grid;gap:16px;min-width:0}
+.sumbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 16px}
+.sumbar p{margin:0;color:var(--muted);font-size:.9rem}
+.btn{font:inherit;font-size:.85rem;font-weight:600;border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:4px;padding:6px 12px;cursor:pointer}
+.btn:hover{background:var(--soft)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;display:grid;grid-template-columns:112px minmax(0,1fr);overflow:hidden}
+@media (max-width:480px){.card{grid-template-columns:92px minmax(0,1fr)}}
+.card.top{border-color:var(--ink);box-shadow:0 2px 0 var(--ink)}
+.alt{background:var(--soft);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:12px 0 16px;min-height:320px}
+.ah{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:0 10px 10px}
+.plot{position:relative;flex:1;margin:16px 0 0 10px}
+.tk{position:absolute;left:0;right:0;border-top:1px solid var(--line)}
+.tk em{position:absolute;right:6px;top:-15px;font-style:normal;font-family:var(--f-mono);font-size:.64rem;color:var(--muted)}
+.ab{position:absolute;left:0;width:12px;background:var(--ink);border-radius:2px}
+.ab.gl{border-top:10px solid var(--p-blue)}
+.al{position:absolute;left:18px;right:4px;transform:translateY(-50%);background:var(--soft);display:grid;font-family:var(--f-mono);font-size:.8rem;font-weight:500;line-height:1.15;color:var(--ink);padding:2px 0;z-index:1}
+.al small{font-family:var(--f-body);font-size:.64rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.body{padding:14px 16px 16px;display:grid;gap:10px;min-width:0}
+.head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.rank{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.card h2{font-family:var(--f-display);font-weight:800;font-size:1.75rem;line-height:1;margin:0;text-transform:uppercase;letter-spacing:.01em;text-wrap:balance}
+.ctry{font-size:.85rem;color:var(--muted)}
+.site{font-size:.82rem;font-weight:600;color:var(--ink);text-decoration-color:var(--accent);text-underline-offset:3px}
+.score{margin-left:auto;display:flex;align-items:baseline;gap:4px}
+.score b{font-family:var(--f-display);font-size:2rem;line-height:1;color:var(--accent)}
+.score small{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:8px;margin:0}
+.stats div{border-top:1px solid var(--line);padding-top:5px;min-width:0}
+.stats dt{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+.stats dd{margin:0;font-family:var(--f-mono);font-size:.88rem;font-variant-numeric:tabular-nums}
+.why{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:4px 20px}
+.why ul{list-style:none;margin:0;padding:0;display:grid;gap:3px;font-size:.9rem}
+.why li{display:grid;grid-template-columns:16px minmax(0,1fr);gap:6px}
+.why li::before{font-weight:700}
+.pro li::before{content:"+";color:var(--good)}
+.con li::before{content:"!";color:var(--warn)}
+.terrain{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.78rem;color:var(--muted)}
+.terrain span{display:inline-flex;align-items:center;gap:5px}
+.pips{display:inline-flex;gap:2px}
+.pips i{width:6px;height:10px;background:var(--line);display:block;border-radius:1px}
+.pips i.on{background:var(--ink)}
+.links{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85rem;padding-top:4px;border-top:1px dashed var(--line)}
+.links a{color:var(--ink);font-weight:600;text-decoration-color:var(--accent);text-underline-offset:3px}
+.links .lbl{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;align-self:center}
+.snow{display:grid;gap:6px}
+.snowhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;font-size:.8rem;color:var(--muted)}
+.snowhead b{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink)}
+.fcl{margin-left:auto;color:var(--ink);font-weight:600;text-decoration-color:var(--accent);text-underline-offset:3px}
+.fcl.live{color:var(--accent)}
+.fcn{font-size:.72rem}
+.months{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;width:100%;max-width:300px}
+.mo{display:grid;justify-items:center;gap:2px;font-size:.72rem;color:var(--muted);border-radius:3px;padding:3px 0}
+.mo.on{background:var(--soft);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1px var(--ink)}
+.mo .bar{width:14px;height:34px;background:var(--line);border-radius:2px;display:flex;align-items:flex-end;overflow:hidden}
+.mo .bar i{display:block;width:100%}
+.mo .bar i.hi{background:var(--p-green)}
+.mo .bar i.md{background:var(--p-blue)}
+.mo .bar i.lo{background:var(--warn)}
+.snowbody{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px}
+.skey{list-style:none;margin:0;padding:0;display:grid;gap:3px;font-size:.74rem;color:var(--muted)}
+.skey li{display:flex;align-items:center;gap:6px}
+.skey i{width:10px;height:10px;border-radius:2px;display:inline-block;flex:none}
+.skey i.hi{background:var(--p-green)}
+.skey i.md{background:var(--p-blue)}
+.skey i.lo{background:var(--warn)}
+.skey i.cur{background:var(--soft);box-shadow:inset 0 0 0 1px var(--ink)}
+.mo .mv{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.plan{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padding-top:8px;max-width:70ch}
+.plan b{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink)}
+.plan ul{margin:4px 0 0;padding-left:18px;display:grid;gap:2px}
+.drv .kitg{padding:10px;border-top:1px solid var(--line);grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.drv .kiti span:not(.via){font-weight:600}
+.trstatus{margin:0;padding:8px 10px;border-top:1px solid var(--line);font-size:.84rem}
+.trstatus .ok{color:var(--good);font-weight:600}
+.trstatus .btn.sm{margin-left:4px}
+.trlinks{display:flex;flex-wrap:wrap;gap:6px 14px}
+.trlinks a,.trline a{color:var(--ink);font-weight:600;text-decoration-color:var(--accent);text-underline-offset:3px;margin-left:8px}
+.trlinks a{margin-left:0}
+.trline{margin:0;font-size:.84rem;color:var(--muted)}
+.trline b{color:var(--ink)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.05);background:var(--accent)}
+.findbar{position:sticky;bottom:0;margin:0 -18px -18px;padding:12px 18px 16px;border-radius:0 0 6px 6px;background:var(--card);border-top:1px solid var(--line);z-index:2}
+.findbar .btn{width:100%;padding:10px 14px;font-size:.95rem}
+.ready{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:28px 24px;display:none;gap:12px;justify-items:start}
+.ready h2{margin:0;font-family:var(--f-display);font-weight:800;font-size:1.6rem;text-transform:uppercase;letter-spacing:.02em;text-wrap:balance}
+.ready p{margin:0;color:var(--muted);max-width:60ch}
+.results.pre .ready{display:grid}
+.results.pre .sumbar,.results.pre #list,.results.pre .affnote,.results.pre .adbar,.results.pre #sharebox,.results.pre .note,.results.pre .plan{display:none}
+.stale{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border:1px solid var(--accent);border-radius:6px;background:var(--card);font-size:.88rem;position:sticky;top:max(8px,env(safe-area-inset-top,0px));z-index:3}
+.stale[hidden]{display:none}
+.sx{margin-left:auto;display:flex;align-items:center;gap:10px}
+.sx .score{margin-left:0}
+.card.collapsed{grid-template-columns:minmax(0,1fr)}
+@media (max-width:600px){.card.collapsed .head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:2px 8px}.card.collapsed .head .rank{grid-row:1}.card.collapsed .head h2{grid-column:2;min-width:0}.card.collapsed .head .sx{grid-column:3;grid-row:1 / span 2;align-self:center;flex-direction:column;align-items:flex-end;gap:4px}.card.collapsed .head .ctry{grid-column:2;grid-row:2}.card.collapsed .head .more{grid-column:2;grid-row:3;justify-self:start}}
+.card.collapsed .alt{display:none}
+.card.collapsed .body{padding:10px 14px;gap:4px}
+.card.collapsed .body > :not(.head):not(.mini){display:none}
+.card.collapsed .site,.card.collapsed .more small,.card.collapsed .whyb{display:none}
+.card.collapsed h2{font-size:1.45rem}
+.card.collapsed .score b{font-size:1.6rem}
+.card:not(.collapsed) .mini{display:none}
+.mini{margin:0;display:flex;flex-wrap:wrap;gap:2px 0;font-size:.84rem;color:var(--muted)}
+.mini span:not(:last-child)::after{content:"\00b7";margin:0 8px;color:var(--line)}
+.xpand{font:inherit;font-size:.78rem;font-weight:600;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:3px 10px 3px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;align-self:center}
+.xpand span{width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-top:-3px}
+.xpand[aria-expanded="true"] span{transform:rotate(-135deg);margin-top:3px}
+.xpand:hover{border-color:var(--ink)}
+.whyb{flex-basis:100%;text-align:right;font:inherit;font-size:.72rem;font-weight:600;color:var(--ink);background:transparent;border:0;padding:2px 0;cursor:pointer;text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px}
+.score{flex-wrap:wrap;justify-content:flex-end}
+.whyp{border:1px solid var(--line);border-radius:4px;background:var(--snow);overflow-x:auto}
+.whyp table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:460px}
+.whyp th{text-align:left;font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;padding:6px 10px}
+.whyp td{padding:5px 10px;border-top:1px solid var(--line);vertical-align:top}
+.whyp td:first-child{font-weight:600;white-space:nowrap}
+.whyp .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.whyp .neg td{color:var(--warn)}
+.whyp .tot td{font-weight:700;border-top:2px solid var(--ink)}
+.wbar{display:inline-block;width:60px;height:6px;background:var(--line);border-radius:3px;overflow:hidden;vertical-align:middle}
+.wbar i{display:block;height:100%;background:var(--accent)}
+.rbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;flex-basis:100%;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:6px}
+.folds{display:grid;gap:0;border-top:1px solid var(--line);padding-top:12px}
+.foldhint{margin:0 0 6px;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.fold{border-bottom:1px solid var(--line)}
+.fold summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) 16px;align-items:baseline;gap:10px;padding:10px 2px}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);justify-self:end;align-self:center;margin-top:-4px;transition:transform .15s}
+.fold[open] summary::after{transform:rotate(-135deg);margin-top:4px}
+.fold summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.ft{font-family:var(--f-display);font-weight:700;font-size:1.05rem;text-transform:uppercase;letter-spacing:.06em}
+.fs{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.fold[open] .fs{visibility:hidden}
+.fb{display:grid;gap:10px;padding:2px 2px 14px}
+.sortby{display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sortby select{font:inherit;font-size:.85rem;font-weight:600;text-transform:none;letter-spacing:0;color:var(--ink);background:var(--card);border:1px solid var(--ink);border-radius:4px;padding:5px 8px}
+.grp{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:8px 0 -4px;padding-bottom:6px;border-bottom:2px solid var(--ink);font-family:var(--f-display);font-weight:800;font-size:1.35rem;text-transform:uppercase;letter-spacing:.03em}
+.grp small{font-family:var(--f-body);font-size:.8rem;font-weight:500;color:var(--muted);text-transform:none;letter-spacing:0}
+.adbar{display:grid;gap:6px}
+.adnote{margin:0;font-size:.82rem;color:var(--muted);display:flex;gap:8px;align-items:baseline}
+.adtag{display:inline-block;font-family:var(--f-body);font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;line-height:1;padding:3px 6px;border-radius:3px;border:1.5px solid var(--accent);color:var(--accent);background:var(--card);margin-right:6px;vertical-align:2px;text-decoration:none}
+.adnote .adtag{margin-right:0;flex:none}
+.affnote{margin:0;font-size:.85rem;color:var(--ink);display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.affnote .adtag{margin-right:0}
+.affnote a{color:var(--muted);text-decoration-color:var(--accent);text-underline-offset:3px}
+.go .adtag{margin-right:5px}
+.spon{border:1px dashed var(--muted);border-radius:6px;background:transparent;padding:12px 16px;display:grid;gap:8px}
+.sponhead{display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--muted)}
+.sponhead .adtag{margin:0}
+.sponbody{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px}
+.spontext{flex:1;min-width:220px;display:grid;gap:3px}
+.sponname{font-family:var(--f-display);font-weight:800;font-size:1.3rem;text-transform:uppercase;letter-spacing:.02em;line-height:1}
+.spontext p{margin:0;font-size:.88rem;color:var(--ink);max-width:60ch}
+.sponfine{font-size:.72rem;color:var(--muted);font-style:italic}
+.sponcta{cursor:default;opacity:.85}
+.spon-sm{padding:10px 12px}
+.spon-sm .sponname{font-size:1.05rem}
+.cookiebar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -2px 10px rgba(0,0,0,.08);display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 16px;font-size:.85rem;
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.cookiebar p{margin:0;color:var(--ink)}
+.cbtn{display:flex;gap:8px}
+body.cbpad{padding-bottom:140px}
+.rchips{display:flex;flex-wrap:wrap;gap:6px}
+.rchips:empty{display:none}
+.rchip{font:inherit;font-size:.85rem;font-weight:600;border:1px solid var(--ink);background:var(--soft);color:var(--ink);border-radius:999px;padding:4px 10px 4px 12px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.rchip span{color:var(--muted);font-weight:700;font-size:1rem;line-height:1}
+.rchip:hover span,.rchip:focus-visible span{color:var(--accent)}
+.sharebox{display:inline-flex;align-items:center;gap:8px;font-size:.8rem}
+.sharebox[hidden]{display:none}
+.sharebox #shareCode{width:auto;padding:5px 8px;font-size:.95rem}
+.sharemsg{color:var(--good);font-weight:600}
+.sharelbl{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sharebox{padding-right:6px;border-right:1px solid var(--line)}
+.sharebox input,.ocrow input{font-family:var(--f-mono);font-size:1rem;letter-spacing:.08em;color:var(--ink);background:var(--snow);border:1px solid var(--line);border-radius:4px;padding:7px 8px;width:100%;min-width:0}
+.saved{background:var(--card);border:1px solid var(--line);border-radius:6px}
+.saved summary{cursor:pointer;padding:10px 14px;font-family:var(--f-display);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:1rem}
+.saved summary span{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);letter-spacing:0}
+.savedbody{display:grid;gap:12px;padding:0 14px 14px}
+#savedList{list-style:none;margin:0;padding:0;display:grid}
+#savedList li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:8px 0;border-top:1px solid var(--line)}
+#savedList li.none{color:var(--muted);font-size:.85rem}
+.sv{flex:1;min-width:180px;display:grid}
+.sv b{font-size:.9rem;font-weight:600}
+.sv small{color:var(--muted);font-size:.75rem}
+.btn.ghost{border-color:var(--line);color:var(--muted)}
+.ocrow{display:flex;gap:8px}
+.opencode{display:grid;gap:6px}
+.holwarn{flex-basis:100%;border:1px solid var(--warn);color:var(--ink);background:var(--card);border-radius:4px;padding:8px 12px;font-size:.88rem}
+.holwarn b{color:var(--warn)}
+.holwarn.core{border-width:2px}
+.notlist{margin-top:18px;border:1px solid var(--line);border-left:3px solid var(--accent);background:var(--card);border-radius:4px;padding:12px 14px;font-size:.88rem}
+.notlist h3{font-family:var(--f-display);text-transform:uppercase;font-size:1.05rem;letter-spacing:.02em;margin:0 0 4px}
+.notlist>p{margin:0 0 8px;color:var(--muted)}
+.notlist ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.notlist li{padding-top:10px;border-top:1px solid var(--line)}
+.notlist li:first-child{border-top:0;padding-top:0}
+.notlist .fx{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.notlist .muted{color:var(--muted)}
+.whyhow{margin:8px 0 0;font-size:.8rem}
+.mini .strong{color:var(--good,var(--ink));font-weight:600}
+.holwarn .holalt{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
+.btn.sm{padding:3px 9px;font-size:.78rem}
+.stats dd .sub{display:block;font-family:var(--f-body);font-size:.7rem;color:var(--muted);line-height:1.3}
+.stats .bud dd{color:var(--accent);font-weight:500}
+.bline{margin:0;font-size:.8rem;color:var(--muted)}
+.city{border:1px solid var(--line);border-radius:4px;background:var(--snow);min-width:0}
+.cityhead{display:flex;flex-wrap:wrap;gap:2px 12px;align-items:baseline;padding:8px 10px;border-bottom:1px solid var(--line);font-size:.85rem}
+.cityhead b{font-family:var(--f-display);font-size:1.05rem;text-transform:uppercase;letter-spacing:.05em}
+.cityhead span{color:var(--muted);font-size:.8rem}
+.tscroll{overflow-x:auto}
+.city table{width:100%;border-collapse:collapse;font-size:.84rem;min-width:520px}
+.city th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;padding:6px 10px}
+.city td{padding:6px 10px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+.city td:first-child{font-weight:600;white-space:normal}
+.city tr.pick td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.xp{font-size:.68rem;font-weight:600;color:var(--warn);border:1px solid currentColor;border-radius:3px;padding:0 4px;margin-left:4px;white-space:nowrap}
+.fit{display:inline-block;width:48px;height:6px;background:var(--line);border-radius:3px;margin-right:6px;vertical-align:middle;overflow:hidden}
+.fit i{display:block;height:100%;background:var(--ink)}
+.note{font-size:.8rem;color:var(--muted);margin:0;max-width:70ch}
+.rn{all:unset;cursor:pointer;text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:2px;text-underline-offset:4px}
+.rn:hover{color:var(--accent)}
+.rn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+dialog#dt{border:1px solid var(--ink);border-radius:6px;background:var(--card);color:var(--ink);padding:0;width:min(640px,calc(100vw - 32px));max-height:calc(100vh - 48px)}
+dialog#dt::backdrop{background:rgba(13,19,26,.55)}
+.dh{display:flex;align-items:baseline;gap:8px 12px;flex-wrap:wrap;padding:16px 18px 12px;border-bottom:2px solid var(--ink)}
+.dh h3{font-family:var(--f-display);font-weight:800;font-size:1.8rem;line-height:1;margin:0;text-transform:uppercase}
+.dh .x{margin-left:auto}
+.db{padding:14px 18px 18px;display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.db>*{min-width:0}
+.leg{border:1px solid var(--line);border-radius:4px;background:var(--snow)}
+.leg .cityhead{border-bottom:1px solid var(--line)}
+.leg table{width:100%;border-collapse:collapse;font-size:.84rem;min-width:480px}
+.leg th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;padding:6px 10px}
+.leg td{padding:6px 10px;border-top:1px solid var(--line);color:var(--muted)}
+.ph{display:inline-block;height:9px;border-radius:2px;background:var(--line);vertical-align:middle}
+.pend{border-left:3px solid var(--accent);padding:6px 10px;font-size:.84rem;margin:0;background:var(--soft)}
+.acc{display:grid;gap:8px}
+.accmix{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.accmix li{display:inline-flex;align-items:baseline;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.82rem;background:var(--snow)}
+.accmix li b{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700}
+.accmix li.l3{border-color:var(--ink)}
+.accmix li.l3 b{color:var(--good)}
+.accmix li.l1{color:var(--muted)}
+.fb{margin:4px 0 0;font-size:.82rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px}
+.fb a{color:var(--ink);font-weight:600;text-decoration-color:var(--accent);text-underline-offset:3px}
+.stays{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;margin-top:2px}
+.stays a{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:4px;padding:8px 10px;background:var(--card);color:var(--ink);text-decoration:none;font-weight:600;font-size:.9rem}
+.stays a:hover{border-color:var(--accent)}
+.stays a span{display:grid}
+.stays small{font-weight:400;font-size:.74rem;color:var(--muted)}
+.stays .adtag{margin-right:0}
+
+.acc h4,.kit h4{margin:6px 0 2px;font-family:var(--f-display);font-size:1.15rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink);padding-bottom:4px;border-bottom:2px solid var(--accent);justify-self:start}
+.accg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px}
+.acci{border:1px solid var(--line);border-radius:4px;padding:6px 8px;display:grid;gap:4px;font-size:.84rem;background:var(--snow)}
+.acci .lv{display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.acci.l3{border-color:var(--ink);font-weight:600}
+.acci.l1{color:var(--muted)}
+a.acci{color:inherit;text-decoration:none;cursor:pointer}
+a.acci:hover{border-color:var(--accent);background:var(--soft)}
+.kit{display:grid;gap:6px}
+
+.kitg{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px}
+.kiti{border:1px solid var(--line);border-radius:4px;padding:8px 10px;background:var(--snow);display:grid;gap:4px;font-size:.84rem}
+.kiti b{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.kiti a{color:var(--ink);font-weight:600;text-decoration-color:var(--accent);text-underline-offset:3px}
+.kiti .soon{font-size:.78rem;font-weight:600;color:var(--muted);border:1px dashed var(--line);border-radius:3px;padding:1px 6px;justify-self:start}
+.kiti .via{font-size:.74rem;color:var(--muted)}
+a.acci .go{font-size:.72rem;color:var(--accent);font-weight:600}
+.more{font:inherit;font-size:.78rem;font-weight:700;color:var(--accent);background:transparent;border:1.5px solid var(--accent);border-radius:999px;padding:3px 11px;cursor:pointer;display:inline-flex;align-items:baseline;gap:6px;white-space:nowrap}
+.more small{font-weight:500;color:var(--muted);font-size:.72rem}
+.more:hover{background:var(--accent);color:var(--accent-ink)}
+.more:hover small{color:var(--accent-ink)}
+@media (max-width:480px){.more small{display:none}}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:6px;padding:24px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.card{animation:in .25s ease both}}
+@keyframes in{from{transform:translateY(4px)}to{transform:none}}
+</style>
+<style>.sitefoot{border-top:1px solid var(--line);padding-top:14px;color:var(--muted);font-size:.85rem;display:flex;flex-wrap:wrap;gap:4px 16px;justify-content:center}.sitefoot a{color:var(--muted);text-decoration-color:var(--accent);text-underline-offset:3px}</style>
+<style>
+.testbar{background:var(--accent);color:var(--accent-ink);text-align:center;font-weight:600;font-size:.85rem;padding:6px 12px;border-radius:6px}
+.testbar a{color:inherit}
+.card.nr{grid-template-columns:minmax(0,1fr)}
+.wxs .months{grid-template-columns:repeat(7,minmax(0,1fr));max-width:420px}
+.mo .bar{height:44px}
+.mo .mw{font-size:.66rem;white-space:nowrap}
+.wxhow{margin:0;font-size:.78rem;color:var(--muted);max-width:62ch}
+.acts .sel{color:var(--ink);font-weight:600}
+.acts .closed{font-style:normal;color:var(--warn)}
+.dogbox{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;padding:12px 16px;font-size:.88rem}
+.dogbox ul{margin:6px 0 8px;padding-left:18px;display:grid;gap:4px}
+.dogbox a{color:var(--ink);text-decoration-color:var(--accent);text-underline-offset:3px}
+.hint{margin:0;font-size:.8rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="testbar">Test version, not public yet. Spotted something? <a href="mailto:admin@seasonwisego.com?subject=Summer%20test%20feedback">Email feedback</a></div>
+  <header>
+    <svg class="ridges" viewBox="0 0 1200 84" preserveAspectRatio="none" aria-hidden="true">
+      <polygon fill="var(--r1)" points="0,52 90,30 170,44 260,14 340,36 430,20 520,40 610,10 700,34 790,22 880,42 980,16 1070,38 1200,24 1200,84 0,84"/>
+      <polygon fill="var(--r2)" points="0,64 110,40 200,58 300,30 380,54 470,36 560,60 660,32 760,56 850,42 950,62 1050,38 1140,56 1200,46 1200,84 0,84"/>
+      <polygon fill="var(--r3)" points="0,76 140,58 250,72 360,54 470,74 580,60 700,78 820,62 930,76 1040,60 1200,72 1200,84 0,84"/>
+    </svg>
+    <h1>SeasonWiseGo <span>Summer</span></h1>
+    <p class="tag">Lakes and mountains you can reach easily from home. Pick your dates and what you love doing, and it ranks destinations by getting there, the weather in your month and what there is to do.</p>
+    <div class="themesw" role="group" aria-label="Colour theme">
+      <button type="button" data-th="light">Light</button><button type="button" data-th="dark">Dark</button><button type="button" data-th="auto">Device</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <form id="f" autocomplete="off" onsubmit="return false">
+      <fieldset>
+        <legend>Your trip</legend>
+        <div class="row">
+          <label class="f">Flying from
+            <select id="dep"></select>
+          </label>
+          <label class="f">Or also from
+            <select id="dep2"><option value="">None</option></select>
+          </label>
+        </div>
+        <div class="row">
+          <label class="f">Going out
+            <input type="date" id="d1" value="2027-07-17" min="2027-04-01" max="2027-10-31">
+          </label>
+          <label class="f">Nights
+            <select id="nights"><option>3</option><option>4</option><option>5</option><option>6</option><option selected>7</option><option>10</option><option>14</option></select>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>What you're after</legend>
+        <div class="chips" id="acts"></div>
+        <label class="f">Who's going
+          <select id="who"><option value="adults">Couple or friends</option><option value="young">Family, young children</option><option value="grown">Adult family group (grown-up children)</option></select>
+        </label>
+        <label class="f">Level
+          <select id="level"><option value="easy">Easy: gentle walks and rides</option><option value="moderate" selected>Moderate</option><option value="hard">Challenging: big days out</option></select>
+        </label>
+        <label class="toggle"><input type="checkbox" id="cool"> Not too hot, please</label>
+        <label class="toggle"><input type="checkbox" id="dog"> Bringing the dog</label>
+        <p class="hint" id="doghint" hidden>Ryanair, easyJet and Jet2 don't carry pet dogs, so with the dog we rank on the drive from Folkestone instead of flights.</p>
+      </fieldset>
+      <div class="findbar"><button type="button" class="btn primary" id="go">Find my summer</button></div>
+    </form>
+
+    <section class="results" id="resultsSec" aria-live="polite">
+      <div class="sumbar">
+        <p id="summary"></p>
+        <div class="rbar" id="rb">
+          <label class="sortby" for="count">Results
+            <select id="count"><option>5</option><option selected>8</option><option>12</option><option value="99">All</option></select>
+          </label>
+          <button type="button" class="btn sm ghost" id="expandAll">Expand all</button>
+        </div>
+      </div>
+      <div id="dogbox" class="dogbox" hidden>
+        <b>Taking your dog from the UK</b>
+        <ul>
+          <li><b>Before you go:</b> a new Animal Health Certificate from your vet for every trip, issued no more than 10 days before you travel. Since 22 April 2026, GB residents can't use an EU pet passport to enter the EU.</li>
+          <li><b>Also needed:</b> a microchip, and a rabies jab at least 21 days before you go.</li>
+          <li><b>Coming home:</b> a vet must treat your dog for tapeworm 1 to 5 days before you arrive back in Great Britain (not needed coming straight from Norway).</li>
+          <li><b>Crossing:</b> LeShuttle through the Channel Tunnel and the Dover ferries take dogs in your car.</li>
+        </ul>
+        <p class="note">Rules change, so check <a href="https://www.gov.uk/taking-your-pet-abroad" target="_blank" rel="noopener">GOV.UK: taking your pet abroad</a> before you book.</p>
+      </div>
+      <div id="list" class="results"></div>
+      <p class="note">Weather: 10-year averages (2016 to 2025) for each town. Flights: Ryanair, easyJet and Jet2 timetables for summer 2027 (checked 17 November 2026), plus the main airlines to Geneva, Zurich, Munich, Kraków, Oslo and Bergen. Transfer and driving times are approximate. Driving times start at Folkestone and include the Channel Tunnel crossing, but not stops. Always check flights, lift rules and guest-card terms before booking.</p>
+    </section>
+  </div>
+  <footer class="sitefoot"><span>© 2026 SeasonWiseGo</span><a href="privacy.html">Privacy and cookies</a><a href="affiliate-disclosure.html">How we make money</a><a href="mailto:admin@seasonwisego.com?subject=Summer%20test%20feedback">Send feedback</a></footer>
+</div>
 <script>
+(function(){
+  let t="light"; try{t=localStorage.getItem("pp-theme")||"light";}catch(e){}
+  const apply=v=>{ if(v==="auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme",v);
+    document.querySelectorAll(".themesw button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.th===v))); };
+  apply(t);
+  document.querySelectorAll(".themesw button").forEach(b=>b.addEventListener("click",()=>{ apply(b.dataset.th); try{localStorage.setItem("pp-theme",b.dataset.th);}catch(e){} }));
+})();
 const DEST=[{"n":"Chamonix","c":"France","g":[["GVA",75]],"a":{"walk":5,"hike":5,"bike":4,"family":3,"water":2,"thrill":5,"glacier":0},"price":3,"card":"Chamonix Multipass covers the valley's lifts (paid; prices on the Compagnie du Mont-Blanc site)","hi":"Aiguille du Midi cable car · Montenvers train to the Mer de Glace · Tour du Mont Blanc trails · Tandem paragliding"},{"n":"Morzine and Les Gets","c":"France","g":[["GVA",75]],"a":{"walk":4,"hike":4,"bike":5,"family":5,"water":3,"thrill":4,"glacier":0},"price":2,"card":"Portes du Soleil Multipass: lifts and activities for a small daily charge with partner accommodation","hi":"Portes du Soleil bike parks · Lac de Montriond · Mechanical Music Museum (Les Gets) · Lift-served family walks"},{"n":"Annecy","c":"France","g":[["GVA",45],["LYS",90]],"a":{"walk":5,"hike":3,"bike":4,"family":4,"water":5,"thrill":5,"glacier":0},"price":2,"card":"","hi":"Lake swimming and boats · Old town canals · Lakeside cycle path · Paragliding from Col de la Forclaz"},{"n":"Zermatt","c":"Switzerland","g":[["GVA",210],["ZRH",210]],"a":{"walk":5,"hike":5,"bike":3,"family":3,"water":1,"thrill":4,"glacier":5},"price":3,"card":"Lift passes are paid; the Swiss Travel Pass gives discounts on mountain railways","hi":"Summer glacier skiing on the Theodul glacier · Gornergrat railway · Matterhorn Glacier Paradise · 5-Seenweg lakes walk"},{"n":"Engelberg","c":"Switzerland","g":[["ZRH",75]],"a":{"walk":5,"hike":5,"bike":3,"family":4,"water":2,"thrill":4,"glacier":1},"price":3,"card":"","hi":"Titlis Rotair and Cliff Walk · Trübsee lake walks · Lucerne day trips · Via ferrata Brunnistöckli"},{"n":"Interlaken","c":"Switzerland","g":[["ZRH",120],["GVA",150]],"a":{"walk":5,"hike":5,"bike":3,"family":4,"water":4,"thrill":5,"glacier":0},"price":3,"card":"","hi":"Jungfraujoch railway · Lakes Thun and Brienz boats · Grindelwald First Cliff Walk · Paragliding and canyoning"},{"n":"Mayrhofen","c":"Austria","g":[["MUC",120],["INN",60]],"a":{"walk":4,"hike":5,"bike":4,"family":5,"water":3,"thrill":4,"glacier":4},"price":2,"card":"Zillertal Activcard: a lift a day on 10 summer lifts, six outdoor pools and buses (adult €137.50 for 6 days)","hi":"Ahorn and Penken lifts · Hintertux glacier 30 min away (summer skiing) · Outdoor pools · Zillertal hut walks"},{"n":"Saalbach","c":"Austria","g":[["SZG",80],["MUC",150]],"a":{"walk":4,"hike":4,"bike":5,"family":5,"water":2,"thrill":3,"glacier":0},"price":2,"card":"JOKER CARD free with partner accommodation: unlimited Saalbach lifts, adventure pool, guided hikes","hi":"Bike parks in Saalbach and Leogang · Montelino's Adventure Path · Käpt'n Hook pool · Guided hikes"},{"n":"Zell am See","c":"Austria","g":[["SZG",75],["MUC",150]],"a":{"walk":5,"hike":4,"bike":4,"family":5,"water":5,"thrill":3,"glacier":3},"price":2,"card":"Zell am See-Kaprun Summer Card free with partner accommodation: lifts, lake boats, pools","hi":"Lake swimming and boats · Kitzsteinhorn glacier and Gipfelwelt 3000 · Grossglockner road · Krimml waterfalls"},{"n":"Garmisch-Partenkirchen","c":"Germany","g":[["MUC",80],["INN",60]],"a":{"walk":5,"hike":5,"bike":3,"family":4,"water":3,"thrill":3,"glacier":1},"price":2,"card":"","hi":"Zugspitze cog railway · Partnach Gorge · Eibsee lake · Painted Bavarian streets"},{"n":"Lake Garda","c":"Italy","g":[["VRN",60],["BGY",120]],"a":{"walk":5,"hike":3,"bike":4,"family":5,"water":5,"thrill":4,"glacier":0},"price":2,"card":"","hi":"Lake swimming, sailing and windsurfing · Monte Baldo cable car (Malcesine) · Climbing at Arco · Gardaland theme park"},{"n":"Lake Como","c":"Italy","g":[["BGY",75],["MXP",90],["LIN",75]],"a":{"walk":5,"hike":3,"bike":2,"family":3,"water":4,"thrill":2,"glacier":0},"price":3,"card":"","hi":"Lake ferries between Bellagio, Varenna and Menaggio · Villa gardens · Greenway lakeside walk · Brunate funicular"},{"n":"Val Gardena","c":"Italy","g":[["VRN",150],["VCE",160],["TSF",150],["INN",120]],"a":{"walk":5,"hike":5,"bike":4,"family":4,"water":1,"thrill":5,"glacier":0},"price":2,"card":"","hi":"Dolomites walks on Seceda and the Seiser Alm · Via ferratas · Hut-to-hut routes · Woodcarving town of Ortisei"},{"n":"Bled","c":"Slovenia","g":[["LJU",40],["TRS",120]],"a":{"walk":5,"hike":4,"bike":3,"family":4,"water":5,"thrill":4,"glacier":0},"price":1,"card":"","hi":"Lake Bled island and castle · Lake Bohinj swimming · Vintgar Gorge · Rafting on the Sava and Soča"},{"n":"Zakopane","c":"Poland","g":[["KRK",120]],"a":{"walk":4,"hike":5,"bike":2,"family":4,"water":2,"thrill":2,"glacier":0},"price":1,"card":"","hi":"Tatra National Park trails · Morskie Oko lake · Kasprowy Wierch cable car · Thermal pools"},{"n":"Lucerne","c":"Switzerland","g":[["ZRH",60]],"a":{"walk":5,"hike":4,"bike":2,"family":4,"water":4,"thrill":3,"glacier":0},"price":3,"card":"Tell-Pass regional pass (paid) covers lake boats, trains and mountain railways","hi":"Lake cruises · Pilatus cog railway and Rigi · Old town and Chapel Bridge · Swiss Museum of Transport"},{"n":"Lake Maggiore","c":"Italy","g":[["MXP",45],["LIN",75],["BGY",100]],"a":{"walk":5,"hike":2,"bike":2,"family":3,"water":4,"thrill":1,"glacier":0},"price":2,"card":"","hi":"Borromean Islands from Stresa · Lake ferries up to Locarno · Villa Taranto gardens · Lakeside promenades"},{"n":"Achensee","c":"Austria","g":[["INN",45],["MUC",90]],"a":{"walk":5,"hike":4,"bike":4,"family":5,"water":5,"thrill":3,"glacier":0},"price":2,"card":"","hi":"Lake swimming and sailing · Achensee steam cog railway · Rofan cable car · Karwendel hikes"},{"n":"Berchtesgaden","c":"Germany","g":[["SZG",30],["MUC",150]],"a":{"walk":5,"hike":5,"bike":3,"family":4,"water":4,"thrill":2,"glacier":0},"price":2,"card":"","hi":"Königssee boat trip · Eagle's Nest (Kehlsteinhaus) · Salt mine tour · Jenner cable car"},{"n":"Davos","c":"Switzerland","g":[["ZRH",120]],"a":{"walk":5,"hike":5,"bike":5,"family":4,"water":3,"thrill":3,"glacier":0},"price":3,"card":"Mountain railways included with an overnight stay in summer (check terms when booking)","hi":"Lake Davos · Lift-served trails on Jakobshorn and Parsenn · Schatzalp funicular · Rhaetian Railway"},{"n":"Grindelwald","c":"Switzerland","g":[["ZRH",150],["GVA",180]],"a":{"walk":5,"hike":5,"bike":4,"family":5,"water":2,"thrill":5,"glacier":0},"price":3,"card":"","hi":"First Cliff Walk and First Glider · Bachalpsee walk · Eiger Express to the Jungfraujoch · Trottibike scooters"},{"n":"Cortina d'Ampezzo","c":"Italy","g":[["VCE",120],["TSF",120],["VRN",180]],"a":{"walk":5,"hike":5,"bike":4,"family":3,"water":2,"thrill":5,"glacier":0},"price":3,"card":"","hi":"Tre Cime di Lavaredo walk · First World War via ferratas · Cinque Torri · Lago di Braies nearby"},{"n":"Sölden","c":"Austria","g":[["INN",75],["MUC",180]],"a":{"walk":4,"hike":5,"bike":5,"family":4,"water":2,"thrill":4,"glacier":0},"price":2,"card":"","hi":"007 ELEMENTS on Gaislachkogl · Bike Republic trails · Aqua Dome thermal spa · Timmelsjoch high road"},{"n":"Voss and Flåm","c":"Norway","g":[["BGO",90]],"a":{"walk":5,"hike":5,"bike":3,"family":4,"water":4,"thrill":5,"glacier":0},"price":3,"card":"","hi":"Flåm Railway · Nærøyfjord cruise (UNESCO) · Voss Gondol · Rafting and paragliding in Voss"},{"n":"Lillehammer","c":"Norway","g":[["OSL",120]],"a":{"walk":4,"hike":4,"bike":5,"family":5,"water":3,"thrill":3,"glacier":0},"price":3,"card":"","hi":"Hafjell bike park · Hunderfossen family park · Maihaugen open-air museum · Olympic ski jump"},{"n":"High Tatras (Slovakia)","c":"Slovakia","g":[["KRK",150]],"a":{"walk":4,"hike":5,"bike":2,"family":3,"water":2,"thrill":2,"glacier":0},"price":1,"card":"","hi":"Štrbské Pleso lake · Lomnický štít cable car · Tatra Electric Railway · Hut-to-hut trails"}];
 const WX={"Chamonix":{"elev":1042.0,"m":{"4":[12,14,10.2],"5":[15,19,10.4],"6":[21,17,12.1],"7":[23,14,12.8],"8":[23,12,11.6],"9":[18,14,9.6],"10":[15,12,7.9]}},"Morzine and Les Gets":{"elev":961.0,"m":{"4":[13,13,10.3],"5":[16,18,10.6],"6":[21,17,12.3],"7":[23,15,13.0],"8":[23,12,11.7],"9":[18,14,9.8],"10":[15,12,8.0]}},"Annecy":{"elev":451.0,"m":{"4":[15,11,10.1],"5":[19,15,10.6],"6":[24,14,12.4],"7":[26,11,13.0],"8":[26,10,11.8],"9":[21,11,9.8],"10":[17,12,7.9]}},"Zermatt":{"elev":1613.0,"m":{"4":[5,12,10.0],"5":[9,13,10.7],"6":[16,12,12.4],"7":[18,11,13.3],"8":[18,10,11.9],"9":[14,12,9.9],"10":[10,11,7.6]}},"Engelberg":{"elev":1008.0,"m":{"4":[10,15,9.7],"5":[14,21,9.6],"6":[19,20,11.7],"7":[20,21,11.7],"8":[20,18,10.6],"9":[17,17,9.1],"10":[13,15,7.5]}},"Interlaken":{"elev":566.0,"m":{"4":[15,15,9.9],"5":[18,20,9.8],"6":[23,17,11.7],"7":[24,19,12.2],"8":[25,15,10.9],"9":[20,15,9.3],"10":[17,13,7.7]}},"Mayrhofen":{"elev":637.0,"m":{"4":[14,16,9.7],"5":[17,21,9.7],"6":[24,19,11.8],"7":[25,20,11.7],"8":[25,18,10.8],"9":[21,15,9.1],"10":[17,13,7.6]}},"Saalbach":{"elev":1004.0,"m":{"4":[12,15,9.3],"5":[15,20,9.3],"6":[21,18,11.5],"7":[22,20,11.2],"8":[22,16,10.4],"9":[18,14,8.8],"10":[14,13,7.2]}},"Zell am See":{"elev":770.0,"m":{"4":[14,14,9.5],"5":[17,20,9.4],"6":[23,16,11.5],"7":[24,18,11.4],"8":[24,15,10.6],"9":[20,13,8.9],"10":[16,12,7.3]}},"Garmisch-Partenkirchen":{"elev":706.0,"m":{"4":[13,16,9.3],"5":[16,22,9.3],"6":[22,20,11.2],"7":[23,21,11.2],"8":[23,20,10.1],"9":[19,17,8.7],"10":[16,14,7.2]}},"Lake Garda":{"elev":108.0,"m":{"4":[17,12,10.2],"5":[21,19,10.4],"6":[26,14,13.1],"7":[28,14,13.2],"8":[28,14,11.9],"9":[23,13,10.1],"10":[19,12,7.7]}},"Lake Como":{"elev":211.0,"m":{"4":[17,13,9.7],"5":[20,18,10.3],"6":[26,16,12.5],"7":[28,16,13.1],"8":[28,13,11.6],"9":[23,15,9.7],"10":[19,13,7.2]}},"Val Gardena":{"elev":1244.0,"m":{"4":[11,13,10.5],"5":[15,19,10.7],"6":[21,15,12.9],"7":[22,16,13.0],"8":[22,12,11.9],"9":[18,11,10.2],"10":[13,8,8.2]}},"Bled":{"elev":505.0,"m":{"4":[15,12,9.7],"5":[18,19,9.7],"6":[24,14,12.4],"7":[25,15,12.5],"8":[25,13,11.4],"9":[20,13,9.2],"10":[16,11,7.1]}},"Zakopane":{"elev":818.0,"m":{"4":[11,14,8.8],"5":[15,18,10.2],"6":[20,16,11.8],"7":[21,18,11.8],"8":[21,14,10.8],"9":[17,14,8.7],"10":[12,13,6.8]}},"Achensee":{"elev":962.0,"m":{"4":[13,14,9.5],"5":[16,20,9.4],"6":[21,17,11.4],"7":[22,20,11.1],"8":[22,17,10.3],"9":[18,15,8.7],"10":[15,12,7.5]}},"Grindelwald":{"elev":1036.0,"m":{"4":[11,15,10.0],"5":[15,22,10.1],"6":[20,21,11.8],"7":[22,21,12.1],"8":[22,18,11.0],"9":[18,18,9.4],"10":[15,15,7.8]}},"Sölden":{"elev":1384.0,"m":{"4":[9,15,10.1],"5":[13,20,10.0],"6":[19,18,12.0],"7":[20,20,12.0],"8":[21,18,10.9],"9":[17,14,9.3],"10":[13,12,7.7]}},"Voss and Flåm":{"elev":56.0,"m":{"4":[8,13,9.6],"5":[14,14,10.8],"6":[19,18,11.0],"7":[20,20,10.8],"8":[19,20,8.8],"9":[16,18,6.7],"10":[10,20,4.2]}},"Lucerne":{"elev":441.0,"m":{"4":[15,14,9.6],"5":[18,18,9.5],"6":[23,16,11.6],"7":[24,18,11.7],"8":[24,15,10.5],"9":[20,14,9.2],"10":[16,13,7.1]}},"Lake Maggiore":{"elev":220.0,"m":{"4":[17,12,9.7],"5":[21,18,10.4],"6":[26,16,12.3],"7":[28,16,13.1],"8":[28,14,11.5],"9":[23,14,9.7],"10":[18,13,7.2]}},"Cortina d'Ampezzo":{"elev":1228.0,"m":{"4":[9,13,9.7],"5":[14,22,9.7],"6":[20,22,12.5],"7":[21,23,12.6],"8":[21,21,11.6],"9":[17,16,9.7],"10":[13,11,7.8]}}};
 const FL={"STN":{"SZG":{"Ryanair":5},"KRK":{"Ryanair":7},"VRN":{"Ryanair":7,"Jet2":2},"BGY":{"Ryanair":7},"MXP":{"Ryanair":7},"VCE":{"Ryanair":7},"TRS":{"Ryanair":6},"OSL":{"Ryanair":7}},"LTN":{"KRK":{"Ryanair":7,"Wizz Air":null},"VCE":{"Ryanair":7},"GVA":{"easyJet":null},"LJU":{"easyJet":null},"LYS":{"easyJet":null},"MUC":{"easyJet":null},"MXP":{"easyJet":null},"ZRH":{"easyJet":null}},"MAN":{"KRK":{"Ryanair":7,"easyJet":null},"VRN":{"Ryanair":4,"easyJet":null,"Jet2":2},"BGY":{"Ryanair":7},"MXP":{"Ryanair":7,"easyJet":null},"VCE":{"Ryanair":7,"easyJet":null,"Jet2":4},"GVA":{"easyJet":null},"LIN":{"easyJet":null},"LJU":{"easyJet":null},"LYS":{"easyJet":null},"MUC":{"easyJet":null,"Lufthansa":null},"ZRH":{"easyJet":null,"Swiss":null},"INN":{"Jet2":2},"OSL":{"Norwegian":null,"SAS":null},"BGO":{"Norwegian":null}},"BHX":{"KRK":{"Ryanair":7},"VRN":{"Ryanair":5,"Jet2":2},"BGY":{"Ryanair":7},"TSF":{"Ryanair":2},"GVA":{"easyJet":null},"MXP":{"easyJet":null},"INN":{"Jet2":1},"VCE":{"Jet2":2},"ZRH":{"Swiss":null},"MUC":{"Lufthansa":null}},"BRS":{"KRK":{"Ryanair":7,"easyJet":null},"BGY":{"Ryanair":6},"VCE":{"Ryanair":3,"easyJet":null},"GVA":{"easyJet":null},"MUC":{"easyJet":null},"MXP":{"easyJet":null},"VRN":{"easyJet":null,"Jet2":2},"ZRH":{"easyJet":null}},"EMA":{"KRK":{"Ryanair":5},"BGY":{"Ryanair":2},"TSF":{"Ryanair":2},"VRN":{"Jet2":1}},"LBA":{"KRK":{"Ryanair":7},"VRN":{"Jet2":2}},"NCL":{"KRK":{"Ryanair":4},"BGY":{"Ryanair":5},"VRN":{"Jet2":1}},"EDI":{"KRK":{"Ryanair":7,"easyJet":null},"BGY":{"Ryanair":7},"MXP":{"Ryanair":3,"easyJet":null},"VCE":{"Ryanair":5,"easyJet":null},"GVA":{"easyJet":null},"LIN":{"easyJet":null},"LJU":{"easyJet":null},"LYS":{"easyJet":null},"MUC":{"easyJet":null,"Lufthansa":null},"ZRH":{"easyJet":null,"Edelweiss":null,"Swiss":null},"VRN":{"Jet2":2},"OSL":{"Norwegian":null}},"GLA":{"KRK":{"Ryanair":3},"VRN":{"Jet2":1}},"BFS":{"KRK":{"Ryanair":2,"easyJet":null},"BGY":{"Ryanair":2},"VRN":{"Jet2":1}},"DUB":{"KRK":{"Ryanair":7},"VRN":{"Ryanair":5},"BGY":{"Ryanair":7},"MXP":{"Ryanair":7},"VCE":{"Ryanair":7},"TRS":{"Ryanair":3},"GVA":{"Aer Lingus":null},"ZRH":{"Aer Lingus":null,"Swiss":null},"MUC":{"Aer Lingus":null,"Lufthansa":null},"OSL":{"Norwegian":null,"SAS":null},"BGO":{"Widerøe":null}},"ORK":{"BGY":{"Ryanair":3},"VCE":{"Ryanair":3}},"SNN":{"KRK":{"Ryanair":5},"BGY":{"Ryanair":2}},"BOH":{"KRK":{"Ryanair":3}},"LPL":{"KRK":{"Ryanair":6,"easyJet":null},"BGY":{"Ryanair":2}},"ABZ":{"KRK":{"Ryanair":2},"BGO":{"Widerøe":null}},"LGW":{"GVA":{"easyJet":null},"INN":{"easyJet":null},"KRK":{"easyJet":null,"Wizz Air":null},"LIN":{"easyJet":null},"LJU":{"easyJet":null},"LYS":{"easyJet":null},"MUC":{"easyJet":null},"MXP":{"easyJet":null},"VCE":{"easyJet":null},"VRN":{"easyJet":null},"ZRH":{"easyJet":null,"Swiss":null},"OSL":{"Norwegian":null},"BGO":{"Norwegian":null}},"LHR":{"GVA":{"British Airways":null,"Swiss":null},"ZRH":{"British Airways":null,"Swiss":null},"KRK":{"British Airways":null},"MUC":{"British Airways":null,"Lufthansa":null},"OSL":{"British Airways":null,"SAS":null}}};
 const AIR={GVA:"Geneva",LYS:"Lyon",ZRH:"Zurich",MUC:"Munich",INN:"Innsbruck",SZG:"Salzburg",VRN:"Verona",BGY:"Milan Bergamo",MXP:"Milan Malpensa",LIN:"Milan Linate",VCE:"Venice",TSF:"Treviso",LJU:"Ljubljana",TRS:"Trieste",KRK:"Kraków",BGO:"Bergen",OSL:"Oslo"};
 const DEP=[["LGW","London Gatwick"],["LHR","London Heathrow"],["STN","London Stansted"],["LTN","London Luton"],["MAN","Manchester"],["BHX","Birmingham"],["BRS","Bristol"],["EMA","East Midlands"],["LBA","Leeds Bradford"],["NCL","Newcastle"],["EDI","Edinburgh"],["GLA","Glasgow"],["BFS","Belfast International"],["DUB","Dublin"],["ORK","Cork"],["SNN","Shannon"],["BOH","Bournemouth"],["LPL","Liverpool"],["ABZ","Aberdeen"]].sort((a,b)=>a[1].localeCompare(b[1]));
 const ACTS=[["walk","Walks and lakes"],["hike","Hiking"],["bike","Mountain biking"],["family","Family adventure"],["water","Swimming and water sports"],["thrill","Via ferrata, paragliding, rafting"],["glacier","Summer skiing"]];
+const STRONG={walk:"Great for walks and lakes",hike:"Great hiking",bike:"Top mountain biking",family:"Great for families",water:"Great for swimming",thrill:"Big on thrills",glacier:"Summer skiing"};
 const MON=["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+// Driving from the UK: road km from Calais (as in Piste Picker). null = not a practical drive
+const DRIVEKM={"Chamonix":900,"Morzine and Les Gets":870,"Annecy":840,"Zermatt":1050,"Engelberg":850,"Interlaken":860,"Mayrhofen":1150,"Saalbach":1180,"Zell am See":1200,"Garmisch-Partenkirchen":1000,"Lake Garda":1200,"Lake Como":1050,"Val Gardena":1250,"Bled":1400,"Zakopane":1650,"Lucerne":800,"Lake Maggiore":1050,"Achensee":1100,"Berchtesgaden":1150,"Davos":1000,"Grindelwald":880,"Cortina d'Ampezzo":1350,"Sölden":1130,"Voss and Flåm":null,"Lillehammer":null,"High Tatras (Slovakia)":1700};
+const DOG_LIFTS={Austria:"Most cable cars take dogs on a lead and muzzle; some charge a dog ticket.",Germany:"Most cable cars take dogs on a lead and muzzle, sometimes for a small fee.",Switzerland:"Lifts and mountain trains generally take dogs, usually with a dog ticket."};
+const DOG_LIFTS_ANY="Lift rules vary: many take dogs on a lead, some ask for a muzzle or a ticket.";
+const DOG_NOTE={"Zakopane":["Tatra National Park allows dogs on only two routes: Droga pod Reglami and the Chochołowska Valley.",2],"High Tatras (Slovakia)":["Dogs are allowed on 29 marked routes in Slovakia's Tatra National Park, not on every trail.",1],"Voss and Flåm":["There's no car ferry from the UK to Norway, so it's two days or more by road via Denmark.",0],"Lillehammer":["There's no car ferry from the UK to Norway, so it's two days or more by road via Denmark.",0]};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const h=m=>{const x=Math.round(m/30)/2;return (x%1?x.toFixed(1):x)+" h";};
 for(const [c,n] of DEP){$("dep").add(new Option(n,c));$("dep2").add(new Option(n,c));}
 $("dep").value="MAN";
-$("acts").innerHTML=ACTS.map(([k,l])=>`<label><input type="checkbox" value="${k}"${k==="walk"||k==="water"?" checked":""}> ${l}</label>`).join("");
-function params(){return{deps:[$("dep").value,$("dep2").value].filter((x,i,a)=>x&&a.indexOf(x)===i),d1:$("d1").value,nights:+$("nights").value||7,acts:[...document.querySelectorAll("#acts input:checked")].map(i=>i.value),who:$("who").value,level:$("level").value,cool:$("cool").checked};}
+$("acts").innerHTML=ACTS.map(([k,l])=>`<span class="chip"><input type="checkbox" id="a-${k}" value="${k}"${k==="walk"||k==="water"?" checked":""}><label for="a-${k}">${l}</label></span>`).join("");
+function params(){return{deps:[$("dep").value,$("dep2").value].filter((x,i,a)=>x&&a.indexOf(x)===i),d1:$("d1").value||"2027-07-17",nights:+$("nights").value||7,acts:[...document.querySelectorAll("#acts input:checked")].map(i=>i.value),who:$("who").value,level:$("level").value,cool:$("cool").checked,dog:$("dog").checked,count:+$("count").value||8};}
 function flightsFor(deps,ap){const out=[];for(const d of deps){const f=(FL[d]||{})[ap];if(f)out.push({dep:d,al:f});}return out;}
 const SHOULDER=m=>m<=5||m>=10;
-const LIFT={bike:"bike parks",family:"lift-served family parks",glacier:"glacier"};
-function actVal(r,k,m){let v=r.a[k];if(k==="glacier"&&!glacierOpen(r.n,m))return 0;if(SHOULDER(m)){if(k==="bike")return 0;if(k==="family")return Math.min(v,2);if(k==="hike"||k==="thrill")return Math.min(v,3);if(k==="water")return Math.min(v,m===5?3:2);}return v;}
 function glacierOpen(n,m){if(n==="Zermatt")return true;if(n==="Mayrhofen")return m>=4&&m<=7||m>=9;if(n==="Zell am See")return m>=6&&m<=10;return false;}
+function actVal(r,k,m,dog){let v=r.a[k];if(k==="glacier"&&!glacierOpen(r.n,m))return 0;if(SHOULDER(m)){if(k==="bike")return 0;if(k==="family")return Math.min(v,2);if(k==="hike"||k==="thrill")return Math.min(v,3);if(k==="water")return Math.min(v,m===5?3:2);}
+  if(dog&&DOG_NOTE[r.n]&&(k==="hike"||k==="walk"))v=Math.max(0,v-DOG_NOTE[r.n][1]);return v;}
+function driveInfo(r){const km=DRIVEKM[r.n];if(km==null)return {far:true};const total=Math.round(km*0.57+45)+80;return {km,total,oneDay:total<=780};}
+const band=(t,cool)=>{const lo=cool?15:18,hi=cool?23:26;return t>hi?"lo":t<lo?"md":"hi";};
 function score(r,p){
   const m=+p.d1.slice(5,7), w=WX[r.n]&&WX[r.n].m[m];
-  // getting there: best gateway with a direct flight
   let best=null;
   for(const [ap,t] of r.g){const f=flightsFor(p.deps,ap);if(!f.length)continue;const al=new Set(f.flatMap(x=>Object.keys(x.al)));
     const s=Math.max(0,1-(t-40)/220)*0.8+Math.min(al.size,3)/3*0.2; if(!best||s>best.s)best={ap,t,f,al:[...al],s};}
-  const get=best?best.s*20:0;
-  // activities
+  const di=driveInfo(r);
+  const get=p.dog?(di.far?0:Math.max(0,Math.min(1,1-(di.total-540)/720))*20):(best?best.s*20:0);
   const sel=p.acts.length?p.acts:ACTS.map(a=>a[0]);
-  let act=sel.reduce((s,k)=>s+actVal(r,k,m),0)/sel.length/5;
-  if(p.level==="easy")act=act*0.85+((r.a.walk+r.a.family)/10)*0.15;
-  if(p.level==="hard")act=act*0.85+((r.a.hike+r.a.thrill)/10)*0.15;
-  // weather
+  const A=k=>actVal(r,k,m,p.dog);
+  let act=sel.reduce((s,k)=>s+A(k),0)/sel.length/5;
+  if(p.level==="easy")act=act*0.85+((A("walk")+A("family"))/10)*0.15;
+  if(p.level==="hard")act=act*0.85+((A("hike")+A("thrill"))/10)*0.15;
   let wx=0.5,hot=false;
   if(w){const [tx,rain,sun]=w; const ideal=p.cool?20:24; const tol=p.cool?5:6;
     const tScore=Math.max(0,1-Math.max(0,Math.abs(tx-ideal)-2)/tol); hot=tx>=(p.cool?25:28);
     wx=tScore*0.55+Math.max(0,1-rain/22)*0.3+Math.min(sun/13,1)*0.15;}
-  // who's going
-  const A=k=>actVal(r,k,m);
   const whoS=p.who==="adults"?(A("walk")+A("water")+A("hike"))/15:p.who==="young"?(A("family")*2+A("water"))/15:(A("walk")+A("hike")+A("thrill")+A("water"))/20;
-  const value=(4-r.price)/3*0.7+(r.card&&/free/.test(r.card)?0.3:0);
-  const raw=act*40+wx*20+get+Math.min(value,1)*10+Math.min(whoS,1)*10;
-  return {r,m,w,best,hot,pct:Math.round(raw),parts:{act:act*40,wx:wx*20,get,value:Math.min(value,1)*10,who:Math.min(whoS,1)*10}};
+  const value=Math.min(1,(4-r.price)/3*0.7+(r.card&&/free/i.test(r.card)?0.3:0));
+  const parts={act:act*40,wx:wx*20,get,value:value*10,who:Math.min(whoS,1)*10};
+  const exact=parts.act+parts.wx+parts.get+parts.value+parts.who;
+  return {r,m,w,best,di,hot,exact,parts,sel};
 }
-function card(s,i,p){const r=s.r,m=s.m;const sel=new Set(p.acts);
-  const fly=s.best?`${AIR[s.best.ap]}: ${s.best.f.map(x=>`${depName(x.dep)} (${Object.entries(x.al).map(([a,n])=>a+(n?` ~${n}/wk`:"")).join(", ")})`).join("; ")}`:`<span class="warn">No direct summer flight from ${p.deps.map(depName).join(" or ")}</span>`;
-  const alts=r.g.filter(([ap])=>!s.best||ap!==s.best.ap).map(([ap,t])=>`${AIR[ap]} ${t} min`).join(", ");
-  const acts=ACTS.map(([k,l])=>{const v=actVal(r,k,m);if(!v&&r.a[k]&&(k==="bike"||k==="glacier"))return `<span class="${sel.has(k)?"sel":""} closed">${l} <i>closed in ${MON[m]}</i></span>`;return v?`<span class="${sel.has(k)?"sel":""}">${l} <b>${"●".repeat(v)}${"○".repeat(5-v)}</b></span>`:"";}).join("");
-  const wx=[4,5,6,7,8,9,10].map(mm=>{const w=WX[r.n]&&WX[r.n].m[mm];return w?`<div class="${mm===m?"on":""}">${MON[mm]}<b>${w[0]}°</b>${w[1]} wet</div>`:"";}).join("");
-  const w=s.w;
-  return `<article class="card"><div class="head"><span class="rank">#${i+1}</span><h2>${esc(r.n)}</h2><span class="cty">${esc(r.c)}</span><span class="score">${s.pct}<small>% match</small></span></div>
-  <dl class="stats"><div><dt>Fly to</dt><dd>${s.best?`${s.best.ap} · ${s.best.t} min transfer`:"No direct flight"}<span class="s">${alts?`Also: ${alts}`:""}</span></dd></div>
-  <div><dt>${MON[m]} weather</dt><dd>${w?`${w[0]}°C highs · ${w[1]} wet days`:"Weather data to follow"}<span class="s">${w?`about ${w[2]} h sun a day`:""}${s.hot?' · <span class="warn">hot in the valley</span>':""}</span></dd></div>
-  <div><dt>Price level</dt><dd>${"£".repeat(r.price)}<span class="s">${["","Good value","Mid-range","Pricey"][r.price]}</span></dd></div></dl>
-  <div class="acts">${acts}</div>
-  <p class="hi"><b>Highlights:</b> ${esc(r.hi)}</p>
-  ${r.card?`<p class="cardnote"><b>Guest card:</b> ${esc(r.card)}</p>`:""}
-  <p class="note" style="margin:8px 0 0"><b>Direct flights, summer 2027:</b> ${fly}</p>
-  <div class="wx" aria-label="Average highs and wet days by month">${wx}</div>
-  <div class="links"><a href="https://www.google.com/travel/flights" target="_blank" rel="noopener">Search flights ↗</a><a href="https://www.booking.com/searchresults.html?ss=${encodeURIComponent(r.n)}" target="_blank" rel="noopener">Places to stay ↗</a><a href="https://www.getyourguide.com/s/?q=${encodeURIComponent(r.n)}" target="_blank" rel="noopener">Things to do ↗</a></div></article>`;}
+function neatPct(list){
+  const x=list.map(s=>s.exact), n=x.length, eps=1e-9;
+  const fit=D=>{const d=[];for(let i=0;i<n;i++){let v=Math.floor(x[i]+D+eps); if(i) v=Math.min(v,d[i-1]-1); if(v<Math.ceil(x[i]-D-eps)) return null; d.push(v);} return d;};
+  let d=null; for(let D=0.5;D<=2+eps&&!d;D+=0.05) d=fit(D);
+  if(d){ d[n-1]=Math.min(d[n-1],Math.round(x[n-1])); for(let i=n-2;i>=0;i--) d[i]=Math.max(d[i+1]+1,Math.min(d[i],Math.round(x[i]))); }
+  else { d=[]; for(let i=0;i<n;i++){let v=Math.round(x[i]); if(i&&v>=d[i-1]) v=(d[i-1]-1>=Math.ceil(x[i]-2))?d[i-1]-1:d[i-1]; d.push(v);} }
+  list.forEach((s,i)=>s.pct=Math.max(0,Math.min(100,d[i])));
+  return list;}
 const depName=c=>(DEP.find(x=>x[0]===c)||[c,c])[1];
-function run(){const p=params();const S=DEST.map(r=>score(r,p)).sort((a,b)=>b.pct-a.pct);
+function pips(v){return `<span class="pips">${[1,2,3,4,5].map(i=>`<i class="${i<=v?"on":""}"></i>`).join("")}</span>`}
+function topStrength(s,p){let best=null,bv=0;for(const k of s.sel){const v=actVal(s.r,k,s.m,p.dog);if(v>=4&&v>bv){bv=v;best=k;}}return best?STRONG[best]:"";}
+function getLine(s,p){const r=s.r;
+  if(p.dog) return s.di.far?"Not a practical drive":`Drive ~${h(s.di.total)} from Folkestone`;
+  return s.best?`${s.best.t} min from ${AIR[s.best.ap]}`:"No direct flight";}
+function reasons(s,p){const r=s.r,m=s.m,w=s.w,pro=[],con=[];
+  for(const k of s.sel){const v=actVal(r,k,m,p.dog),l=ACTS.find(a=>a[0]===k)[1];
+    if(v>=4)pro.push(`${STRONG[k]}`);else if(!v&&r.a[k]&&(k==="bike"||k==="glacier"))con.push(`${l}: closed in ${MON[m]}`);else if(v<=2)con.push(`Not the place for ${l.toLowerCase()}`);}
+  if(w){const b=band(w[0],p.cool);if(b==="hi")pro.push(`Comfortable in ${MON[m]}: about ${w[0]}°C highs`);else if(b==="lo")con.push(`Warm in town in ${MON[m]}: about ${w[0]}°C highs`);else con.push(`Cool in ${MON[m]}: about ${w[0]}°C highs`);
+    if(w[1]>=15)con.push(`Rain on about ${w[1]} days in ${MON[m]}, so pack a waterproof`);}
+  if(p.dog){if(s.di.far)con.push(DOG_NOTE[r.n]?DOG_NOTE[r.n][0]:"Not a practical drive from the UK");
+    else if(s.di.oneDay)pro.push(`Drivable in a day: about ${h(s.di.total)} from Folkestone`);else con.push(`A long drive (about ${h(s.di.total)}), so plan an overnight stop`);
+    if(DOG_NOTE[r.n]&&DOG_NOTE[r.n][1])con.push(DOG_NOTE[r.n][0]);}
+  else{if(!s.best)con.push(`No direct summer flight from ${p.deps.map(depName).join(" or ")}`);
+    else{if(s.best.t<=90)pro.push(`Short ${s.best.t} min transfer from ${AIR[s.best.ap]}`);else if(s.best.t>=150)con.push(`Long ${s.best.t} min transfer from ${AIR[s.best.ap]}`);
+      if(s.best.al.length>=2)pro.push(`Direct with ${s.best.al.join(" and ")}`);}}
+  if(r.card&&/free/i.test(r.card))pro.push("Free guest card with your stay");
+  return {pro:pro.slice(0,5),con:con.slice(0,4)};}
+function whyPanel(s,p,i){const q=s.parts,r=s.r,f=x=>(Math.round(x*10)/10).toFixed(1).replace(/\.0$/,"");
+  const selTxt=s.sel.map(k=>ACTS.find(a=>a[0]===k)[1].toLowerCase()).join(", ");
+  const rows=[["Things to do",q.act,40,`How well it does ${selTxt} in ${MON[s.m]}${p.level!=="moderate"?`, at ${p.level==="easy"?"an easy":"a challenging"} level`:""}`],
+    ["Weather",q.wx,20,s.w?`About ${s.w[0]}°C highs, ${s.w[1]} wet days and ${s.w[2]} h of sun a day in ${MON[s.m]}${p.cool?"; you asked for not too hot":""}`:"No weather data yet, so it scores halfway"],
+    [p.dog?"Driving":"Getting there",q.get,20,p.dog?(s.di.far?"Not a practical drive from the UK":`About ${h(s.di.total)} from Folkestone via the Channel Tunnel`):(s.best?`${s.best.t} min from ${AIR[s.best.ap]}, direct with ${s.best.al.join(", ")}`:"No direct flight from your airport")],
+    ["Value",q.value,10,`${["","Good value","Mid-range","Pricey"][r.price]}${r.card&&/free/i.test(r.card)?", plus a free guest card":""}`],
+    ["Who's going",q.who,10,{adults:"Couple or friends",young:"Family with young children",grown:"Adult family group"}[p.who]]];
+  const bar=(v,m)=>`<span class="wbar"><i style="width:${m?Math.max(0,Math.min(100,v/m*100)):0}%"></i></span>`;
+  return `<div class="whyp" id="why-${i}" hidden><table><thead><tr><th>Factor</th><th>Points</th><th></th><th>Because</th></tr></thead><tbody>`+
+    rows.map(x=>`<tr><td>${x[0]}</td><td class="num">${f(x[1])} / ${x[2]}</td><td>${bar(x[1],x[2])}</td><td>${esc(x[3])}</td></tr>`).join("")+
+    `<tr class="tot"><td>Total</td><td class="num">${f(s.exact)} / 100</td><td></td><td>= ${(Math.round(s.exact*10)/10).toFixed(1)}% match${Math.round(s.exact)!==s.pct?` (shown as ${s.pct}% so the list reads in order)`:""}</td></tr></tbody></table></div>`;}
+function wxStrip(s,p){const r=s.r,m=s.m,lo=p.cool?15:18,hi=p.cool?23:26,W=WX[r.n];
+  if(!W)return "";
+  const ms=[4,5,6,7,8,9,10].filter(mm=>W.m[mm]);
+  return `<div class="snow wxs"><div class="snowhead"><b>Weather by month</b><span>Average daytime high in town${W.elev?` (${Math.round(W.elev).toLocaleString("en-GB")} m)`:""} and days with rain, 2016–2025</span></div>
+    <div class="snowbody"><div class="months">${ms.map(mm=>{const w=W.m[mm];const ht=Math.max(8,Math.min(100,Math.round(w[0]/32*100)));
+      return `<div class="mo${mm===m?" on":""}"><span class="bar"><i style="height:${ht}%" class="${band(w[0],p.cool)}"></i></span><span class="ml">${MON[mm]}</span><span class="mv">${w[0]}°</span><span class="mw">${w[1]} wet</span></div>`;}).join("")}</div>
+    <ul class="skey" aria-label="Key"><li><i class="hi"></i>Comfortable, ${lo}–${hi}°C</li><li><i class="md"></i>Cool, under ${lo}°C</li><li><i class="lo"></i>Warm, over ${hi}°C</li><li><i class="cur"></i>Your month</li></ul></div>
+    <p class="wxhow">How to read it: each bar is the typical daytime high in town that month; the taller the bar, the warmer. The number under it is how many days that month usually get at least 1 mm of rain, so lower is drier. Up the mountain it's cooler: roughly 6°C less for every 1,000 m you climb.</p></div>`;}
+let openCards=new Set();
+function card(s,i,p){const r=s.r,m=s.m,w=s.w,isOpen=openCards.has(r.n);const {pro,con}=reasons(s,p);
+  const sel=new Set(p.acts);
+  const acts=ACTS.map(([k,l])=>{const v=actVal(r,k,m,p.dog);if(!v&&r.a[k]&&(k==="bike"||k==="glacier"))return `<span class="${sel.has(k)?"sel":""}">${l} <i class="closed">closed in ${MON[m]}</i></span>`;return v?`<span class="${sel.has(k)?"sel":""}">${l} ${pips(v)}</span>`:"";}).join("");
+  const alts=r.g.filter(([ap])=>!s.best||ap!==s.best.ap).map(([ap,t])=>`${AIR[ap]} ${t} min`).join(", ");
+  const flySub=s.best?`direct with ${s.best.f.map(x=>Object.entries(x.al).map(([a,n])=>a+(n?` (~${n}/wk)`:"")).join(", ")+(p.deps.length>1?` from ${depName(x.dep)}`:"")).join("; ")}`:"no direct summer flight, so you'd need a connection";
+  const tr=p.dog?(s.di.far?`<div><dt>Driving</dt><dd>Not practical<span class="sub">no car ferry from the UK</span></dd></div>`:`<div><dt>Driving</dt><dd>~${h(s.di.total)}<span class="sub">from Folkestone via the Channel Tunnel${s.di.oneDay?"":", best with an overnight stop"}</span></dd></div>`)
+    :`<div><dt>Transfer</dt><dd>${s.best?`${s.best.t} min · ${s.best.ap}`:`${r.g[0][1]} min · ${r.g[0][0]}`}${alts?`<span class="sub">also ${esc(alts)}</span>`:""}</dd></div>`;
+  const gf=`https://www.google.com/travel/flights?q=${encodeURIComponent(`Flights from ${p.deps[0]} to ${(s.best||{ap:r.g[0][0]}).ap} on ${p.d1}`)}`;
+  return `<article class="card nr${i===0?" top":""}${isOpen?"":" collapsed"}" data-card="${esc(r.n)}">
+    <div class="body">
+      <div class="head"><span class="rank">#${i+1}</span><h2>${esc(r.n)}</h2><span class="ctry">${esc(r.c)}</span>
+        <span class="sx"><span class="score"><b>${s.pct}</b><small>% match</small><button type="button" class="whyb" aria-expanded="false" data-why="${i}" data-pct="${s.pct}">Why ${s.pct}%?</button></span>
+        <button type="button" class="xpand" data-toggle aria-expanded="${isOpen}">${isOpen?"Less":"More"}<span aria-hidden="true"></span></button></span></div>
+      <p class="mini">${topStrength(s,p)?`<span class="strong">${topStrength(s,p)}</span>`:""}<span>${getLine(s,p)}</span><span>${w?`${w[0]}°C in ${MON[m]}`:"Weather to follow"}</span><span>${"£".repeat(r.price)} ${["","good value","mid-range","pricey"][r.price]}</span>${p.dog&&!s.di.far?`<span>Dog-friendly drive</span>`:""}</p>
+      ${whyPanel(s,p,i)}
+      <dl class="stats">
+        ${tr}
+        <div class="bud"><dt>Price level</dt><dd>${"£".repeat(r.price)}<span class="sub">${["","Good value","Mid-range","Pricey"][r.price]}</span></dd></div>
+        <div><dt>${MON[m]} weather</dt><dd>${w?`${w[0]}°C · ${w[1]} wet days`:"To follow"}<span class="sub">${w?`about ${w[2]} h sun a day${s.hot?", hot in town":""}`:""}</span></dd></div>
+        ${p.dog?"":`<div><dt>Fly from</dt><dd>${esc(p.deps.map(depName).join(" or "))}<span class="sub">${flySub}</span></dd></div>`}
+      </dl>
+      ${wxStrip(s,p)}
+      <div class="terrain acts">${acts}</div>
+      <p class="offs"><b>Highlights:</b> ${esc(r.hi)}</p>
+      ${r.card?`<p class="offs"><b>Guest card:</b> ${esc(r.card)}</p>`:""}
+      ${p.dog?`<p class="offs dogl"><b>With your dog:</b> ${esc(DOG_LIFTS[r.c]||DOG_LIFTS_ANY)}${DOG_NOTE[r.n]&&DOG_NOTE[r.n][1]?" "+esc(DOG_NOTE[r.n][0]):""} Check the lift company's rules before you go.</p>`:""}
+      <div class="why"><ul class="pro">${pro.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><ul class="con">${con.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+      <div class="links"><span class="lbl">Search</span>${p.dog?`<a href="https://www.leshuttle.com/uk-en/support/articles/what-documentation-does-my-pet-need-to-travel-207857029" target="_blank" rel="noopener">LeShuttle with pets</a>`:`<a href="${gf}" target="_blank" rel="noopener">Google Flights</a>`}<a href="https://www.booking.com/searchresults.html?ss=${encodeURIComponent(r.n)}${p.dog?"&nflt=hotelfacility%3D4":""}" target="_blank" rel="noopener">${p.dog?"Pet-friendly stays":"Places to stay"}</a><a href="https://www.getyourguide.com/s/?q=${encodeURIComponent(r.n)}" target="_blank" rel="noopener">Things to do</a></div>
+    </div></article>`;}
+function run(){const p=params();
+  const all=DEST.map(r=>score(r,p)).sort((a,b)=>(b.exact-a.exact));
+  const list=neatPct(all.slice(0,p.count));
   const m=+p.d1.slice(5,7);
-  $("sum").textContent=`${S.length} destinations for ${MON[m]} 2027 from ${p.deps.map(depName).join(" and ")}, best match first.`+(SHOULDER(m)?` ${MON[m]} is outside the main summer season: most lifts and bike parks are closed, so we rank on lakes, walks and towns.`:"");
-  $("out").innerHTML=S.map((s,i)=>card(s,i,p)).join("");}
+  $("summary").textContent=`${list.length} of ${all.length} destinations for ${p.nights} nights in ${MON[m]} 2027 ${p.dog?"driving with your dog":"from "+p.deps.map(depName).join(" and ")}, best match first.`+(SHOULDER(m)?` ${MON[m]} is outside the main summer season: most lifts and bike parks are closed, so we rank on lakes, walks and towns.`:"");
+  $("dogbox").hidden=!p.dog; $("doghint").hidden=!p.dog;
+  $("list").innerHTML=list.map((s,i)=>card(s,i,p)).join("");syncExpandAll();}
+function setCard(a,open){a.classList.toggle("collapsed",!open);const t=a.querySelector("[data-toggle]");if(t){t.firstChild.textContent=open?"Less":"More";t.setAttribute("aria-expanded",String(open));}
+  const n=a.dataset.card;if(open)openCards.add(n);else openCards.delete(n);syncExpandAll();}
+function syncExpandAll(){const all=[...document.querySelectorAll("#list .card")];$("expandAll").textContent=all.length&&all.every(a=>!a.classList.contains("collapsed"))?"Collapse all":"Expand all";}
+$("list").addEventListener("click",e=>{const t=e.target.closest("[data-toggle]");if(!t)return;const a=t.closest(".card");setCard(a,a.classList.contains("collapsed"));});
+$("list").addEventListener("click",e=>{const b=e.target.closest("[data-why]");if(!b)return;const pn=$("why-"+b.dataset.why);if(!pn)return;
+  pn.hidden=!pn.hidden;b.setAttribute("aria-expanded",String(!pn.hidden));b.textContent=pn.hidden?`Why ${b.dataset.pct}%?`:"Hide breakdown";});
+$("expandAll").addEventListener("click",()=>{const all=[...document.querySelectorAll("#list .card")];const open=all.some(a=>a.classList.contains("collapsed"));all.forEach(a=>setCard(a,open));});
 $("go").addEventListener("click",run);
-document.querySelectorAll("#f select,#f input").forEach(e=>e.addEventListener("change",run));
+document.querySelectorAll("#f select,#f input,#rb select").forEach(e=>e.addEventListener("change",run));
 run();
-</script></body></html>
+</script>
+</body>
+</html>
