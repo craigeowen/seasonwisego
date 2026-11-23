@@ -744,11 +744,12 @@ function card(s,i,p){const r=s.r,m=s.m,w=s.w,isOpen=openCards.has(r.n);const {pr
 const S22={aid:"seasonwisego",campaign:"summer",extra:"&currency=GBP&lang=en"};
 const EG={camref:"1110lSLvz",creativeref:"1011l66932",adref:"PZp8612cEs"};
 const EGV={camref:"1100l6yPQ5",creativeref:"1011l63085",adref:"PZ095zBlE3"};
-// Viator partner (P00333552, from Craig's link builder 23 Nov 2026); GetYourGuide partner ID to add when Craig sends it
+// Viator partner (P00333552, from Craig's link builder 23 Nov 2026)
 const VIA={pid:"P00333552",mcid:"42383",medium:"link"};
 const viator=q=>`https://www.viator.com/searchResults/all?text=${encodeURIComponent(q)}&pid=${VIA.pid}&mcid=${VIA.mcid}&medium=${VIA.medium}`;
-const GYG={pid:""};
-const gyg=q=>`https://www.getyourguide.com/s/?q=${encodeURIComponent(q)}${GYG.pid?`&partner_id=${GYG.pid}`:""}`;
+// GetYourGuide partner ID from Craig's tracking link (23 Nov 2026; account in review at the time)
+const GYG={pid:"M1TUEIW"};
+const gyg=q=>`https://www.getyourguide.com/en-gb/s/?q=${encodeURIComponent(q)}&partner_id=${GYG.pid}&utm_medium=online_publisher`;
 const affTag='<span class="adtag" title="We may earn a commission if you book">Ad</span>';
 
 const outDate=p=>new Date(new Date(p.d1+"T12:00:00").getTime()+p.nights*864e5).toISOString().slice(0,10);
