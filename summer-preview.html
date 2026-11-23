@@ -443,9 +443,14 @@ input[type=text]{font:inherit;font-size:.95rem;color:var(--ink);background:var(-
           <label class="f">Going out
             <input type="date" id="d1" value="2027-07-17" min="2027-04-01" max="2027-10-31">
           </label>
-          <label class="f">Nights
-            <select id="nights"><option>3</option><option>4</option><option>5</option><option>6</option><option selected>7</option><option>10</option><option>14</option></select>
-          </label>
+          <div class="row">
+            <label class="f">Nights
+              <select id="nights"><option>3</option><option>4</option><option>5</option><option>6</option><option selected>7</option><option>10</option><option>14</option></select>
+            </label>
+            <label class="f">People
+              <input type="number" id="pax" min="1" max="12" value="2">
+            </label>
+          </div>
         </div>
       </fieldset>
 
@@ -462,6 +467,34 @@ input[type=text]{font:inherit;font-size:.95rem;color:var(--ink);background:var(-
         <label class="toggle"><input type="checkbox" id="dog"> Bringing the dog</label>
         <p class="hint" id="doghint" hidden>Ryanair, easyJet and Jet2 don't carry pet dogs, and most UK holidays with a dog are by car, so we've switched you to Drive. You can switch back to Fly if you've found an airline that takes your dog.</p>
       </fieldset>
+
+      <div class="folds">
+        <p class="foldhint">Fine-tune (optional)</p>
+        <details class="fold" id="fd-where">
+          <summary><span class="ft">Where</span><span class="fs" id="fs-where"></span></summary>
+          <div class="fb">
+            <div class="chips" id="ctry"></div>
+            <label class="f">Use the countries to
+              <select id="cmode">
+                <option value="prefer" selected>Prefer them (boost in ranking)</option>
+                <option value="only">Only show them</option>
+              </select>
+            </label>
+            <p class="hint">Leave every country unticked to search anywhere.</p>
+            <label class="f">Places you have in mind
+              <select id="resPick"><option value="">Add a destination…</option></select>
+            </label>
+            <div class="rchips" id="resChips"></div>
+            <label class="f">Use the places to
+              <select id="rmode">
+                <option value="prefer" selected>Prefer them (boost in ranking)</option>
+                <option value="only">Only show them (compare side by side)</option>
+              </select>
+            </label>
+            <p class="hint">Places you have in mind get a boost and always stay on the list.</p>
+          </div>
+        </details>
+      </div>
       <div class="findbar"><button type="button" class="btn primary" id="go">Find my summer</button></div>
     </form>
 
@@ -469,12 +502,45 @@ input[type=text]{font:inherit;font-size:.95rem;color:var(--ink);background:var(-
       <div class="sumbar">
         <p id="summary"></p>
         <div class="rbar" id="rb">
+          <label class="sortby" for="sortBy">Order
+            <select id="sortBy">
+              <option value="match">By best match</option>
+              <option value="getting">By getting there (quickest first)</option>
+              <option value="country">By country</option>
+            </select>
+          </label>
+          <label class="sortby" for="price">Price level
+            <select id="price">
+              <option value="3" selected>Any</option>
+              <option value="2">££ or less</option>
+              <option value="1">£ good value only</option>
+            </select>
+          </label>
+          <button type="button" class="btn sm ghost" id="expandAll">Expand all</button>
           <label class="sortby" for="count">Results
             <select id="count"><option>5</option><option selected>8</option><option>12</option><option value="99">All</option></select>
           </label>
-          <button type="button" class="btn sm ghost" id="expandAll">Expand all</button>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn" id="shareBtn">Share trip code</button>
+          <span id="sharebox" class="sharebox" hidden>
+            <label for="shareCode" class="sharelbl">Your trip code</label>
+            <input id="shareCode" readonly size="16">
+            <span id="shareMsg" class="sharemsg"></span>
+          </span>
+          <button type="button" class="btn" id="copy">Copy shortlist</button>
         </div>
       </div>
+      <details id="saved" class="saved">
+        <summary>Open a trip code</summary>
+        <div class="savedbody">
+          <div class="opencode">
+            <label class="f" for="codeIn">Trip code</label>
+            <div class="ocrow"><input id="codeIn" placeholder="For example 7KQM-A2XD-4" autocomplete="off"><button type="button" class="btn" id="codeOpen">Open</button></div>
+            <p class="hint" id="codeMsg">Trip codes carry your search settings only: not your name, your starting town or any account.</p>
+          </div>
+        </div>
+      </details>
       <div id="dogbox" class="dogbox" hidden>
         <b>Taking your dog from the UK</b>
         <ul>
@@ -487,6 +553,7 @@ input[type=text]{font:inherit;font-size:.95rem;color:var(--ink);background:var(-
       </div>
       <p class="affnote"><span class="adtag">Ad</span>marks links that may earn us a commission if you book, at no extra cost to you. It never changes the ranking. <a href="affiliate-disclosure.html" target="_blank" rel="noopener">How we make money</a></p>
       <div id="list" class="results"></div>
+      <div id="notlist" class="notlist" hidden></div>
       <dialog id="dt" aria-labelledby="dtt"></dialog>
       <p class="note">Weather: 10-year averages (2016 to 2025) for each town, from Open-Meteo. A few destinations use NASA POWER data, adjusted to match. Flights: Ryanair, easyJet and Jet2 timetables for summer 2027 (checked 17 November 2026), plus the main airlines to Geneva, Zurich, Munich, Kraków, Oslo and Bergen. Transfer and driving times are approximate. Driving times start at Folkestone and include the Channel Tunnel crossing, but not stops. Always check flights, lift rules and guest-card terms before booking.</p>
     </section>
@@ -520,7 +587,7 @@ const h=m=>{const x=Math.round(m/30)/2;return (x%1?x.toFixed(1):x)+" h";};
 for(const [c,n] of DEP){$("dep").add(new Option(n,c));$("dep2").add(new Option(n,c));}
 $("dep").value="MAN";
 $("acts").innerHTML=ACTS.map(([k,l])=>`<span class="chip"><input type="checkbox" id="a-${k}" value="${k}"${k==="walk"||k==="water"?" checked":""}><label for="a-${k}">${l}</label></span>`).join("");
-function params(){return{deps:[$("dep").value,$("dep2").value].filter((x,i,a)=>x&&a.indexOf(x)===i),d1:$("d1").value||"2027-07-17",nights:+$("nights").value||7,acts:[...document.querySelectorAll("#acts input:checked")].map(i=>i.value),who:$("who").value,level:$("level").value,cool:$("cool").checked,dog:$("dog").checked,drive:document.querySelector("input[name=mode]:checked").value==="drive",start:($("start").value||"").trim(),count:+$("count").value||8};}
+function params(){return{deps:[$("dep").value,$("dep2").value].filter((x,i,a)=>x&&a.indexOf(x)===i),d1:$("d1").value||"2027-07-17",nights:+$("nights").value||7,acts:[...document.querySelectorAll("#acts input:checked")].map(i=>i.value),who:$("who").value,level:$("level").value,cool:$("cool").checked,dog:$("dog").checked,drive:document.querySelector("input[name=mode]:checked").value==="drive",start:($("start").value||"").trim(),count:+$("count").value||8,pax:Math.max(1,Math.min(12,+$("pax").value||2)),countries:[...document.querySelectorAll("#ctry input:checked")].map(i=>i.value),cmode:$("cmode").value,resorts:chosen(),rmode:$("rmode").value,order:$("sortBy").value,price:+$("price").value||3};}
 function flightsFor(deps,ap){const out=[];for(const d of deps){const f=(FL[d]||{})[ap];if(f)out.push({dep:d,al:f});}return out;}
 const SHOULDER=m=>m<=5||m>=10;
 const GLAC={"Tignes": [6, 7], "Les 2 Alpes": [6, 8], "Hintertux": [1, 12], "Saas-Fee": [7, 10], "Cervinia": [6, 9], "Passo Tonale": [6, 8]};
@@ -548,8 +615,13 @@ function score(r,p){
   const whoS=p.who==="adults"?(A("walk")+A("water")+A("hike"))/15:p.who==="young"?(A("family")*2+A("water"))/15:(A("walk")+A("hike")+A("thrill")+A("water"))/20;
   const value=Math.min(1,(4-r.price)/3*0.7+(r.card&&/free/i.test(r.card)?0.3:0));
   const parts={act:act*40,wx:wx*20,get,value:value*10,who:Math.min(whoS,1)*10};
-  const exact=parts.act+parts.wx+parts.get+parts.value+parts.who;
-  return {r,m,w,best,di,hot,exact,parts,sel};
+  const prefOn=p.countries.length>0&&p.cmode==="prefer", resOn=p.resorts.length>0&&p.rmode==="prefer";
+  const inPref=p.countries.includes(r.c), inRes=p.resorts.includes(r.n);
+  parts.pref=prefOn&&inPref?8:0; parts.res=resOn&&inRes?12:0; parts.prefOn=prefOn; parts.resOn=resOn;
+  const max=100+(prefOn?8:0)+(resOn?12:0), raw=parts.act+parts.wx+parts.get+parts.value+parts.who+parts.pref+parts.res;
+  parts.raw=raw; parts.max=max;
+  const exact=raw/max*100;
+  return {r,m,w,best,di,hot,exact,parts,sel,inRes};
 }
 function neatPct(list){
   const x=list.map(s=>s.exact), n=x.length, eps=1e-9;
@@ -589,10 +661,12 @@ function whyPanel(s,p,i){const q=s.parts,r=s.r,f=x=>(Math.round(x*10)/10).toFixe
     [p.drive?"Driving":"Getting there",q.get,20,p.drive?(s.di.far?"Not a practical drive from the UK":`About ${h(s.di.total)} from Folkestone via the Channel Tunnel`):(s.best?`${s.best.t} min from ${AIR[s.best.ap]}, direct with ${s.best.al.join(", ")}`:"No direct flight from your airport")],
     ["Value",q.value,10,`${["","Good value","Mid-range","Pricey"][r.price]}${r.card&&/free/i.test(r.card)?", plus a free guest card":""}`],
     ["Who's going",q.who,10,{adults:"Couple or friends",young:"Family with young children",grown:"Adult family group"}[p.who]]];
+  if(q.prefOn) rows.push(["Preferred country",q.pref,8,q.pref?`${r.c} is one of your countries`:"Not one of your preferred countries"]);
+  if(q.resOn) rows.push(["Place you have in mind",q.res,12,q.res?"On your list":"Not on your list"]);
   const bar=(v,m)=>`<span class="wbar"><i style="width:${m?Math.max(0,Math.min(100,v/m*100)):0}%"></i></span>`;
   return `<div class="whyp" id="why-${i}" hidden><table><thead><tr><th>Factor</th><th>Points</th><th></th><th>Because</th></tr></thead><tbody>`+
     rows.map(x=>`<tr><td>${x[0]}</td><td class="num">${f(x[1])} / ${x[2]}</td><td>${bar(x[1],x[2])}</td><td>${esc(x[3])}</td></tr>`).join("")+
-    `<tr class="tot"><td>Total</td><td class="num">${f(s.exact)} / 100</td><td></td><td>= ${(Math.round(s.exact*10)/10).toFixed(1)}% match${Math.round(s.exact)!==s.pct?` (shown as ${s.pct}% so the list reads in order)`:""}</td></tr></tbody></table></div>`;}
+    `<tr class="tot"><td>Total</td><td class="num">${f(q.raw)} / ${q.max}</td><td></td><td>= ${(Math.round(s.exact*10)/10).toFixed(1)}% match${Math.round(s.exact)!==s.pct?` (shown as ${s.pct}% so the list reads in order)`:""}</td></tr></tbody></table></div>`;}
 function wxStrip(s,p){const r=s.r,m=s.m,lo=p.cool?15:18,hi=p.cool?23:26,W=WX[r.n];
   if(!W)return "";
   const ms=[4,5,6,7,8,9,10].filter(mm=>W.m[mm]);
@@ -612,7 +686,7 @@ function card(s,i,p){const r=s.r,m=s.m,w=s.w,isOpen=openCards.has(r.n);const {pr
   const gf=`https://www.google.com/travel/flights?q=${encodeURIComponent(`Flights from ${p.deps[0]} to ${(s.best||{ap:r.g[0][0]}).ap} on ${p.d1}`)}`;
   return `<article class="card nr${i===0?" top":""}${isOpen?"":" collapsed"}" data-card="${esc(r.n)}">
     <div class="body">
-      <div class="head"><span class="rank">#${i+1}</span><h2>${esc(r.n)}</h2><span class="ctry">${esc(r.c)}</span>
+      <div class="head"><span class="rank">#${s.rank}</span><h2>${esc(r.n)}</h2><span class="ctry">${esc(r.c)}</span>
         <button type="button" class="more" data-detail="${i}">Details <span aria-hidden="true">›</span><small>getting there · stays · things to do</small></button>
         <span class="sx"><span class="score"><b>${s.pct}</b><small>% match</small><button type="button" class="whyb" aria-expanded="false" data-why="${i}" data-pct="${s.pct}">Why ${s.pct}%?</button></span>
         <button type="button" class="xpand" data-toggle aria-expanded="${isOpen}">${isOpen?"Less":"More"}<span aria-hidden="true"></span></button></span></div>
@@ -639,15 +713,15 @@ const S22={aid:"seasonwisego",campaign:"summer",extra:"&currency=GBP&lang=en"};
 const EG={camref:"1110lSLvz",creativeref:"1011l66932",adref:"PZp8612cEs"};
 const EGV={camref:"1100l6yPQ5",creativeref:"1011l63085",adref:"PZ095zBlE3"};
 const affTag='<span class="adtag" title="We may earn a commission if you book">Ad</span>';
-const PAX=2;
+
 const outDate=p=>new Date(new Date(p.d1+"T12:00:00").getTime()+p.nights*864e5).toISOString().slice(0,10);
 const placeQ=r=>r.n.replace(/ \(.*\)$/,"")+", "+r.c;
 function s22wrap(provider,url){return `https://www.stay22.com/allez/${provider}?aid=${S22.aid}&link=${encodeURIComponent(url)}&campaign=${S22.campaign}${S22.extra}`;}
-function kayakFlights(r,s,p){const ap=(s.best||{ap:r.g[0][0]}).ap;return s22wrap("kayak",`https://www.kayak.co.uk/flights/${p.deps[0]}-${ap}/${p.d1}/${outDate(p)}/${PAX}adults`);}
-function bkUrl(r,p){return `https://www.stay22.com/allez/booking?aid=${S22.aid}&address=${encodeURIComponent(placeQ(r))}&checkin=${p.d1}&checkout=${outDate(p)}&adults=${PAX}&campaign=${S22.campaign}${S22.extra}`;}
-function hcom(r,p){const land=`https://uk.hotels.com/Hotel-Search?destination=${encodeURIComponent(placeQ(r))}&startDate=${p.d1}&endDate=${outDate(p)}&adults=${PAX}`;
+function kayakFlights(r,s,p){const ap=(s.best||{ap:r.g[0][0]}).ap;return s22wrap("kayak",`https://www.kayak.co.uk/flights/${p.deps[0]}-${ap}/${p.d1}/${outDate(p)}/${p.pax}adults`);}
+function bkUrl(r,p){return `https://www.stay22.com/allez/booking?aid=${S22.aid}&address=${encodeURIComponent(placeQ(r))}&checkin=${p.d1}&checkout=${outDate(p)}&adults=${p.pax}&campaign=${S22.campaign}${S22.extra}`;}
+function hcom(r,p){const land=`https://uk.hotels.com/Hotel-Search?destination=${encodeURIComponent(placeQ(r))}&startDate=${p.d1}&endDate=${outDate(p)}&adults=${p.pax}`;
   return `https://www.hotels.com/affiliate?landingPage=${encodeURIComponent(land)}&camref=${EG.camref}&creativeref=${EG.creativeref}&adref=${EG.adref}`;}
-function vrbo(r,p){const land=`https://www.vrbo.com/en-gb/search?destination=${encodeURIComponent(placeQ(r))}&startDate=${p.d1}&endDate=${outDate(p)}&adults=${PAX}`;
+function vrbo(r,p){const land=`https://www.vrbo.com/en-gb/search?destination=${encodeURIComponent(placeQ(r))}&startDate=${p.d1}&endDate=${outDate(p)}&adults=${p.pax}`;
   return `https://vrbo.com/affiliate?landingPage=${encodeURIComponent(land)}&camref=${EGV.camref}&creativeref=${EGV.creativeref}&adref=${EGV.adref}`;}
 let last=[],lastP=null;
 const TOLLS={France:"French motorway tolls (péage) on most of the route.",Switzerland:"Swiss motorway vignette (CHF 40, valid for the calendar year), plus French tolls if you go through France.",Austria:"Austrian motorway vignette (a 10-day one is available). Some tunnels and mountain roads charge extra.",Germany:"No motorway tolls for cars in Germany.",Italy:"Italian motorway tolls, plus the Swiss or Austrian vignette depending on your route.",Slovenia:"Slovenian e-vignette (a 7-day one is available), plus the Austrian vignette and the Karawanken tunnel toll on the way.",Poland:"Some Polish motorways charge tolls; the German part of the route is toll-free.",Slovakia:"Slovak motorway e-vignette, plus Austrian or Czech tolls depending on your route.",Norway:"Long drive via Denmark and a ferry."};
@@ -667,7 +741,7 @@ function detailPanel(s,p){const r=s.r,m=s.m,w=s.w,place=r.n.replace(/ \(.*\)$/,"
       <div class="city"><div class="cityhead"><b>Direct flights, summer 2027</b><span>Weekly flights in July where we have them</span></div><div class="tscroll"><table><thead><tr><th>Fly to</th><th>From</th><th>Airlines</th><th>Transfer</th></tr></thead><tbody>${rows.join("")}</tbody></table></div></div>
       <div class="stays">${atile(kayakFlights(r,s,p),"Kayak","Compare flights")}${tile(`https://www.skyscanner.net/transport/flights/${p.deps[0].toLowerCase()}/${ap.toLowerCase()}/${y}/${ret}/`,"Skyscanner","Compare flights")}${tile(`https://www.google.com/travel/flights?q=${encodeURIComponent(`Flights from ${p.deps[0]} to ${ap} on ${p.d1}`)}`,"Google Flights","Compare flights")}</div></div>`;}
   const ci=p.d1,co=new Date(new Date(p.d1+"T12:00:00").getTime()+p.nights*864e5).toISOString().slice(0,10);
-  const stay=`<div class="acc"><h4>Where to stay</h4>${p.dog?'<p class="trline">With the dog, tick <b>Pets allowed</b> in each site\'s filters once it opens.</p>':""}<div class="stays">${atile(bkUrl(r,p),"Booking.com","Hotels and apartments")}${atile(hcom(r,p),"Hotels.com","Hotels")}${atile(vrbo(r,p),"Vrbo","Holiday rentals")}${tile(`https://www.airbnb.co.uk/s/${encodeURIComponent(place+", "+r.c)}/homes?checkin=${ci}&checkout=${co}&adults=2${p.dog?"&pets=1":""}`,"Airbnb",p.dog?"Homes that take pets":"Homes and apartments")}</div></div>`;
+  const stay=`<div class="acc"><h4>Where to stay</h4>${p.dog?'<p class="trline">With the dog, tick <b>Pets allowed</b> in each site\'s filters once it opens.</p>':""}<div class="stays">${atile(bkUrl(r,p),"Booking.com","Hotels and apartments")}${atile(hcom(r,p),"Hotels.com","Hotels")}${atile(vrbo(r,p),"Vrbo","Holiday rentals")}${tile(`https://www.airbnb.co.uk/s/${encodeURIComponent(place+", "+r.c)}/homes?checkin=${ci}&checkout=${co}&adults=${p.pax}${p.dog?"&pets=1":""}`,"Airbnb",p.dog?"Homes that take pets":"Homes and apartments")}</div></div>`;
   const acts=(p.acts.length?p.acts:["walk","hike"]).filter(k=>actVal(r,k,m,p.dog)>0);
   const todo=`<div class="acc"><h4>Things to do</h4><p class="trline"><b>Highlights:</b> ${esc(r.hi)}</p>${r.card?`<p class="trline"><b>Guest card:</b> ${esc(r.card)}</p>`:""}
     <div class="stays">${acts.map(k=>tile(`https://www.getyourguide.com/s/?q=${encodeURIComponent(place+" "+ACTQ[k])}`,ACTS.find(a=>a[0]===k)[1],"GetYourGuide")).join("")}${acts.includes("bike")?tile(`https://www.google.com/search?q=${encodeURIComponent("bike hire "+place)}`,"Bike and e-bike hire","Search local shops"):""}${acts.includes("road")?tile(`https://www.google.com/search?q=${encodeURIComponent("road bike hire "+place)}`,"Road bike hire","Search local shops"):""}</div></div>`;
@@ -682,15 +756,112 @@ function detailPanel(s,p){const r=s.r,m=s.m,w=s.w,place=r.n.replace(/ \(.*\)$/,"
 function openDetail(i){const s=last[i];if(!s)return;const dlg=$("dt");dlg.innerHTML=detailPanel(s,lastP);dlg.querySelector("[data-close]").addEventListener("click",()=>dlg.close());dlg.showModal();}
 $("dt").addEventListener("click",e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
 $("list").addEventListener("click",e=>{const b=e.target.closest("[data-detail]");if(b)openDetail(+b.dataset.detail);});
+
+// ---------- Where: countries and places in mind ----------
+const CTRY=[...new Set(DEST.map(r=>r.c))].sort();
+$("ctry").innerHTML=CTRY.map((c,i)=>`<span class="chip"><input type="checkbox" id="c-${i}" value="${esc(c)}"><label for="c-${i}">${esc(c)}</label></span>`).join("");
+let wantRes=[];
+const chosen=()=>wantRes.slice();
+function renderResChips(){
+  $("resChips").innerHTML=wantRes.map(n=>`<button type="button" class="rchip" data-rm="${esc(n)}" aria-label="Remove ${esc(n)}">${esc(n)}<span aria-hidden="true">×</span></button>`).join("");
+  $("resPick").innerHTML=`<option value="">${wantRes.length?"Add another place…":"Add a destination…"}</option>`+
+    CTRY.map(c=>{const o=DEST.filter(r=>r.c===c&&!wantRes.includes(r.n)).sort((a,b)=>a.n.localeCompare(b.n));return o.length?`<optgroup label="${esc(c)}">${o.map(r=>`<option value="${esc(r.n)}">${esc(r.n)}</option>`).join("")}</optgroup>`:"";}).join("");}
+renderResChips();
+$("resPick").addEventListener("change",e=>{const v=e.target.value;if(v&&!wantRes.includes(v))wantRes.push(v);renderResChips();run();});
+$("resChips").addEventListener("click",e=>{const b=e.target.closest("[data-rm]");if(!b)return;wantRes=wantRes.filter(n=>n!==b.dataset.rm);renderResChips();run();});
+function foldSummary(p){const wh=[];if(p.countries.length)wh.push(`${p.cmode==="only"?"Only":"Prefer"} ${p.countries.join(", ")}`);
+  if(p.resorts.length)wh.push(`${p.resorts.length} place${p.resorts.length>1?"s":""} in mind`);$("fs-where").textContent=wh.join(" · ")||"Anywhere";}
+function renderNotList(missing,p,list){const box=$("notlist");
+  const shownC=new Set(list.map(s=>s.r.c)),wantR=new Set(p.resorts);
+  const rows=missing.filter(m=>wantR.has(m.s.r.n)||!shownC.has(m.s.r.c)||m.why!=="rank").slice(0,8);
+  if(!rows.length){box.hidden=true;box.innerHTML="";return;}
+  const opts=[...$("count").options].map(o=>+o.value);
+  const li=rows.map(({s,why,pos})=>{const r=s.r;let t="",fx=[];
+    if(why==="price"){t=`It's ${["","good value","mid-range","pricey"][r.price]}, above your price level.`;fx.push(`<button type="button" class="btn sm" data-fix="price">Show any price level</button>`);}
+    else{const k=opts.find(o=>o>=pos);
+      if(k&&k<99){t=`It ranked #${pos} for your settings, just outside your top ${p.count}.`;fx.push(`<button type="button" class="btn sm" data-fix="count:${k}">Show ${k} results</button>`);}
+      else{t=`Other places match your settings better (it ranked #${pos}).`;fx.push(`<button type="button" class="btn sm" data-fix="count:99">Show all results</button>`);
+        if(p.cmode!=="only"&&p.countries.includes(r.c))fx.push(`<button type="button" class="btn sm ghost" data-fix="only">Only show the countries you picked</button>`);}}
+    return `<li><b>${esc(r.n)}</b> <span class="muted">${esc(r.c)}</span><br>${t}${fx.length?`<div class="fx">${fx.join("")}</div>`:""}</li>`;}).join("");
+  box.innerHTML=`<h3>Not on your list</h3><p>You picked these, but they didn't make your results.</p><ul>${li}</ul>`;box.hidden=false;}
+$("notlist").addEventListener("click",e=>{const b=e.target.closest("[data-fix]");if(!b)return;const [k,v]=b.dataset.fix.split(":");
+  if(k==="count")$("count").value=v;else if(k==="price")$("price").value="3";else if(k==="only")$("cmode").value="only";run();});
+
+// ---------- Trip codes and shortlist (settings only; the "Driving from" town is never included) ----------
+const B32="0123456789ABCDEFGHJKMNPQRSTVWXYZ", NIGHTS=["3","4","5","6","7","10","14"], COUNTS=["5","8","12","99"], ORDERS=["match","getting","country"], DAY0=Date.parse("2027-04-01T00:00:00Z");
+function tripCode(){const p=params(),W=[];const put=(v,n)=>{for(let k=n-1;k>=0;k--)W.push((v>>k)&1);};
+  put(1,2); put(p.drive?1:0,1);
+  put(Math.max(0,DEP.findIndex(d=>d[0]===p.deps[0])),5); put(p.deps[1]?DEP.findIndex(d=>d[0]===p.deps[1])+1:0,5);
+  put(Math.max(0,Math.min(255,Math.round((Date.parse(p.d1+"T00:00:00Z")-DAY0)/864e5))),8);
+  put(Math.max(0,NIGHTS.indexOf(String(p.nights))),3); put(p.pax,4);
+  ACTS.forEach(([k])=>put(p.acts.includes(k)?1:0,1));
+  put(["adults","young","grown"].indexOf(p.who),2); put(["easy","moderate","hard"].indexOf(p.level),2); put(p.cool?1:0,1); put(p.dog?1:0,1);
+  CTRY.forEach(c=>put(p.countries.includes(c)?1:0,1)); put(p.cmode==="only"?1:0,1);
+  const res=p.resorts.map(n=>DEST.findIndex(r=>r.n===n)).filter(i=>i>=0).slice(0,15); put(res.length,4); res.forEach(i=>put(i,7)); put(p.rmode==="only"?1:0,1);
+  put(Math.max(0,ORDERS.indexOf(p.order)),2); put(p.price,2); put(Math.max(0,COUNTS.indexOf(String(p.count))),2);
+  while(W.length%5)W.push(0);
+  const v=[];for(let i=0;i<W.length;i+=5)v.push(parseInt(W.slice(i,i+5).join(""),2));
+  v.push(v.reduce((a,x,i)=>(a+x*(i+1))%32,0));
+  return v.map(x=>B32[x]).join("").match(/.{1,4}/g).join("-");}
+function readCode(txt){const t=String(txt||"").toUpperCase().replace(/[^0-9A-Z]/g,"").replace(/O/g,"0").replace(/[IL]/g,"1");if(t.length<8)return null;
+  const v=[...t].map(c=>B32.indexOf(c));if(v.some(x=>x<0))return null;const chk=v.pop();
+  if(v.reduce((a,x,i)=>(a+x*(i+1))%32,0)!==chk)return null;
+  const W=[];v.forEach(x=>{for(let k=4;k>=0;k--)W.push((x>>k)&1);});let i=0;const get=n=>{let x=0;for(let k=0;k<n;k++)x=x*2+(W[i++]||0);return x;};
+  if(get(2)!==1)return null;
+  const o={};o.drive=get(1);o.dep=get(5);o.dep2=get(5);o.day=get(8);o.nights=get(3);o.pax=get(4);o.acts=ACTS.map(()=>get(1));
+  o.who=get(2);o.level=get(2);o.cool=get(1);o.dog=get(1);o.ctry=CTRY.map(()=>get(1));o.cmode=get(1);
+  const n=get(4);o.res=[];for(let k=0;k<n;k++)o.res.push(get(7));o.rmode=get(1);o.order=get(2);o.price=get(2);o.count=get(2);return o;}
+function openTrip(o){
+  $(o.drive?"m-drive":"m-fly").checked=true;
+  if(DEP[o.dep])$("dep").value=DEP[o.dep][0]; $("dep2").value=o.dep2&&DEP[o.dep2-1]?DEP[o.dep2-1][0]:"";
+  $("d1").value=new Date(DAY0+o.day*864e5).toISOString().slice(0,10); $("nights").value=NIGHTS[o.nights]||"7"; $("pax").value=o.pax||2;
+  document.querySelectorAll("#acts input").forEach((el,k)=>el.checked=!!o.acts[k]);
+  $("who").value=["adults","young","grown"][o.who]||"adults"; $("level").value=["easy","moderate","hard"][o.level]||"moderate";
+  $("cool").checked=!!o.cool; $("dog").checked=!!o.dog;
+  document.querySelectorAll("#ctry input").forEach((el,k)=>el.checked=!!o.ctry[k]); $("cmode").value=o.cmode?"only":"prefer";
+  wantRes=o.res.map(k=>DEST[k]&&DEST[k].n).filter(Boolean); renderResChips(); $("rmode").value=o.rmode?"only":"prefer";
+  $("sortBy").value=ORDERS[o.order]||"match"; $("price").value=String(o.price||3); $("count").value=COUNTS[o.count]||"8";
+  if(o.ctry.some(Boolean)||o.res.length) $("fd-where").open=true;
+  run();}
+const shareUrl=c=>(/^https?:/.test(location.protocol)?location.origin+location.pathname:"https://seasonwisego.com/summer-preview.html")+"#trip-"+c;
+function flash(b,t,back){b.textContent=t;setTimeout(()=>b.textContent=back,1600);}
+$("shareBtn").addEventListener("click",async()=>{const code=tripCode();$("shareCode").value=code;$("sharebox").hidden=false;
+  try{await navigator.clipboard.writeText(`SeasonWiseGo Summer trip code: ${code}\n${shareUrl(code)}`);$("shareMsg").textContent="";flash($("shareBtn"),"Code copied","Share trip code");}
+  catch(e){$("shareMsg").textContent="Select and copy";$("shareCode").focus();$("shareCode").select();}});
+$("codeOpen").addEventListener("click",()=>{const d=readCode($("codeIn").value),m=$("codeMsg");
+  if(!d){m.textContent="That code doesn't match. Check each letter and number and try again.";return;}
+  openTrip(d);m.textContent="Opened.";$("codeIn").value="";});
+$("codeIn").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("codeOpen").click();}});
+$("f").addEventListener("input",()=>{$("sharebox").hidden=true;});
+$("copy").addEventListener("click",async()=>{const p=lastP||params(),m=+p.d1.slice(5,7),code=tripCode();
+  const how=p.drive?"driving":`flying from ${p.deps.map(depName).join(" or ")}`;
+  const txt=`Summer shortlist: ${p.nights} nights from ${new Date(p.d1+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}, ${how}, ${p.pax} ${p.pax===1?"person":"people"}\n`+
+    last.map(s=>{const r=s.r,w=s.w;const get=p.drive?(s.di.far?"not a practical drive":`about ${h(s.di.total)} drive from Folkestone`):(s.best?`fly to ${AIR[s.best.ap]} (${s.best.ap}) then ${s.best.t} min`:"no direct flight");
+      return `${s.rank}. ${r.n} (${r.c}): ${s.pct}% match, ${get}${w?`, about ${w[0]}°C highs in ${MON[m]}`:""}, ${["","good value","mid-range","pricey"][r.price]}`;}).join("\n")+
+    `\n\nOpen this search: ${shareUrl(code)} (trip code ${code})`;
+  const b=$("copy");try{await navigator.clipboard.writeText(txt);b.textContent="Copied";}catch(e){b.textContent="Copy failed";}setTimeout(()=>b.textContent="Copy shortlist",1600);});
 function routeLinks(r,p){const from=p.start||"Folkestone",to=`${r.n.replace(/ \(.*\)$/,"")}, ${r.c}`;
   const gm=`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`;
   return `<a href="${gm}" target="_blank" rel="noopener">Route on Google Maps</a><a href="https://www.viamichelin.co.uk/" target="_blank" rel="noopener" title="Type in your start and ${esc(to)}">Tolls and fuel cost (ViaMichelin)</a><a href="${p.dog?"https://www.leshuttle.com/uk-en/support/articles/what-documentation-does-my-pet-need-to-travel-207857029":"https://www.leshuttle.com/uk-en"}" target="_blank" rel="noopener">${p.dog?"LeShuttle with pets":"LeShuttle crossings"}</a>`;}
 function syncMode(){const drive=document.querySelector("input[name=mode]:checked").value==="drive";$("flyFields").hidden=drive;$("driveFields").hidden=!drive;}
 function run(){syncMode();const p=params();
-  const all=DEST.map(r=>score(r,p)).sort((a,b)=>(b.exact-a.exact));
-  const list=neatPct(all.slice(0,p.count));
+  const ronly=p.resorts.length&&p.rmode==="only";
+  const pool=ronly?DEST.filter(r=>p.resorts.includes(r.n)):(p.countries.length&&p.cmode==="only"?DEST.filter(r=>p.countries.includes(r.c)):DEST);
+  const scored=pool.map(r=>score(r,p)).sort((a,b)=>(b.exact-a.exact));
+  const priceOK=s=>ronly||s.inRes||s.r.price<=p.price;
+  const all=scored.filter(priceOK);
+  const list=neatPct(all.slice(0,ronly?99:p.count));
+  list.forEach((s,i)=>s.rank=i+1);
+  const getKey=s=>p.drive?(s.di.far?9999:s.di.total):(s.best?s.best.t:9999);
+  if(p.order==="getting") list.sort((a,b)=>getKey(a)-getKey(b)||a.rank-b.rank);
+  else if(p.order==="country") list.sort((a,b)=>a.r.c.localeCompare(b.r.c)||a.rank-b.rank);
+  // "Not on your list": countries or places you picked that didn't make the results
+  const shown=new Set(list.map(s=>s.r.n)), want=new Set([...p.countries,...p.resorts]);
+  const missing=scored.filter(s=>!shown.has(s.r.n)&&(want.has(s.r.c)||want.has(s.r.n))).map(s=>({s,why:priceOK(s)?"rank":"price",pos:all.indexOf(s)+1}));
+  renderNotList(missing,p,list);
+  foldSummary(p);
   const m=+p.d1.slice(5,7);
-  $("summary").textContent=`${list.length} of ${all.length} destinations for ${p.nights} nights in ${MON[m]} 2027 ${p.drive?(p.dog?"driving with your dog":"driving"+(p.start?" from "+p.start:"")):"flying from "+p.deps.map(depName).join(" and ")+(p.dog?", with your dog":"")}, best match first.`+(SHOULDER(m)?` ${MON[m]} is outside the main summer season: most lifts and bike parks are closed, so we rank on lakes, walks and towns.`:"");
+  $("summary").textContent=`${list.length} of ${pool.length} destinations for ${p.nights} nights in ${MON[m]} 2027 ${p.drive?(p.dog?"driving with your dog":"driving"+(p.start?" from "+p.start:"")):"flying from "+p.deps.map(depName).join(" and ")+(p.dog?", with your dog":"")}, best match first.`+(SHOULDER(m)?` ${MON[m]} is outside the main summer season: most lifts and bike parks are closed, so we rank on lakes, walks and towns.`:"");
   $("dogbox").hidden=!p.dog;
   last=list;lastP=p;$("list").innerHTML=list.map((s,i)=>card(s,i,p)).join("");syncExpandAll();}
 function setCard(a,open){a.classList.toggle("collapsed",!open);const t=a.querySelector("[data-toggle]");if(t){t.firstChild.textContent=open?"Less":"More";t.setAttribute("aria-expanded",String(open));}
@@ -704,7 +875,7 @@ $("go").addEventListener("click",run);
 $("dog").addEventListener("change",()=>{const fly=$("m-fly").checked;if($("dog").checked&&fly){$("m-drive").checked=true;$("doghint").hidden=false;}else if(!$("dog").checked)$("doghint").hidden=true;run();});
 document.querySelectorAll("input[name=mode]").forEach(e=>e.addEventListener("change",()=>{if($("m-fly").checked)$("doghint").hidden=true;}));
 document.querySelectorAll("#f select,#f input,#rb select").forEach(e=>e.addEventListener("change",run));
-run();
+{const hh=decodeURIComponent((location.hash||"").slice(1));const d=/^trip-/i.test(hh)?readCode(hh.slice(5)):null;if(d)openTrip(d);else run();}
 </script>
 </body>
 </html>
