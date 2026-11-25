@@ -403,7 +403,7 @@ input[type=text]{font:inherit;font-size:.95rem;color:var(--ink);background:var(-
 </head>
 <body>
 <div class="wrap">
-  <div class="testbar">Test version, not public yet. Spotted something? <a href="mailto:admin@seasonwisego.com?subject=Summer%20test%20feedback">Email feedback</a></div>
+  <div class="testbar">Test version, not public yet. Spotted something? <a href="/cdn-cgi/l/email-protection#6607020b0f0826150307150908110f150301094805090b591513040c0305125b35130b0b031443545612031512435456000303020407050d">Email feedback</a></div>
   <header>
     <svg class="ridges" viewBox="0 0 1200 84" preserveAspectRatio="none" aria-hidden="true">
       <polygon fill="var(--r1)" points="0,52 90,30 170,44 260,14 340,36 430,20 520,40 610,10 700,34 790,22 880,42 980,16 1070,38 1200,24 1200,84 0,84"/>
@@ -579,9 +579,9 @@ input[type=text]{font:inherit;font-size:.95rem;color:var(--ink);background:var(-
       <p class="note">Weather: 10-year averages (2016 to 2025) for each town, from Open-Meteo. A few destinations use NASA POWER data, adjusted to match. Flights: Ryanair, easyJet and Jet2 timetables for summer 2027 (checked 17 November 2026), plus the main airlines to Geneva, Zurich, Munich, Kraków, Oslo and Bergen. Transfer and driving times are approximate. Driving times start at Folkestone and include the Channel Tunnel crossing, but not stops. Always check flights, lift rules and guest-card terms before booking.</p>
     </section>
   </div>
-  <footer class="sitefoot"><span>© 2026 SeasonWiseGo</span><a href="privacy.html">Privacy and cookies</a><a href="affiliate-disclosure.html">How we make money</a><a href="mailto:admin@seasonwisego.com?subject=Summer%20test%20feedback">Send feedback</a></footer>
+  <footer class="sitefoot"><span>© 2026 SeasonWiseGo</span><a href="privacy.html">Privacy and cookies</a><a href="affiliate-disclosure.html">How we make money</a><a href="/cdn-cgi/l/email-protection#c5a4a1a8acab85b6a0a4b6aaabb2acb6a0a2aaeba6aaa8fab6b0a7afa0a6b1f896b0a8a8a0b7e0f7f5b1a0b6b1e0f7f5a3a0a0a1a7a4a6ae">Send feedback</a></footer>
 </div>
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 (function(){
   let t="light"; try{t=localStorage.getItem("pp-theme")||"light";}catch(e){}
   const apply=v=>{ if(v==="auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme",v);
@@ -934,8 +934,12 @@ const VIG={swiss:["Swiss e-vignette","https://via.admin.ch/shop/dashboard","Need
   slovakia:["Slovak e-vignette","https://eznamka.sk/","Needed on Slovak motorways."],
   france:["French tolls (péage)","https://www.bipandgo.com/en/","Pay at the booths by card, or get a Bip&Go tag for the fast lanes."]};
 const VIG_BY={France:["france"],Switzerland:["france","swiss"],Austria:["austria"],Germany:[],Italy:["swiss","austria"],Slovenia:["austria","slovenia"],Spain:["france"],Andorra:["france"],Poland:["czech"],Slovakia:["czech","slovakia"],Norway:[]};
+// APH (Awin 1478, approved 25 Nov 2026): parking and hotels at the UK airport you fly from
+const APH={"LGW":{"p":"/gatwick-airport-parking.html","h":"/gatwick-airport-hotels.html"},"LHR":{"p":"/heathrow-airport/parking/","h":"/heathrow-airport/hotels-and-parking/"},"STN":{"p":"/stansted-airport/parking/","h":"/stansted-airport/hotels-and-parking/"},"LTN":{"p":"/luton-airport-parking.html","h":"/luton-airport-hotels.html"},"SEN":{"p":"/southend-airport-parking.html"},"MAN":{"p":"/manchester-airport-parking.html","h":"/manchester-airport-hotels.html"},"BHX":{"p":"/birmingham-airport/parking/","h":"/birmingham-airport/hotels/"},"BRS":{"p":"/bristol-airport-parking.html","h":"/bristol-airport-hotels.html"},"EMA":{"p":"/east-midlands-airport-parking.html"},"LBA":{"p":"/leeds-bradford-airport-parking.html"},"NCL":{"p":"/newcastle-airport-parking.html","h":"/newcastle-airport-hotels-and-parking.html"},"EDI":{"p":"/edinburgh-airport-parking.html"},"GLA":{"p":"/glasgow-airport-parking.html","h":"/glasgow-airport-hotels.html"},"ABZ":{"p":"/aberdeen-airport-parking.html","h":"/aberdeen-airport-hotels-and-parking.html"},"EXT":{"p":"/exeter-airport-parking.html"},"CWL":{"p":"/cardiff-airport-parking.html"},"LPL":{"p":"/liverpool-airport-parking.html","h":"/liverpool-airport-hotels.html"}};
 function aroundPanel(s,p){if(p.drive)return "";const r=s.r,ap=(s.best||{ap:r.g[0][0]}).ap,apN=AIR[ap]||ap,d2=outDate(p);
   const items=[];
+  const ukDep=((s.best&&s.best.f[0])||{dep:p.deps[0]}).dep, aphL=[["p","Airport parking"],["h","Hotel the night before"]].filter(([k])=>APH[ukDep]&&APH[ukDep][k]).map(([k,l])=>`<a href="${awin("1478","https://www.aph.com"+APH[ukDep][k])}" target="_blank" rel="noopener">${affTag}${l} ↗</a>`).join("");
+  if(aphL)items.push(`<div class="kiti"><b>UK airport</b>${aphL}<span class="via">Parking or a hotel the night before at ${esc(depName(ukDep))}, compared on APH.</span></div>`);
   if(ST_AP[ap])items.push(`<div class="kiti"><b>Airport transfer</b><a href="${awin("111238",`https://www.suntransfers.com/${ST_AP[ap]}`)}" target="_blank" rel="noopener">${affTag}Transfers from ${esc(apN)} on Suntransfers ↗</a><span class="via">About ${(s.best||{t:r.g[0][1]}).t} min to ${esc(r.n.replace(/ \(.*\)$/,""))}. Shared shuttles are cheaper; private suits groups or late flights.</span></div>`);
   items.push(`<div class="kiti"><b>Car hire</b>${DC_AP[ap]?`<a href="https://www.discovercars.com/${DC_AP[ap]}?a_aid=seasonwisego" target="_blank" rel="noopener">${affTag}Discover Cars at ${esc(apN)} ↗</a>`:""}<a href="${s22wrap("kayak",`https://www.kayak.co.uk/cars/${ap}/${p.d1}/${d2}`)}" target="_blank" rel="noopener">${affTag}Compare on Kayak ↗</a><span class="via">Handy for reaching trailheads, passes and lakes at your own pace.</span></div>`);
   return `<div class="kit"><h4>Getting around</h4><div class="kitg">${items.join("")}</div></div>`;}
@@ -992,5 +996,5 @@ document.querySelectorAll("input[name=mode]").forEach(e=>e.addEventListener("cha
 document.querySelectorAll("#f select,#f input,#rb select").forEach(e=>e.addEventListener("change",run));
 {const hh=decodeURIComponent((location.hash||"").slice(1));const d=/^trip-/i.test(hh)?readCode(hh.slice(5)):null;if(d)openTrip(d);else run();}
 </script>
-</body>
+<!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "996cf929b20f479197d60185ee3b9e99"}'></script><!-- Cloudflare Pages Analytics --></body>
 </html>
