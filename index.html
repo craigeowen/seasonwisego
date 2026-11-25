@@ -1282,7 +1282,7 @@ function fitForm(){const f=$("f"); if(!f) return;
   f.classList.toggle("mb", f.scrollTop+f.clientHeight < f.scrollHeight-4);}
 addEventListener("scroll",fitForm,{passive:true}); addEventListener("resize",fitForm);
 
-const KEY="piste-picker-v1";
+const KEY="piste-picker-v2"; // v2 (25 Nov 2026): forget remembered form settings once so everyone gets the new defaults
 function save(){try{const o={};document.querySelectorAll("#f input,#f select,#rb select").forEach(el=>{o[el.id]=el.type==="checkbox"||el.type==="radio"?el.checked:el.value});localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
 function load(){try{const o=JSON.parse(localStorage.getItem(KEY)||"null");if(!o)return;for(const id in o){const el=$(id);if(!el)continue;if(el.type==="checkbox"||el.type==="radio")el.checked=o[id];else el.value=o[id];}}catch(e){}}
 load();
