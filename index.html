@@ -1943,6 +1943,14 @@ $("copy").addEventListener("click",async()=>{
   try{await navigator.clipboard.writeText(txt);b.textContent="Copied";}catch(e){b.textContent="Copy failed";}
   setTimeout(()=>b.textContent="Copy shortlist",1600);
 });
+// Arriving from a resort page (?resort=morzine): add that resort under "Resorts you have in mind", set to Prefer, keep everything else
+(()=>{let q=null; try{q=new URLSearchParams(location.search).get("resort");}catch(e){} if(!q) return;
+  const sl=n=>n.normalize("NFKD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+  const r=R.find(x=>x.n===q)||R.find(x=>sl(x.n)===sl(q)); if(!r) return;
+  const sel=chosenResorts(); if(!sel.includes(r.n)) sel.push(r.n); $("resorts").value=sel.join("|"); $("rmode").value="prefer";
+  const fd=$("fd-where"); if(fd) fd.open=true; onFormChange();
+  try{history.replaceState(null,"",location.pathname+location.hash);}catch(e){}
+})();
 render();
 }
 </script>
